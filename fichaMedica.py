@@ -311,5 +311,5 @@ class FichaMedica:
         self.vacunasSuministradasConsulta.append(vacunas)
     #vacunas
     
-    def validarFormatoDatos(self): #validar formato de datos en la propia clase ya que pueden saltarse validacioines mediante ui
+    def validarFormatoDatos(self): #validar formato de datos en la propia clase ya que pueden saltarse validacioines mediante ui #holka
         pass
