@@ -16,3 +16,11 @@ for tratamiento in tratamientos:
 
 for alergia in alergias:
     print(str(alergia))""" 
+
+
+trat = {'id' : 1,'nombreTratamiento': '1','causaVisita' : 'causa',}
+
+tratamientos = None
+tratamientos = trat
+
+print(str(tratamientos)+'hola ')

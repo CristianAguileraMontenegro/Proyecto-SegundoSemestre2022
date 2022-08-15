@@ -14,10 +14,10 @@ mycursor = db.cursor()
 
 class FichaMedica:
 
-    def __init__(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, idTabla):
+    def __init__(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp): #debido al funcionamiento de python
+        #solo manejaremos un constructor que sera ocupado para principalmente el manejo en base de datos, pero tambien para el ingresao normal 
         
         self.idFicha = idFicha
-        self.idTabla = idTabla
         self.idSucursalVeterinaria = sucursalVeterinaria
         self.veterinarioACargo = veterinarioACargo
         self.fechaConsulta = fechaConsulta
@@ -58,8 +58,8 @@ class FichaMedica:
     def getId(self):
         return self.id
 
-    def getIdTabla(self):
-        return self.idTabla
+    #def getIdTabla(self):
+        #return self.idTabla
     
     def getSucursalVeterinaria(self):
         return self.sucursalVeterinaria
@@ -116,9 +116,6 @@ class FichaMedica:
 
     def setId(self, id):
         self.id = id
-
-    def setIdTabla(self, idTabla):
-        self.idTabla = idTabla
     
     def setSucursalVeterinaria(self, sucursalVeterinaria):
         self.sucursalVeterinaria = sucursalVeterinaria
@@ -155,7 +152,7 @@ class FichaMedica:
 
     def solicitarFichaDeOperacionEnBaseDeDatos(self):
         sql = 'SELECT * FROM fichaOperación WHERE FichaMedica_idFichaMedica = (%s)' #se genera la consulta en base al id unico de la ficha medica 
-        mycursor.execute(sql, (str(self.id),)) #ejecuta la consulta
+        mycursor.execute(sql, (str(self.getId()),)) #ejecuta la consulta
         opFicha = mycursor.fetchone() #captura el resultado 
         if(opFicha[3] == 1):
             aut = True #autorización del tutor
@@ -169,12 +166,13 @@ class FichaMedica:
         }
 
     def guardarFichaDeOperacionEnBaseDeDatos(self):
-        sql = 'INSERT INTO fichaOperación VALUES (%s, %s, %s, %s, %s, %s)'
-        mycursor.execute(sql, (str(self.operacionFicha['id']), str(self.operacionFicha['diagnostico']), str(self.operacionFicha['cirugiaARealizar']), str(self.operacionFicha['autTutor']), str(self.getId()), str(self.getIdTabla())))
+        sql = 'INSERT INTO fichaOperación VALUES (%s, %s, %s, %s, %s)'
+        mycursor.execute(sql, (str(self.operacionFicha['id']), str(self.operacionFicha['diagnostico']), str(self.operacionFicha['cirugiaARealizar']), str(self.operacionFicha['autTutor']), str(self.getId())))
         db.commit()
 
     def setFichaOperacion(self, opFicha):
         self.operacionFicha = opFicha #se guarda el diccionario correpondiente a la ficha de operacion 
+        self.operacion = 1
         if(self.operacion == 1): #se verifica que la ficha posee una ficha de operación 
             self.guardarFichaDeOperacionEnBaseDeDatos()
     #aqui 22-07-2022 22:58 cristian Aguilera
@@ -186,7 +184,7 @@ class FichaMedica:
     def solicitarFichaDeHospitalizacionEnBaseDeDatos(self):
         if(self.hospitalizacion == 1):
             sql = 'SELECT * FROM FichaHospitalización WHERE FichaMedica_idFichaMedica = (%s)'
-            mycursor.execute(sql, (str(self.id),))
+            mycursor.execute(sql, (str(self.getId()),))
             hospiFicha = mycursor.fetchone()
             self.hospitalizacionFicha = { #al ser una ficha se guarda directamente en el tributo relerente al diccionario
                 'id':hospiFicha[0],
@@ -194,12 +192,13 @@ class FichaMedica:
             }
 
     def guardarFichaDeHospitalizacionEnBaseDeDatos(self):
-        sql = 'INSERT INTO fichahospitalización VALUES (%s, %s, %s, %s)'
-        mycursor.execute(sql, (str(self.hospitalizacionFicha['id']), str(self.hospitalizacionFicha['motivo']), str(self.getId()), str(self.getIdTabla())))
+        sql = 'INSERT INTO fichahospitalización VALUES (%s, %s, %s)'
+        mycursor.execute(sql, (str(self.hospitalizacionFicha['id']), str(self.hospitalizacionFicha['motivo']), str(self.getId())))
         db.commit()
     
     def setFichaDeHospitalizacion(self, hospFicha):
         self.hospitalizacionFicha = hospFicha
+        self.hospitalizacion = 1
         self.guardarFichaDeHospitalizacionEnBaseDeDatos()
 
     #ficha de hospitalizacion 
@@ -208,7 +207,7 @@ class FichaMedica:
     def solicitarFichaDeSedacionEnBaseDeDatos(self):
         if (self.sedacion == 1):
             sql = 'SELECT * FROM FichaSedación WHERE FichaMedica_idFichaMedica = (%s)'
-            mycursor.execute(sql, (str(self.id),))
+            mycursor.execute(sql, (str(self.getId()),))
             sedacion = mycursor.fetchone()
             if(sedacion[1] == 1):
                 aut = True
@@ -220,12 +219,13 @@ class FichaMedica:
             }
     
     def guardarFichaDeSedacionEnBaseDeDatos(self):
-        sql = 'INSERT INTO fichasedación VALUES (%s, %s, %s, %s)'
-        mycursor.execute(sql, (str(self.sedacionFicha['id']), str(self.sedacionFicha['autorizacion']), str(self.getId()), str(self.getIdTabla())))
+        sql = 'INSERT INTO fichasedación VALUES (%s, %s, %s)'
+        mycursor.execute(sql, (str(self.sedacionFicha['id']), str(self.sedacionFicha['autorizacion']), str(self.getId())))
         db.commit()
 
-    def setFichaDeSefacion(self, sedDicc):
-        self.sedacionFicha = sedDicc
+    def setFichaDeSefacion(self, sedFicha):
+        self.sedacionFicha = sedFicha
+        self.sedacion = 1
         self.guardarFichaDeSedacionEnBaseDeDatos()
 
     #ficha de sedacion
@@ -234,7 +234,7 @@ class FichaMedica:
     
     def solicitarTratamientosConsultaBaseDeDatos(self):
         sql = 'SELECT * FROM TratamientosConsulta WHERE FichaMedica_idFichaMedica = (%s)'
-        mycursor.execute(sql, (str(self.id),))
+        mycursor.execute(sql, (str(self.getId()),))
         tratamientos = mycursor.fetchall()
         for tratamiento in tratamientos: #solicitamos todos los tratamientos en la base de datos y los guardamos en la clase 
             trat = {
@@ -246,8 +246,8 @@ class FichaMedica:
         
     def guargarTratamientosConsultaEnBaseDeDatos(self):
         for tratamiento in self.getTratamiento(): #recorremos todos los tratamientos aplicados en la consulta y los guardamos en la base de datos 
-            sql = 'INSERT INTO TratamientosConsulta (idTratamientosConsulta, nombreTratamientos, caudaDeLaVisita, FichaMedica_idFichaMedica, FichaMedica_TablaMedica_idTablaMedica) VALUES (%s, %s, %s, %s, %s)'
-            mycursor.execute(sql, (str(tratamiento['id']), str(tratamiento['nombreTratamiento']), str(tratamiento['causaVisita']), str(self.getId()), str(self.getIdTabla())))
+            sql = 'INSERT INTO TratamientosConsulta VALUES (%s, %s, %s, %s)' #(idTratamientosConsulta, nombreTratamientos, caudaDeLaVisita, FichaMedica_idFichaMedica, FichaMedica_TablaMedica_idTablaMedica)
+            mycursor.execute(sql, (str(tratamiento['id']), str(tratamiento['nombreTratamiento']), str(tratamiento['causaVisita']), str(self.getId())))
             db.commit()
     
     def setTratamientosConsulta(self, tratamiento): 
@@ -262,7 +262,7 @@ class FichaMedica:
     #medicamentos 
     def solicitarMedicamentosConsultaEnBaseDeDatos(self):
         sql = 'SELECT * FROM medicamentosconsulta WHERE FichaMedica_idFichaMedica = (%s)'
-        mycursor.execute(sql, (str(self.getId),))
+        mycursor.execute(sql, (str(self.getId()),))
         medicamentos = mycursor.fetchall()
         for medicamento in medicamentos:
             med = {
@@ -273,8 +273,8 @@ class FichaMedica:
 
     def guardarMedicamentosConsultaEnBaseDeDatos(self): 
         for medicamento in self.getMedicamentosConsulta():
-            sql = 'INSERT INTO MedicamentosConsulta (idMedicamentosConsulta, nombreMedicamentos, FichaMedica_idFichaMedica, FichaMedica_TablaMedica_idTablaMedica) VALUES (%s, %s, %s, %s)'
-            mycursor.execute(sql, (str(medicamento['id']), str(medicamento['nomMedicamento']), str(self.getId()), str(self.getIdTabla())))
+            sql = 'INSERT INTO MedicamentosConsulta VALUES (%s, %s, %s)' #(idMedicamentosConsulta, nombreMedicamentos, FichaMedica_idFichaMedica, FichaMedica_TablaMedica_idTablaMedica) 
+            mycursor.execute(sql, (str(medicamento['id']), str(medicamento['nomMedicamento']), str(self.getId())))
             db.commit()
 
     def setMedicamentosConsulta(self, medicamentos):
@@ -288,7 +288,7 @@ class FichaMedica:
     #vacunas 
     def solicitarVacunacionEnBaseDeDatos(self):
         sql = 'SELECT * FROM VacunasSuministradasConsulta WHERE FichaMedica_idFichaMedica = (%s)'
-        mycursor.execute(sql, (str(self.id),))
+        mycursor.execute(sql, (str(self.getId()),))
         vacunas = mycursor.fetchall()
         for vacuna in vacunas:
             vac = {
@@ -299,8 +299,8 @@ class FichaMedica:
     
     def guardarVacunacionEnBaseDeDatos(self):
         for vacuna in self.getVacunasSuministradasConsulta():
-            sql = 'INSERT INTO VacunasSuministradasConsulta (idVacunasSuministradas, nombreVacuna, FichaMedica_idFichaMedica, FichaMedica_TablaMedica_idTablaMedica) VALUES (%s, %s, %s, %s)'
-            mycursor.execute(sql, (str(vacuna['id']), str(vacuna['nomVacuna']), str(self.getId()), str(self.getIdTabla())))
+            sql = 'INSERT INTO VacunasSuministradasConsulta VALUES (%s, %s, %s)' #(idVacunasSuministradas, nombreVacuna, FichaMedica_idFichaMedica, FichaMedica_TablaMedica_idTablaMedica)
+            mycursor.execute(sql, (str(vacuna['id']), str(vacuna['nomVacuna']), str(self.getId())))
             db.commit() #aqui se guardan las vacunas correspondientes a la ficha de vacunación, en la funcion superior se realizara en guardado en la tabla 
 
     def setVacunacion(self, vacunas):
