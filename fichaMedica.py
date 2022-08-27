@@ -1,4 +1,3 @@
-from typing_extensions import Self
 import mysql.connector
 
 
@@ -48,21 +47,20 @@ class FichaMedica:
     def crearFichaMedica(self):
         pass
 
-    def editarFichaMedica(self):
-        pass
-
-    def crearFichaMedica(self):
-        pass
+    def guardarFichaGeneralEnBaseDeDatos(self, idTabla):
+        sql = 'INSERT INTO FichaMedica VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)' 
+        mycursor.execute(sql, (str(self.getId()), str(idTabla), str(self.getSucursalVeterinaria()), str(self.getVeterinarioACargo()), str(self.getFechaConsulta()), self.getOperacion(), str(self.getFrecRespiratoria()), str(self.getFrecCardiaca()), self.getPeso(), str(self.getEdad()), self.getHospitalizacion(), self.getSedacion(), self.getTemp()))
+        db.commit()
 
 #getters
     def getId(self):
-        return self.id
+        return self.idFicha
 
     #def getIdTabla(self):
         #return self.idTabla
     
     def getSucursalVeterinaria(self):
-        return self.sucursalVeterinaria
+        return self.idSucursalVeterinaria
 
     def getTemp(self):
         return self.temp
@@ -169,10 +167,16 @@ class FichaMedica:
         sql = 'INSERT INTO fichaOperación VALUES (%s, %s, %s, %s, %s)'
         mycursor.execute(sql, (str(self.operacionFicha['id']), str(self.operacionFicha['diagnostico']), str(self.operacionFicha['cirugiaARealizar']), str(self.operacionFicha['autTutor']), str(self.getId())))
         db.commit()
+    
+    def modificarOperacionFichaGeneralEnBaseDeDatos(self):
+        sql = 'UPDATE fichaMedica SET operación=(%s) WHERE idFichaMedica = (%s)'
+        mycursor.execute(sql, (self.operacion, str(self.getId())))
+        db.commit()
 
     def setFichaOperacion(self, opFicha):
         self.operacionFicha = opFicha #se guarda el diccionario correpondiente a la ficha de operacion 
         self.operacion = 1
+        self.modificarOperacionFichaGeneralEnBaseDeDatos()
         if(self.operacion == 1): #se verifica que la ficha posee una ficha de operación 
             self.guardarFichaDeOperacionEnBaseDeDatos()
     #aqui 22-07-2022 22:58 cristian Aguilera
@@ -196,9 +200,15 @@ class FichaMedica:
         mycursor.execute(sql, (str(self.hospitalizacionFicha['id']), str(self.hospitalizacionFicha['motivo']), str(self.getId())))
         db.commit()
     
+    def modificarHospitalizacionFichaGeneralEnBaseDeDatos(self):
+        sql = 'UPDATE fichamedica SET hospitalización=(%s) WHERE idFichaMedica = (%s)'
+        mycursor.execute(sql, (self.hospitalizacion, str(self.getId())))
+        db.commit()
+    
     def setFichaDeHospitalizacion(self, hospFicha):
         self.hospitalizacionFicha = hospFicha
         self.hospitalizacion = 1
+        self.modificarHospitalizacionFichaGeneralEnBaseDeDatos()
         self.guardarFichaDeHospitalizacionEnBaseDeDatos()
 
     #ficha de hospitalizacion 
@@ -223,9 +233,15 @@ class FichaMedica:
         mycursor.execute(sql, (str(self.sedacionFicha['id']), str(self.sedacionFicha['autorizacion']), str(self.getId())))
         db.commit()
 
+    def modificarSedacionFichaGeneralEnBaseDeDatos(self):
+        sql = 'UPDATE fichamedica SET sedación=(%s) WHERE idFichaMedica = (%s)'
+        mycursor.execute(sql, (self.sedacion, str(self.getId())))
+        db.commit()
+
     def setFichaDeSefacion(self, sedFicha):
         self.sedacionFicha = sedFicha
         self.sedacion = 1
+        self.modificarSedacionFichaGeneralEnBaseDeDatos()
         self.guardarFichaDeSedacionEnBaseDeDatos()
 
     #ficha de sedacion

@@ -1,5 +1,3 @@
-from ast import If
-from typing_extensions import Self
 import mysql.connector
 
 from fichaMedica import FichaMedica #importamos la clase 
@@ -47,8 +45,17 @@ class TablaMedica:
             #self.fichas.append(fichaMedica)
 
 
+    def guardarTablaEnBaseDeDatos(self):
+        sql = "INSERT INTO tablamedica values (%s)"
+        mycursor.execute(sql, (str(self.id)))
+        db.commit()
+
     def agregarFichaMedicaConsultaATabla(self, fichaMedicaConsulta:FichaMedica):
         self.fichas.append(fichaMedicaConsulta)
+        self.guardarFichaMedicaEnBaseDeDatos(fichaMedicaConsulta)
+
+    def guardarFichaMedicaEnBaseDeDatos(self, fichaMedicaConsulta:FichaMedica):
+        fichaMedicaConsulta.guardarFichaGeneralEnBaseDeDatos(self.getId())
 
     def editarFichaMedicaConsulta(self):
         pass

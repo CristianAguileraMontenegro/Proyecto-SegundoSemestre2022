@@ -1,6 +1,15 @@
-from typing_extensions import Self
+import mysql.connector
 from tablaMedica import TablaMedica
 
+db = mysql.connector.connect(
+    user='root',
+    password='root',
+    host='localhost',
+    database='mydb',
+    port='3306'
+)
+
+mycursor = db.cursor()
 
 class Mascota:
 
@@ -8,7 +17,6 @@ class Mascota:
         self.nombre = nombre
         self.id = id
         self.especie = especie
-        self.tablaMedica = tablaMedica
         self.color = color
         self.raza = raza
         self.nombreTutor = nombreTutor
@@ -16,6 +24,19 @@ class Mascota:
         self.numeroTelefono = numeroTelefono
         self.direccion = direccion
         self.tablaMedica:TablaMedica = tablaMedica
+    
+    def agregarMascotaEnBaseDeDatos(self):
+        sql = "INSERT INTO mascota (idMascota, nombreMascota, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, Dirección, TablaMedica_idTablaMedica) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        mycursor.execute(sql, (str(self.id), str(self.nombre), str(self.especie), str(self.color), str(self.raza), str(self.nombreTutor), str(self.rutTutor), str(self.numeroTelefono), str(self.direccion), str(self.tablaMedica.getId())))
+        db.commit()
+    
+    def agregarTablaMascota(self, idTerminal):
+        sql = "INSERT INTO mascota_has_terminalveterinario values (%s, %s, %s, %s, %s)"
+        mycursor.execute(sql, (str(self.id), str(idTerminal)))
+        db.commit()
+
+    def solicitarFichasEnBaseDeDatos(self):
+        self.tablaMedica.solicitarFichasEnBaseDeDatos()
 
     def getId(self):
         return self.id
@@ -186,6 +207,8 @@ class Mascota:
     def getTratamiento(self, idFicha):
         self.tablaMedica.getTratamiento(idFicha)
 
+ 
+
     """def setOpFichaLocal(self, idFicha, opDicc, operacion):
         self.tablaMedica.setOpFichaLocal(idFicha, opDicc, operacion)
 
@@ -238,33 +261,5 @@ class Mascota:
     # def solicitudServEditar():
     #     pass
 
-    def getId(self):
-        return self.id
-
-    def getTablaMedica(self) -> TablaMedica:
-        return self.tablaMedica
     
-    def getNombreMascota(self):
-        return self.nombre
-
-    def getColorMascota(self):
-        return self.color
-
-    def getEspecie(self):
-        return self.especie
-
-    def getRaza(self):
-        return self.raza
-
-    def getNombreTutor(self):
-        return self.nombreTutor
-
-    def getRutTutor(self):
-        return self.rutTutor
-
-    def getNumeroTelefono(self):
-        return self.numeroTelefono
-
-    def getDireccion(self):
-        return self.direccion
     #faltan Getter y Setters
