@@ -50,11 +50,12 @@ class TablaMedica:
         mycursor.execute(sql, (str(self.id)))
         db.commit()
 
-    def agregarFichaMedicaConsultaATabla(self, fichaMedicaConsulta:FichaMedica):
+    def agregarFichaMedicaConsultaATabla(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp):
+        fichaMedicaConsulta = FichaMedica(idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp)
         self.fichas.append(fichaMedicaConsulta)
-        self.guardarFichaMedicaEnBaseDeDatos(fichaMedicaConsulta)
+        self.guardarFichaGeneralEnBaseDeDatos(fichaMedicaConsulta)
 
-    def guardarFichaMedicaEnBaseDeDatos(self, fichaMedicaConsulta:FichaMedica):
+    def guardarFichaGeneralEnBaseDeDatos(self, fichaMedicaConsulta:FichaMedica):
         fichaMedicaConsulta.guardarFichaGeneralEnBaseDeDatos(self.getId())
 
     def editarFichaMedicaConsulta(self):

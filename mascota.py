@@ -66,9 +66,14 @@ class Mascota:
         return self.direccion
 
     #metodos de bajada para la tabla
+    
 
-    def agregarTablaMedica(self, tablaMedica):
-        self.tablaMedica = tablaMedica
+    def agregarTablaMedica(self, id, alergias, registroDeOperaciones, vacunasSuministradas):
+        self.tablaMedica = TablaMedica(id, alergias, registroDeOperaciones, vacunasSuministradas)
+        self.guardarTablaEnBaseDeDatos()
+    
+    def guardarTablaEnBaseDeDatos(self):
+        self.tablaMedica.guardarTablaEnBaseDeDatos()
 
     def setAlergias(self, alergias):
         self.tablaMedica.setAlergias(alergias)
@@ -105,6 +110,9 @@ class Mascota:
     #metodos de subida para tabla
 
     # metodos de bajada para ficha
+
+    def agregarFichaMedicaConsultaATabla(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp):
+        self.tablaMedica.agregarFichaMedicaConsultaATabla(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp)
 
     def setIdFicha(self, idFicha): 
         self.tablaMedica.setIdFicha(idFicha)

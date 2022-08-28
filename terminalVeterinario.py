@@ -11,6 +11,7 @@ import socket
 
 from mascota import Mascota 
 from tablaMedica import TablaMedica
+from fichaMedica import FichaMedica
 
 db = mysql.connector.connect(
     user='root',
@@ -27,7 +28,7 @@ class terminal:
     def __init__(self):
 
         self.id = self.generarIdTerminal()
-        self.token = None
+        self.tokenActivacion = None
         self.idVeterianria = None
         self.nombreVeterinaria = None
         self.mascotas:Mascota = []
@@ -81,10 +82,94 @@ class terminal:
                                     resultado[7], resultado[8], tablaEntregar)
             self.mascotas.append(mascotalol)
     
-    def agregarMascota(self, mascotaNueva: Mascota):
+    def agregarMascota(self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, tablaMedica):
+        mascotaNueva = Mascota(id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, tablaMedica)
         self.mascotas.append(mascotaNueva)
         mascotaNueva.agregarMascotaEnBaseDeDatos()
         mascotaNueva.agregarTablaMascota(self.id)
+        mascotaNueva.guardarTablaEnBaseDeDatos()
+
+
+
+    def agregarFichaMedica(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, idMascota):
+        for mascota in self.mascotas:
+            if mascota.getId() == idMascota:
+                mascota.agregarFichaMedicaConsultaATabla(idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp)
+                #mascota.setIdFicha(fichaMedica.getId())
+                #mascota.setSucursalVeterinariaFicha(fichaMedica.getSucursalVeterinaria())
+                #mascota.setVeterinarioACargoFicha(fichaMedica.getVeterinarioACargo())
+                #mascota.setFechaConsultaFicha()
+                #mascota.setFrecRespiratoriaFicha()
+                #mascota.setFrecCardiacaFicha()
+                #mascota.setPesoFicha()
+                #mascota.setEdadFicha()
+                #mascota.setTempFicha()
+                #mascota.setFichaDeOperacion()
+                #mascota.setFichaDeHospitalizacion()
+                #mascota.setFichaDeSefacion()
+                #mascota.setOperacionFicha()
+                #mascota.setHospitalizacionFicha()
+                #mascota.setSedacionFicha()
+                break
+
+    def agregarFichaOperacion(self, idFicha, idMascota, opFicha):
+        for mascota in self.mascotas:
+            if mascota.getId() == idMascota:
+                mascota.setFichaDeOperacion(opFicha, idFicha)
+    
+    def agregarFichaSedacion(self, idFicha, idMascota, sedFicha):
+        for mascota in self.mascotas:
+            if mascota.getId() == idMascota:
+                mascota.setFichaDeSefacion(sedFicha, idFicha)
+
+    def agregarFichaHospitalizacion(self, idFicha, idMascota, hospFicha):
+        for mascota in self.mascotas:
+            if mascota.getId() == idMascota:
+                mascota.setFichaDeHospitalizacion(hospFicha, idFicha)
+
+
+    def BuscarMascota(self, idMascotaBuscada):
+        sql = 'SELECT * FROM mascota WHERE idMascota = (%s)' #muestra informacion bascia buscar 
+        mycursor.execute(sql, (idMascotaBuscada,))
+        resultado2 = mycursor.fetchone()
+    
+    def verificarMascotaEnSistema(self): #debe ser adaptado y modificado para las nuevas screens
+
+        if(self.inputBuscar.text() != ""): #& len(self.inputBuscar.text()) == 15):
+            self.MensajeErrorBusqueda.setVisible(False)
+            idMascotaBuscada = self.inputBuscar.text()
+            sql = 'SELECT idMascota FROM mascota WHERE idMascota = (%s)'
+            mycursor.execute(sql, (idMascotaBuscada,))
+            resultado = mycursor.fetchone()
+            if(resultado != None):
+                sql = 'SELECT Mascota_idMascota FROM Mascota_has_TerminalVeterinario WHERE TerminalVeterinario_idTerminalVeterinario = (%s)'
+                mycursor.execute(sql, (self.idVeterinaria,))
+                resultado = mycursor.fetchall()
+                flagMascotaEnc = False
+                for id in resultado:
+                    if(id[0] == str(idMascotaBuscada)):
+                        flagMascotaEnc = True
+                self.botonAgregar.setVisible(False)
+                if(flagMascotaEnc):    
+                    self. buscarMascotaLocal(idMascotaBuscada)
+                else:
+                    self.BuscarMascota(idMascotaBuscada)
+                    self.datosMostrar.setVisible(True)
+                    self.botonAbstracto.setVisible(True)
+                    self.botonEntrar.setVisible(False)
+            else:
+                #Funcion registrar mascota
+                self.datosMostrar.setText('Mascota no ingresada en el sistema')
+                self.botonAgregar.setVisible(True)
+                self.datosMostrar.setVisible(True)
+                self.botonAbstracto.setVisible(False)
+                self.botonEntrar.setVisible(False)
+                self.botonAgregar.clicked.connect(lambda : self.agregarMascota(idMascotaBuscada))
+        else:
+            self.MensajeErrorBusqueda.setVisible(True)
+
+
+    #Metodos relacionados con la validación del terminal
 
     def validarConexionInternet(self):
         try:
