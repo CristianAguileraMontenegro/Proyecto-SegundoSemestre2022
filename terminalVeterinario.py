@@ -241,3 +241,5 @@ class terminal:
                 idRand = uuid.uuid4()
                 f.write(f"{idRand}")
                 return str(idRand)
+
+
