@@ -17,7 +17,7 @@ class TablaMedica:
 
     listaDeFichasCorrespondientesTablaMedica = []
 
-    def __init__(self, id, alergias, registroDeOperaciones, vacunasSuministradas):
+    def __init__(self, id):
         self.id = id
         self.fichas:FichaMedica = [] #arreglo 
         self.alergias = [] #diccionario
@@ -41,7 +41,7 @@ class TablaMedica:
             fichaMedica.solicitarFichaDeHospitalizacionEnBaseDeDatos()
             fichaMedica.solicitarFichaDeSedacionEnBaseDeDatos()
             fichaMedica.solicitarTratamientosConsultaBaseDeDatos()
-            self.agregarFichaMedicaConsultaATabla(fichaMedica)
+            self.agregarFichaMedicaExistente(ficha[0],ficha[2],ficha[3],ficha[4],ficha[5],ficha[6],ficha[7],ficha[8],ficha[9],ficha[10],ficha[11], ficha[12])
             #self.fichas.append(fichaMedica)
 
 
@@ -54,6 +54,10 @@ class TablaMedica:
         fichaMedicaConsulta = FichaMedica(idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp)
         self.fichas.append(fichaMedicaConsulta)
         self.guardarFichaGeneralEnBaseDeDatos(fichaMedicaConsulta)
+
+    def agregarFichaMedicaExistente(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp):
+        fichaMedicaConsulta = FichaMedica(idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp)
+        self.fichas.append(fichaMedicaConsulta)
 
     def guardarFichaGeneralEnBaseDeDatos(self, fichaMedicaConsulta:FichaMedica):
         fichaMedicaConsulta.guardarFichaGeneralEnBaseDeDatos(self.getId())
@@ -85,13 +89,12 @@ class TablaMedica:
     
     def setAlergias(self, alergias):
         self.alergias = alergias
-        self.guardarAlergiasEnBaseDeDatos()
+        #self.guardarAlergiasEnBaseDeDatos()
     
     def solicitarAlergiasEnBaseDeDatos(self):
         sql = 'SELECT * FROM Alergias WHERE TablaMedica_idTablaMedica = (%s)'
         mycursor.execute(sql, (str(self.getId()),))
         alergiasMascota = mycursor.fetchall()
-
         for alergiaMascota in alergiasMascota:
             alergia = {
                 'id': alergiaMascota[0],

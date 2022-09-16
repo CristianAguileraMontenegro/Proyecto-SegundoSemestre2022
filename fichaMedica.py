@@ -63,7 +63,7 @@ class FichaMedica:
         return self.idSucursalVeterinaria
 
     def getTemp(self):
-        return self.temp
+        return self.temperatura
 
     def getVeterinarioACargo(self):
         return self.veterinarioACargo
