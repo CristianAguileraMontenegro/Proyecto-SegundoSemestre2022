@@ -44,7 +44,7 @@ class App(ctk.CTk):
             frame.grid(row=0, column=0, padx=20, pady=20, sticky='nsew')
 
 
-        if(terminalVet.validarTokenDeActivacion == False):
+        if(terminalVet.validarTokenDeActivacion() == False):
             self.show_frame(screenIngresoLlave)
         else:
             self.show_frame(screenBuscarMascota)
@@ -219,9 +219,28 @@ class screenDatosTotalMascota(ctk.CTkFrame): #HACERLA DPS
                 font=('Helvetica', '13'))
             self.listaVacunas.grid(row = 3, column=0, padx=10, pady=10)
 
+            idsFichas = mascotaActual.getIdsFichas()
+            listaFechas = []
+            i = 0
+            while(i <= (len(idsFichas)-1)):
+                aux = mascotaActual.getSucursalVeterinaria(idsFichas[i])
+                print(aux) #Printea None, revisar
+                listaFechas.append(aux)
+                i += 1
+
+            fechasString = []
+            i = 0
+            while(i <= (len(listaFechas)-1)):
+                stringAux = f'Ficha del : {listaFechas[i]}'
+                fechasString.append(stringAux)
+                i += 1
+
+            #vacunasString = f'Ficha del : {vacunas}'
+            fechasMostrar = tk.StringVar(value=fechasString)
+
             self.listFichasMedicas= tk.Listbox(
                 self.frameListboxFichas,
-                listvariable=listaString,
+                listvariable=fechasMostrar,
                 width=36,
                 height=20,
                 selectmode='browse',

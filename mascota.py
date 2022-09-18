@@ -2,8 +2,8 @@ import mysql.connector
 from tablaMedica import TablaMedica
 
 db = mysql.connector.connect(
-    user='root',
-    password='root',
+    user='piero',
+    password='pieron123',
     host='localhost',
     database='mydb',
     port='3306'
@@ -163,6 +163,9 @@ class Mascota:
 
     def getIdFicha(self, idFicha):
         self.tablaMedica.getIdFicha(idFicha)
+
+    def getIdsFichas(self) ->list:
+        return self.tablaMedica.getIdsFichas()
     
     def getSucursalVeterinaria(self, idFicha):
         self.tablaMedica.getSucursalVeterinaria(idFicha)

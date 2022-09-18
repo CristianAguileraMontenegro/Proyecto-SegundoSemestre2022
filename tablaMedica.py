@@ -3,8 +3,8 @@ import mysql.connector
 from fichaMedica import FichaMedica #importamos la clase 
 
 db = mysql.connector.connect(
-    user='root',
-    password='root',
+    user='piero',
+    password='pieron123',
     host='localhost',
     database='mydb',
     port='3306'
@@ -326,6 +326,14 @@ class TablaMedica:
 
     def getId(self):
         return self.id
+
+    def getIdsFichas(self)->list:
+        fichasTrabajar = self.fichas
+        listRetorno = []
+        for ficha in fichasTrabajar:
+            listRetorno.append(ficha.getId())
+
+        return listRetorno
 
     """def setRegistroDeVacunasTrue(self, vacuna):
         for vac in vacuna:
