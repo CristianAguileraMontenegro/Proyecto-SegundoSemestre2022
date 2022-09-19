@@ -3,8 +3,8 @@ import mysql.connector
 from fichaMedica import FichaMedica #importamos la clase 
 
 db = mysql.connector.connect(
-    user='root',
-    password='root',
+    user='piero',
+    password='pieron123',
     host='localhost',
     database='mydb',
     port='3306'
@@ -30,17 +30,11 @@ class TablaMedica:
         mycursor.execute(sql, (str(self.id),))
         fichas = mycursor.fetchall()
         for ficha in fichas: #se recorren todas las ficha correspondientes a la tabla medica en particular 
-            fichaMedica = FichaMedica(ficha[0],ficha[2],ficha[3],ficha[4],ficha[5],ficha[6],ficha[7],ficha[8],ficha[9],ficha[10],ficha[11], ficha[12]) 
             #las posiciones son correspondientes a el dato en la clase fichaMedica, se realiza de esta manera ya que lo que se entrega desde la base de datos es un aareglo de string por lo tanto se debe acceder a cada
             #posicion a fin de obtener los datos del mismo 
 
             #solicitamos todos los datos asociados en la base de datos
-            fichaMedica.solicitarFichaDeHospitalizacionEnBaseDeDatos()
-            fichaMedica.solicitarMedicamentosConsultaEnBaseDeDatos()
-            fichaMedica.solicitarVacunacionEnBaseDeDatos()
-            fichaMedica.solicitarFichaDeHospitalizacionEnBaseDeDatos()
-            fichaMedica.solicitarFichaDeSedacionEnBaseDeDatos()
-            fichaMedica.solicitarTratamientosConsultaBaseDeDatos()
+            
             self.agregarFichaMedicaExistente(ficha[0],ficha[2],ficha[3],ficha[4],ficha[5],ficha[6],ficha[7],ficha[8],ficha[9],ficha[10],ficha[11], ficha[12])
             #self.fichas.append(fichaMedica)
 
@@ -57,6 +51,12 @@ class TablaMedica:
 
     def agregarFichaMedicaExistente(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp):
         fichaMedicaConsulta = FichaMedica(idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp)
+        fichaMedicaConsulta.solicitarFichaDeHospitalizacionEnBaseDeDatos()
+        fichaMedicaConsulta.solicitarMedicamentosConsultaEnBaseDeDatos()
+        fichaMedicaConsulta.solicitarVacunacionEnBaseDeDatos()
+        fichaMedicaConsulta.solicitarFichaDeOperacionEnBaseDeDatos()
+        fichaMedicaConsulta.solicitarFichaDeSedacionEnBaseDeDatos()
+        fichaMedicaConsulta.solicitarTratamientosConsultaBaseDeDatos()
         self.fichas.append(fichaMedicaConsulta)
 
     def guardarFichaGeneralEnBaseDeDatos(self, fichaMedicaConsulta:FichaMedica):
@@ -247,7 +247,7 @@ class TablaMedica:
     def getTemp(self, idFicha):
         for ficha in self.fichas:
             if(ficha.getId() == idFicha):
-                return ficha.getSucursalVeterinaria()
+                return ficha.getTemp()
 
     def getVeterinarioACargo(self, idFicha):
         for ficha in self.fichas:
@@ -327,6 +327,29 @@ class TablaMedica:
     def getId(self):
         return self.id
 
+    def getidFichaActual(self):
+        for ficha in self.fichas:
+            if(ficha.getActual() == True):
+                return ficha.getId()
+
+    def getIdsFichas(self)->list:
+        fichasTrabajar = self.fichas
+        listRetorno = []
+        for ficha in fichasTrabajar:
+            listRetorno.append(ficha.getId())
+
+        return listRetorno
+
+    def setActualFichaMedicaConsulta(self, fecha):
+        for ficha in self.fichas:
+            if(str(ficha.getFechaConsulta()) in fecha):
+                ficha.setActual(True)
+
+    def quitarActualFichaMedica(self, idFicha):
+        for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+                ficha.setActual(False)
+                
     """def setRegistroDeVacunasTrue(self, vacuna):
         for vac in vacuna:
             self.vacunasSuministradas.append(vac)
