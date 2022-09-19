@@ -44,7 +44,7 @@ class App(ctk.CTk):
             frame.grid(row=0, column=0, padx=20, pady=20, sticky='nsew')
 
 
-        if(terminalVet.validarTokenDeActivacion == False):
+        if(terminalVet.validarTokenDeActivacion() == False):
             self.show_frame(screenIngresoLlave)
         else:
             self.show_frame(screenBuscarMascota)

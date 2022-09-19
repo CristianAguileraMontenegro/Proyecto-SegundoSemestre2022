@@ -15,8 +15,8 @@ from tablaMedica import TablaMedica
 from fichaMedica import FichaMedica
 
 db = mysql.connector.connect(
-    user='piero',
-    password='pieron123',
+    user='root',
+    password='root',
     host='localhost',
     database='mydb',
     port='3306'
@@ -188,7 +188,10 @@ if __name__ != "__main__":
                     # resultado = mycursor.fetchall()
                     # flagMascotaEnc = False 
                     for mascota in self.mascotas:
+                        print("haloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
+                        print(mascota)
                         if(mascota.getId() == str(idMascotaBuscada)):
+                            print("holassasasasas")
                             flagMascotaEnc = True
                     if(flagMascotaEnc):
                         mascotaBuscada = self.buscarMascotaLocal(idMascotaBuscada)
