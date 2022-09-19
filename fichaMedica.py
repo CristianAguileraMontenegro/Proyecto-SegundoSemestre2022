@@ -38,6 +38,8 @@ class FichaMedica:
         self.sedacion = sedacion #indicar boolean
         self.sedacionFicha = None #diccionario
 
+        self.fichaActual = False
+
         
         
 
@@ -110,6 +112,9 @@ class FichaMedica:
     def getTratamiento(self):
         return self.tratamientoConsulta
 
+    def getActual(self):
+        return self.fichaActual
+
 #setters 
 
     def setId(self, id):
@@ -147,6 +152,9 @@ class FichaMedica:
 
     def setTemp(self, temp):
         self.temp = temp
+
+    def setActual(self, actual):
+        self.fichaActual = actual
 
     def solicitarFichaDeOperacionEnBaseDeDatos(self):
         sql = 'SELECT * FROM fichaOperación WHERE FichaMedica_idFichaMedica = (%s)' #se genera la consulta en base al id unico de la ficha medica 
@@ -223,10 +231,13 @@ class FichaMedica:
                 aut = True
             else:
                 aut = False
+
+            db.commit()
             self.sedacionFicha =  {
                 'id':sedacion[0],
                 'autorizacion':aut,
             }
+
     
     def guardarFichaDeSedacionEnBaseDeDatos(self):
         sql = 'INSERT INTO fichasedación VALUES (%s, %s, %s)'
@@ -250,6 +261,7 @@ class FichaMedica:
     
     def solicitarTratamientosConsultaBaseDeDatos(self):
         sql = 'SELECT * FROM TratamientosConsulta WHERE FichaMedica_idFichaMedica = (%s)'
+        tratamientosArray = []
         mycursor.execute(sql, (str(self.getId()),))
         tratamientos = mycursor.fetchall()
         for tratamiento in tratamientos: #solicitamos todos los tratamientos en la base de datos y los guardamos en la clase 
@@ -258,8 +270,9 @@ class FichaMedica:
             'nombreTratamiento': tratamiento[1],
             'causaVisita' : tratamiento[2],
             }
-            self.tratamientoConsulta.append(trat)
-        
+            tratamientosArray.append(trat)
+        self.setTratamientosConsulta(tratamientosArray)
+
     def guargarTratamientosConsultaEnBaseDeDatos(self):
         for tratamiento in self.getTratamiento(): #recorremos todos los tratamientos aplicados en la consulta y los guardamos en la base de datos 
             sql = 'INSERT INTO TratamientosConsulta VALUES (%s, %s, %s, %s)' #(idTratamientosConsulta, nombreTratamientos, caudaDeLaVisita, FichaMedica_idFichaMedica, FichaMedica_TablaMedica_idTablaMedica)
@@ -268,7 +281,7 @@ class FichaMedica:
     
     def setTratamientosConsulta(self, tratamiento): 
         self.tratamientoConsulta = tratamiento
-        self.guargarTratamientosConsultaEnBaseDeDatos()
+        #self.guargarTratamientosConsultaEnBaseDeDatos()
     
     def agregarTratamientosConsulta(self, tratamiento):
         self.tratamientoConsulta.append(tratamiento)
@@ -326,6 +339,6 @@ class FichaMedica:
     def agregarVacunacion(self, vacunas):
         self.vacunasSuministradasConsulta.append(vacunas)
     #vacunas
-    
+
     def validarFormatoDatos(self): #validar formato de datos en la propia clase ya que pueden saltarse validacioines mediante ui #holka
         pass

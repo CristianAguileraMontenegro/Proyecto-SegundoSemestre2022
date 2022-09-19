@@ -162,63 +162,70 @@ class Mascota:
     # metodos de subida para ficha
 
     def getIdFicha(self, idFicha):
-        self.tablaMedica.getIdFicha(idFicha)
+        return self.tablaMedica.getIdFicha(idFicha)
 
     def getIdsFichas(self) ->list:
         return self.tablaMedica.getIdsFichas()
     
     def getSucursalVeterinaria(self, idFicha):
-        self.tablaMedica.getSucursalVeterinaria(idFicha)
+        return self.tablaMedica.getSucursalVeterinaria(idFicha)
 
     def getTemp(self, idFicha):
-        self.tablaMedica.getTemp(idFicha)
+        return self.tablaMedica.getTemp(idFicha)
 
     def getVeterinarioACargo(self, idFicha):
-        self.tablaMedica.getVeterinarioACargo(idFicha)
+        return self.tablaMedica.getVeterinarioACargo(idFicha)
 
     def getFechaConsulta(self, idFicha):
-        self.tablaMedica.getFechaConsulta(idFicha)
+        return self.tablaMedica.getFechaConsulta(idFicha)
 
     def getMedicamentosConsulta(self, idFicha):
-        self.tablaMedica.getMedicamentosConsulta(idFicha)
+        return self.tablaMedica.getMedicamentosConsulta(idFicha)
 
     def getOperacion(self, idFicha):
-        self.tablaMedica.getOperacion(idFicha)
+        return self.tablaMedica.getOperacion(idFicha)
 
     def getOperacionFicha(self, idFicha):
-        self.tablaMedica.getOperacionFicha(idFicha)
+        return self.tablaMedica.getOperacionFicha(idFicha)
     
     def getVacunasSuministradasConsulta(self, idFicha):
-        self.tablaMedica.getVacunasSuministradasConsulta(idFicha)
+        return self.tablaMedica.getVacunasSuministradasConsulta(idFicha)
 
     def getFrecRespiratoria(self, idFicha):
-        self.tablaMedica.getFrecRespiratoria(idFicha)
+        return self.tablaMedica.getFrecRespiratoria(idFicha)
     
     def getFrecCardiaca(self, idFicha):
-        self.tablaMedica.getFrecCardiaca(idFicha)
+        return self.tablaMedica.getFrecCardiaca(idFicha)
     
     def getPeso(self, idFicha):
-        self.tablaMedica.getPeso(idFicha)
+        return self.tablaMedica.getPeso(idFicha)
     
     def getEdad(self, idFicha):
-        self.tablaMedica.getEdad(idFicha)
+        return self.tablaMedica.getEdad(idFicha)
     
     def getHospitalizacion(self, idFicha):
-        self.tablaMedica.getHospitalizacion(idFicha)
+        return self.tablaMedica.getHospitalizacion(idFicha)
     
     def getHospitalizacionFicha(self, idFicha):
-        self.tablaMedica.getHospitalizacionFicha(idFicha)
+        return self.tablaMedica.getHospitalizacionFicha(idFicha)
     
     def getSedacion(self, idFicha):
-        self.tablaMedica.getSedacion(idFicha)
+        return self.tablaMedica.getSedacion(idFicha)
     
     def getSedacioFicha(self, idFicha):
-        self.tablaMedica.getSedacioFicha(idFicha)
+        return self.tablaMedica.getSedacioFicha(idFicha)
     
     def getTratamiento(self, idFicha):
-        self.tablaMedica.getTratamiento(idFicha)
+        return self.tablaMedica.getTratamiento(idFicha)
 
- 
+    def setActualFichaMedicaConsulta(self, fecha):
+        self.tablaMedica.setActualFichaMedicaConsulta(fecha)
+
+    def quitarActualFichaMedicaConsulta(self, idFicha):
+        self.tablaMedica.quitarActualFichaMedica(idFicha)
+
+    def getidFichaActual(self):
+        return self.tablaMedica.getidFichaActual()
 
     """def setOpFichaLocal(self, idFicha, opDicc, operacion):
         self.tablaMedica.setOpFichaLocal(idFicha, opDicc, operacion)
@@ -257,8 +264,7 @@ class Mascota:
     # def editarFichaMedicaConsulta(self,fichaMedica):
     #     pass
 
-    def buscarFichaMedicaConsulta(self):
-        pass"""
+    
 
     # def validarFormatoDatosFichaMedicaGeneral():
     #     pass
@@ -273,4 +279,4 @@ class Mascota:
     #     pass
 
     
-    #faltan Getter y Setters
+    #faltan Getter y Setters"""
