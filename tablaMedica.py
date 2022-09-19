@@ -3,8 +3,8 @@ import mysql.connector
 from fichaMedica import FichaMedica #importamos la clase 
 
 db = mysql.connector.connect(
-    user='piero',
-    password='pieron123',
+    user='root',
+    password='root',
     host='localhost',
     database='mydb',
     port='3306'

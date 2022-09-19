@@ -2,8 +2,8 @@ import mysql.connector
 from tablaMedica import TablaMedica
 
 db = mysql.connector.connect(
-    user='piero',
-    password='pieron123',
+    user='root',
+    password='root',
     host='localhost',
     database='mydb',
     port='3306'
