@@ -41,7 +41,7 @@ class TablaMedica:
 
     def guardarTablaEnBaseDeDatos(self):
         sql = "INSERT INTO tablamedica values (%s)"
-        mycursor.execute(sql, (str(self.id)))
+        mycursor.execute(sql, (str(self.id),))
         db.commit()
 
     def agregarFichaMedicaConsultaATabla(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp):
@@ -51,6 +51,7 @@ class TablaMedica:
 
     def agregarFichaMedicaExistente(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp):
         fichaMedicaConsulta = FichaMedica(idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp)
+        #print(fichaMedicaConsulta.getId())
         fichaMedicaConsulta.solicitarFichaDeHospitalizacionEnBaseDeDatos()
         fichaMedicaConsulta.solicitarMedicamentosConsultaEnBaseDeDatos()
         fichaMedicaConsulta.solicitarVacunacionEnBaseDeDatos()
@@ -91,17 +92,23 @@ class TablaMedica:
         self.alergias = alergias
         #self.guardarAlergiasEnBaseDeDatos()
     
+    def setAlergiasBas(self, alergias):
+        self.alergias = alergias
+        self.guardarAlergiasEnBaseDeDatos()
+
     def solicitarAlergiasEnBaseDeDatos(self):
         sql = 'SELECT * FROM Alergias WHERE TablaMedica_idTablaMedica = (%s)'
         mycursor.execute(sql, (str(self.getId()),))
         alergiasMascota = mycursor.fetchall()
+        alergia = {}
+        alergiasFinal = []
         for alergiaMascota in alergiasMascota:
             alergia = {
                 'id': alergiaMascota[0],
-                'nombre': alergiaMascota[1],
+                'nombre': alergiaMascota[1]
             }
-            self.agregarAlergias(alergia)
-
+            alergiasFinal.append(alergia)
+        self.alergias = alergiasFinal
 
     def guardarAlergiasEnBaseDeDatos(self):
         for alergia in self.getAlergias():
@@ -148,7 +155,12 @@ class TablaMedica:
 #Vacunas suministradas 
 
     def agregarVacunas(self, vacunas):
-        self.vacunasSuministradas.append(vacunas)
+
+        self.vacunasSuministradas.append(vacunas) #agregamos tanto las vacunas a la tabla como a la base de datos
+
+        sql = 'INSERT INTO registrovacunassuministradas (idVacunasSuministradas, nombreVacuna, TablaMedica_idTablaMedica) VALUES (%s, %s, %s)'
+        mycursor.execute(sql, (str(vacunas['id']), str(vacunas['nomVacuna']), str(self.getId())))
+        db.commit()
 
     def setRegistroDeVacunas(self, vacunas):
         self.vacunasSuministradas = vacunas 
@@ -161,14 +173,14 @@ class TablaMedica:
         for vacunas in registroVacunas:
             vacuna = {
                 'id': vacunas[0],
-                'nombre': vacunas[1],
+                'nomVacuna': vacunas[1],
             }
             self.vacunasSuministradas.append(vacuna)
 
     def guardarRegistroVacunasEnBaseDeDatos(self):
         for vacunas in self.getVacunasSuministradas():
             sql = 'INSERT INTO registrovacunassuministradas (idVacunasSuministradas, nombreVacuna, TablaMedica_idTablaMedica) VALUES (%s, %s, %s)'
-            mycursor.execute(sql, (str(vacunas['id']), str(vacunas['nombre']), str(self.getId())))
+            mycursor.execute(sql, (str(vacunas['id']), str(vacunas['nomVacuna']), str(self.getId())))
             db.commit()
 
     def getVacunasSuministradas(self):
@@ -180,13 +192,13 @@ class TablaMedica:
 #todos los set se realizaran sobre la ultima ficha agregada, esto debido a que solo la utima puede llegar a ser modificada o se agregaran datos 
 #metodos de bajada de datos a clase inferior, fichas extra 
 
-    def setFichaDeOperacion(self, opFicha, idFicha): #se ocupa el id para identificar la ficha especifica a la que añadir
+    def setFichaDeOperacion(self, opFicha): #se ocupa el id para identificar la ficha especifica a la que añadir
         self.fichas[len(self.fichas)-1].setFichaOperacion(opFicha) #siempre se agrega a la ultima ficha generada
     
-    def setFichaDeHospitalizacion(self, hospFicha, idFicha): #se ocupa el id para identificar
+    def setFichaDeHospitalizacion(self, hospFicha): #se ocupa el id para identificar
         self.fichas[len(self.fichas)-1].setFichaDeHospitalizacion(hospFicha)
     
-    def setFichaDeSefacion(self, sedFicha, idFicha): #se ocupa el id
+    def setFichaDeSefacion(self, sedFicha): #se ocupa el id
         self.fichas[len(self.fichas)-1].setFichaDeSefacion(sedFicha)
     
     def setOperacionFicha(self, operacion): #indicadores de que existe una ficha de cada tipo
@@ -228,6 +240,16 @@ class TablaMedica:
 
     def setTempFicha(self, temp):
         self.fichas[len(self.fichas)-1].setTempFicha(temp)
+    
+    def setTratamientos(self, tratamiento):
+        self.fichas[len(self.fichas)-1].setTratamientosConsulta(tratamiento)
+
+    def setMedicamentos(self, medicamentos):
+        self.fichas[len(self.fichas)-1].setMedicamentosConsulta(medicamentos)
+
+    def setVacunas(self, operacion):
+        self.fichas[len(self.fichas)-1].setVacunacion(operacion)
+  
 
 # metodos de bajada de datos a clase inferior ne ficha general
 
@@ -322,6 +344,7 @@ class TablaMedica:
     def getTratamiento(self, idFicha):
         for ficha in self.fichas:
             if(ficha.getId() == idFicha):
+                #print("hola soy tu validacion de tratamiento")
                 return ficha.getTratamiento()
 
     def getId(self):
@@ -340,15 +363,16 @@ class TablaMedica:
 
         return listRetorno
 
-    def setActualFichaMedicaConsulta(self, fecha):
+    def setActualFichaMedicaConsulta(self, fecha, actual):
         for ficha in self.fichas:
             if(str(ficha.getFechaConsulta()) in fecha):
-                ficha.setActual(True)
+                ficha.setActual(actual)
 
     def quitarActualFichaMedica(self, idFicha):
         for ficha in self.fichas:
             if(ficha.getId() == idFicha):
                 ficha.setActual(False)
+    
                 
     """def setRegistroDeVacunasTrue(self, vacuna):
         for vac in vacuna:
