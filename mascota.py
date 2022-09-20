@@ -2,8 +2,8 @@ import mysql.connector
 from tablaMedica import TablaMedica
 
 db = mysql.connector.connect(
-    user='piero',
-    password='pieron123',
+    user='root',
+    password='root',
     host='localhost',
     database='mydb',
     port='3306'
@@ -31,7 +31,7 @@ class Mascota:
         db.commit()
     
     def agregarTablaMascota(self, idTerminal):
-        sql = "INSERT INTO mascota_has_terminalveterinario values (%s, %s, %s, %s, %s)"
+        sql = "INSERT INTO mascota_has_terminalveterinario values (%s, %s)"
         mycursor.execute(sql, (str(self.id), str(idTerminal)))
         db.commit()
 
@@ -68,8 +68,8 @@ class Mascota:
     #metodos de bajada para la tabla
     
 
-    def agregarTablaMedica(self, id, alergias, registroDeOperaciones, vacunasSuministradas):
-        self.tablaMedica = TablaMedica(id, alergias, registroDeOperaciones, vacunasSuministradas)
+    def agregarTablaMedica(self, id):
+        self.tablaMedica = TablaMedica(id)
         self.guardarTablaEnBaseDeDatos()
     
     def guardarTablaEnBaseDeDatos(self):
@@ -77,6 +77,9 @@ class Mascota:
 
     def setAlergias(self, alergias):
         self.tablaMedica.setAlergias(alergias)
+
+    def setAlergiasBas(self, alergias):
+        self.tablaMedica.setAlergiasBas(alergias)
     
     def agregarAlergias(self, alergia):
         self.tablaMedica.agregarAlergias(alergia)
@@ -112,7 +115,8 @@ class Mascota:
     # metodos de bajada para ficha
 
     def agregarFichaMedicaConsultaATabla(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp):
-        self.tablaMedica.agregarFichaMedicaConsultaATabla(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp)
+        self.tablaMedica.agregarFichaMedicaConsultaATabla(idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp)
+        
 
     def setIdFicha(self, idFicha): 
         self.tablaMedica.setIdFicha(idFicha)
@@ -141,13 +145,13 @@ class Mascota:
     def setTempFicha(self, temp):
         self.tablaMedica.setTempFicha(temp)
 
-    def setFichaDeOperacion(self, opFicha, idFicha): #se ocupa el id para identificar la ficha especifica a la que añadir
+    def setFichaDeOperacion(self, opFicha): #se ocupa el id para identificar la ficha especifica a la que añadir
         self.tablaMedica.setFichaDeOperacion(opFicha)
     
-    def setFichaDeHospitalizacion(self, hospFicha, idFicha): #se ocupa el id para identificar
+    def setFichaDeHospitalizacion(self, hospFicha): #se ocupa el id para identificar
         self.tablaMedica.setFichaDeHospitalizacion(hospFicha)
     
-    def setFichaDeSefacion(self, sedFicha, idFicha): #se ocupa el id
+    def setFichaDeSefacion(self, sedFicha): #se ocupa el id
         self.tablaMedica.setFichaDeSefacion(sedFicha)
     
     def setOperacionFicha(self, operacion): #indicadores de que existe una ficha de cada tipo
@@ -158,6 +162,16 @@ class Mascota:
 
     def setSedacionFicha(self, sedacion):
         self.tablaMedica.setSedacionFicha(sedacion)
+
+    def setTratamientos(self, tratamiento):
+        self.tablaMedica.setTratamientos(tratamiento)
+
+    def setMedicamentos(self, medicamentos):
+        self.tablaMedica.setMedicamentos(medicamentos)
+
+    def setVacunas(self, vacunas):
+        self.tablaMedica.setVacunas(vacunas)
+        
 
     # metodos de subida para ficha
 
@@ -218,14 +232,15 @@ class Mascota:
     def getTratamiento(self, idFicha):
         return self.tablaMedica.getTratamiento(idFicha)
 
-    def setActualFichaMedicaConsulta(self, fecha):
-        self.tablaMedica.setActualFichaMedicaConsulta(fecha)
+    def setActualFichaMedicaConsulta(self, fecha, actual):
+        self.tablaMedica.setActualFichaMedicaConsulta(fecha, actual)
 
     def quitarActualFichaMedicaConsulta(self, idFicha):
         self.tablaMedica.quitarActualFichaMedica(idFicha)
 
     def getidFichaActual(self):
         return self.tablaMedica.getidFichaActual()
+
 
     """def setOpFichaLocal(self, idFicha, opDicc, operacion):
         self.tablaMedica.setOpFichaLocal(idFicha, opDicc, operacion)
