@@ -13,6 +13,7 @@ import socket
 from mascota import Mascota 
 from tablaMedica import TablaMedica
 from fichaMedica import FichaMedica
+from calendario import Calendario
 
 db = mysql.connector.connect(
     user='root',
@@ -34,6 +35,7 @@ if __name__ != "__main__":
             self.idVeterinaria = None
             self.nombreVeterinaria = None
             self.mascotas:Mascota = []
+            self.calendaio:Calendario
 
             self.validarTokenDeActivacion()
 
@@ -42,6 +44,7 @@ if __name__ != "__main__":
                 self.setIdVeterinaria()
                 self.setNombreVeterinaria()
                 self.setMascotas()
+                self.setCalendario()
 
         def setIdVeterinaria(self):
             sql = 'SELECT Veterinaria_idVeterinaria FROM TerminalVeterinario WHERE idTerminalVeterinario = (%s)'
@@ -118,6 +121,14 @@ if __name__ != "__main__":
                 
                 
                 self.mascotas.append(mascotalol)
+        
+        def setCalendario(self):
+            sql = 'SELECT idCalendario FROM calendario WHERE (Veterinaria_idVeterinaria, Veterinaria_nombreVeterinaria) = (%s, %s)'
+            mycursor.execute(sql, (str(self.idVeterinaria), str(self.nombreVeterinaria)))
+            self.calendaio = Calendario(mycursor.fetchone())
+        
+        def setDatosCalendario(self):
+            pass
         
         def agregarMascota(self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, alergias, tablaMedica):
             mascotaNueva = Mascota(id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, tablaMedica)
