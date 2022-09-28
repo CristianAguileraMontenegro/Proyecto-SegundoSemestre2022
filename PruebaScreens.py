@@ -63,13 +63,16 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         self.labelSubTitle = ctk.CTkLabel(frame_0, text="Nombre Veterinaria", text_font=Font_tuple14,text_color='black')
         self.labelSubTitle.grid(row=1, column=0, padx=10 , pady=10)
 
-        self.calendarioVacunacion = Calendario()
-
-         #calendario
-        self.fechasCalendario:datetime.date = []
-
         self.calendario = Calendar(frame_0, selectmode='day',date_pattern='dd/mm/yyyy',  year=today.year, month=today.month, day=today.day)
         self.calendario.grid(row=3, column=0, padx=10 , pady=10)
+
+        self.calendarioVacunacion = Calendario('1') #solo uno para pruebas, despues cambiar
+        self.calendarioVacunacion.solicitarDatosCalendarioBaseDeDatos()
+        self.indicarFechasEnCalendarioPostCargaBaseDeDatos(parent)
+
+         #calendario
+        #self.fechasCalendario:datetime.date = []
+        #elementos calendario
 
         self.ingresarCita = ctk.CTkButton(frame_0, width=10, text='Ingresar cita de vacunación', command=lambda: self.mostarElementos())
         self.ingresarCita.grid(row=4, column=0, padx=10 , pady=10)
@@ -125,14 +128,8 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         
     def clickConfirmarFecha(self, parent):
 
-        fechaSeleccionada = self.calendario.get_date() #obtenermos la fecha seleccionada en el calendario
-        self.fechasCalendario.append(fechaSeleccionada) #la agregamos al arreglo/modificar por objeto
-        fecha = fechaSeleccionada.split('/') #la transformamos a string para poder ocuparla y marcar la casilla
-
-        fechaSeleccionada2 = datetime.date(int(fecha[2]), int(fecha[1]), int(fecha[0])) #marcamos la casilla
-        self.calendario.calevent_create(fechaSeleccionada2, "", tags="vacuna") #el vento nos permite mostrar la casilla
-        self.calendario.tag_config("vacuna", background="green")
-
+        fechaSeleccionada = self.calendario.get_date()
+        self.indicarFechasEnCalendario(parent, fechaSeleccionada)
 
         #obtenermos la hora y minutos
         horaSeleccionada = self.hora.get()
@@ -147,12 +144,33 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
             fechas["numeros"].append(numeroIngresado)
             fechas["horas"].append(horaSeleccionada)
             fechas["minutos"].append(minutosSeleccionados)
- 
-            print(str(fechas))
+    
+            print(str(fechas["fecha"]))
             self.calendarioVacunacion.agregarFechas(fechas)
             print(str(self.calendarioVacunacion.getFechas()))
         else:
            self.calendarioVacunacion.agregarDatosAFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados)
+
+    def indicarFechasEnCalendario(self, parent, fechaSeleccionada):
+
+        fecha = fechaSeleccionada.split('/') #la transformamos a string para poder ocuparla y marcar la casilla
+
+        fechaSeleccionada2 = datetime.date(int(fecha[2]), int(fecha[1]), int(fecha[0])) #marcamos la casilla
+        self.calendario.calevent_create(fechaSeleccionada2, "", tags="vacuna") #el vento nos permite mostrar la casilla
+        self.calendario.tag_config("vacuna", background="green")
+    
+    def indicarFechasEnCalendarioPostCargaBaseDeDatos(self, parent):
+
+        fechas = self.calendarioVacunacion.getFechas()
+        for i in range(len(fechas)):
+            fechaSeleccionada = fechas[i]["fecha"].split('/') #la transformamos a string para poder ocuparla y marcar la casilla
+
+            fechaAIndicar = datetime.date(int(fechaSeleccionada[2]), int(fechaSeleccionada[1]), int(fechaSeleccionada[0])) #marcamos la casilla
+            self.calendario
+            self.calendario.calevent_create(fechaAIndicar, "", tags="vacuna") #el vento nos permite mostrar la casilla
+            self.calendario.tag_config("vacuna", background="green")
+
+
 
     def mostarFechas(self, parent):
         fechaSeleccionada = self.calendario.get_date() #obtenemos la fecha seleccionada
@@ -166,9 +184,6 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
             datos = 'rut :'+str(fechaObtenida["ruts"][i])+' numero de telefono :'+str(fechaObtenida["numeros"][i])+' Hora de atención:'+str(fechaObtenida["horas"][i])+':'+str(fechaObtenida["minutos"][i])
             print(str(datos))
             self.lista.insert(END, datos)
-
-
-        
 
 
     def mostarElementos(self):

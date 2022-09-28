@@ -50,7 +50,7 @@ class FichaMedica:
         pass
 
     def guardarFichaGeneralEnBaseDeDatos(self, idTabla):
-        sql = 'INSERT INTO FichaMedica VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)' 
+        sql = 'INSERT INTO FichaMedica VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)' 
         mycursor.execute(sql, (str(self.getId()), str(idTabla), str(self.getSucursalVeterinaria()), str(self.getVeterinarioACargo()), str(self.getFechaConsulta()), self.getOperacion(), str(self.getFrecRespiratoria()), str(self.getFrecCardiaca()), self.getPeso(), str(self.getEdad()), self.getHospitalizacion(), self.getSedacion(), self.getTemp()))
         db.commit()
 
@@ -110,6 +110,7 @@ class FichaMedica:
         return self.sedacionFicha
     
     def getTratamiento(self):
+        #print(self.tratamientoConsulta)
         return self.tratamientoConsulta
 
     def getActual(self):
@@ -157,19 +158,24 @@ class FichaMedica:
         self.fichaActual = actual
 
     def solicitarFichaDeOperacionEnBaseDeDatos(self):
-        sql = 'SELECT * FROM fichaOperación WHERE FichaMedica_idFichaMedica = (%s)' #se genera la consulta en base al id unico de la ficha medica 
-        mycursor.execute(sql, (str(self.getId()),)) #ejecuta la consulta
-        opFicha = mycursor.fetchone() #captura el resultado 
-        if(opFicha[3] == 1):
-            aut = True #autorización del tutor
-        else:
-            aut = False
-        self.operacionFicha = { #al ser una ficha se guarda directamente en el tributo relerente al diccionario
-            'id':opFicha[0],
-            'diagnostico':opFicha[1],
-            'cirugiaARealizar':opFicha[2],
-            'autTutor': aut
-        }
+        if (self.operacion == 1):
+            sql = 'SELECT * FROM fichaOperación WHERE FichaMedica_idFichaMedica = (%s)' #se genera la consulta en base al id unico de la ficha medica 
+            mycursor.execute(sql, (str(self.getId()),)) #ejecuta la consulta
+            opFicha = mycursor.fetchone() #captura el resultado 
+            if(opFicha[3] == 1):
+                aut = True #autorización del tutor
+            else:
+                aut = False
+            
+            diccionario= {}
+            diccionario = { #al ser una ficha se guarda directamente en el tributo relerente al diccionario
+                'id':opFicha[0],
+                'diagnostico':opFicha[1],
+                'cirugiaARealizar':opFicha[2],
+                'autTutor': aut
+            }
+
+            self.operacionFicha = diccionario
 
     def guardarFichaDeOperacionEnBaseDeDatos(self):
         sql = 'INSERT INTO fichaOperación VALUES (%s, %s, %s, %s, %s)'
@@ -185,7 +191,9 @@ class FichaMedica:
         self.operacionFicha = opFicha #se guarda el diccionario correpondiente a la ficha de operacion 
         self.operacion = 1
         self.modificarOperacionFichaGeneralEnBaseDeDatos()
+        
         if(self.operacion == 1): #se verifica que la ficha posee una ficha de operación 
+            print("hola si if")
             self.guardarFichaDeOperacionEnBaseDeDatos()
     #aqui 22-07-2022 22:58 cristian Aguilera
 
@@ -237,6 +245,7 @@ class FichaMedica:
                 'id':sedacion[0],
                 'autorizacion':aut,
             }
+        
 
     
     def guardarFichaDeSedacionEnBaseDeDatos(self):
@@ -270,18 +279,18 @@ class FichaMedica:
             'nombreTratamiento': tratamiento[1],
             'causaVisita' : tratamiento[2],
             }
-            tratamientosArray.append(trat)
-        self.setTratamientosConsulta(tratamientosArray)
-
+            self.tratamientoConsulta.append(trat)
+    
     def guargarTratamientosConsultaEnBaseDeDatos(self):
         for tratamiento in self.getTratamiento(): #recorremos todos los tratamientos aplicados en la consulta y los guardamos en la base de datos 
             sql = 'INSERT INTO TratamientosConsulta VALUES (%s, %s, %s, %s)' #(idTratamientosConsulta, nombreTratamientos, caudaDeLaVisita, FichaMedica_idFichaMedica, FichaMedica_TablaMedica_idTablaMedica)
             mycursor.execute(sql, (str(tratamiento['id']), str(tratamiento['nombreTratamiento']), str(tratamiento['causaVisita']), str(self.getId())))
             db.commit()
-    
+
+
     def setTratamientosConsulta(self, tratamiento): 
         self.tratamientoConsulta = tratamiento
-        #self.guargarTratamientosConsultaEnBaseDeDatos()
+        self.guargarTratamientosConsultaEnBaseDeDatos()
     
     def agregarTratamientosConsulta(self, tratamiento):
         self.tratamientoConsulta.append(tratamiento)
