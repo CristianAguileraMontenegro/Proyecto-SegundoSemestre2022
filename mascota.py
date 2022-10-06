@@ -13,21 +13,37 @@ mycursor = db.cursor()
 
 class Mascota:
 
-    def __init__(self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, tablaMedica):
-        self.nombre = nombre
-        self.id = id
-        self.especie = especie
-        self.color = color
-        self.raza = raza
-        self.nombreTutor = nombreTutor
-        self.rutTutor = rutTutor
-        self.numeroTelefono = numeroTelefono
-        self.direccion = direccion
-        self.tablaMedica:TablaMedica = tablaMedica
+    #self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, tablaMedica
+    def __init__(self, *args):
+
+        if(len(args) == 1):
+            self.nombre = None
+            self.id = args[0]
+            self.especie = None
+            self.color = None
+            self.raza = None
+            self.nombreTutor = None
+            self.rutTutor = None
+            self.numeroTelefono = None
+            self.direccion = None
+            self.tablaMedica:TablaMedica = None
+        elif(len(args) == 11):
+            print("hola llegue a entrar")
+            self.nombre = args[1]
+            self.id = args[0]
+            self.especie = args[2]
+            self.color = args[3]
+            self.raza = args[4]
+            self.nombreTutor = args[5]
+            self.rutTutor = args[6]
+            self.numeroTelefono = args[7]
+            self.direccion = args[8]
+            self.tablaMedica:TablaMedica = args[9]
+            self.FechaNacimiento = args[10]
     
     def agregarMascotaEnBaseDeDatos(self):
-        sql = "INSERT INTO mascota (idMascota, nombreMascota, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, Dirección, TablaMedica_idTablaMedica) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        mycursor.execute(sql, (str(self.id), str(self.nombre), str(self.especie), str(self.color), str(self.raza), str(self.nombreTutor), str(self.rutTutor), str(self.numeroTelefono), str(self.direccion), str(self.tablaMedica.getId())))
+        sql = "INSERT INTO mascota (idMascota, nombreMascota, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, Dirección, TablaMedica_idTablaMedica,  FechaDeNacimiento) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        mycursor.execute(sql, (str(self.id), str(self.nombre), str(self.especie), str(self.color), str(self.raza), str(self.nombreTutor), str(self.rutTutor), str(self.numeroTelefono), str(self.direccion), str(self.tablaMedica.getId()), str(self.FechaNacimiento)))
         db.commit()
     
     def agregarTablaMascota(self, idTerminal):
@@ -37,6 +53,12 @@ class Mascota:
 
     def solicitarFichasEnBaseDeDatos(self):
         self.tablaMedica.solicitarFichasEnBaseDeDatos()
+    
+    def solicitarFichasParcialesEnBaseDeDatos(self):
+        self.tablaMedica.solicitarFichasParcialesEnBaseDeDatos()
+    
+    def completarFichaParcial(self, idFicha):
+        self.tablaMedica.completarFichaParcial(idFicha)
 
     def getId(self):
         return self.id
@@ -65,13 +87,46 @@ class Mascota:
     def getDireccion(self):
         return self.direccion
 
+    def getFechaDeNacimiento(self):
+        return self.FechaNacimiento
+    
+    def setId(self, id):
+        self.id = id
+    
+    def setNombreMascota(self, nombre):
+        self.nombre = nombre
+
+    def setColorMascota(self, color):
+        self.color = color
+
+    def setEspecie(self, especie):
+        self.especie = especie
+
+    def setRaza(self, raza):
+        self.raza = raza
+
+    def setNombreTutor(self, nombreTutor):
+        self.nombreTutor = nombreTutor
+
+    def setRutTutor(self, rutTutor):
+        self.rutTutor = rutTutor
+
+    def setNumeroTelefono(self, numeroTelefono):
+        self.numeroTelefono = numeroTelefono
+
+    def setDireccion(self, direccion):
+        self.direccion = direccion
+    
+    def setFechaNacimiento(self, fechaNacimiento):
+        self.FechaNacimiento = fechaNacimiento
+
     #metodos de bajada para la tabla
     
 
     def agregarTablaMedica(self, id):
         self.tablaMedica = TablaMedica(id)
-        self.guardarTablaEnBaseDeDatos()
-    
+        #self.guardarTablaEnBaseDeDatos()
+
     def guardarTablaEnBaseDeDatos(self):
         self.tablaMedica.guardarTablaEnBaseDeDatos()
 

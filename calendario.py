@@ -21,6 +21,9 @@ class Calendario:
         self.idCalendario = idCalendario
         self.fechasAsignadas = []
     
+    def getId(self):
+        return self.idCalendario
+    
     def verificarFecha(self, fecha): #verificamos que la fecha ya haya sido agregada previamente
         for i in range(len(self.fechasAsignadas)):
             if (self.fechasAsignadas[i]["fecha"] == fecha):
