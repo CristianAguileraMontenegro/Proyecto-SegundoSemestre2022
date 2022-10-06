@@ -150,8 +150,17 @@ class screenBuscarMascota(ctk.CTkFrame):
         if(resultado[0] == "MalCodigo"):
             self.labelCodigoInvalido.grid(row=0, column=0,padx=10, pady=10)
         elif(resultado[0]=="MascotaLocal"):
-            mascotaMostrar:Mascota = resultado[1]
-            parent.setMascotaApp(mascotaMostrar)
+
+            idMascota = resultado[1]
+            datosMascota = terminalVet.getDatosBasicosMascota(idMascota)
+
+            mascotaLol = Mascota(idMascota)
+
+            terminalVet.setMascotaEspecifica(idMascota, mascotaLol)
+
+            parent.setMascotaApp(mascotaLol)
+            
+            mascotaMostrar:Mascota = parent.getMascotaApp()
             self.labelCodigoInvalido.grid_forget()
             self.botonEntrarAbstract.grid_forget()
             self.labelInfoBasica.grid_forget()
@@ -164,8 +173,16 @@ class screenBuscarMascota(ctk.CTkFrame):
             self.botonEntrar.grid(row=1, column=1, padx=10, pady=10) 
         elif(resultado[0]=='MascotaRemota'):
 
-            mascotaMostrar:Mascota = resultado[1]
-            parent.setMascotaApp(mascotaMostrar)
+            idMascota = resultado[1]
+            datosMascota = terminalVet.getDatosBasicosMascota(idMascota)
+
+            mascotaLol = Mascota(idMascota)
+
+            terminalVet.setMascotaEspecifica(idMascota, mascotaLol)
+
+            parent.setMascotaApp(mascotaLol)
+            
+            mascotaMostrar:Mascota = parent.getMascotaApp()
             self.labelCodigoInvalido.grid_forget()
             self.botonEntrar.grid_forget()
             self.labelInfoBasica.grid_forget()
