@@ -346,7 +346,7 @@ class screenFormularioVerFicha(ctk.CTkFrame):
         if(mascotaActual != None):
             
             idFicha = mascotaActual.getidFichaActual()
-            mascotaActual.completarFichaParcial(idFicha)
+            terminalVet.completarFichaParcial(mascotaActual.getId(), idFicha)
 
             self.frameForm = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
             self.frameForm.grid(row=0, column=0, padx=20, pady=20)
@@ -1265,7 +1265,8 @@ class screenFormularioCrearFichaAuthCirugia(ctk.CTkFrame):
             'cirugiaARealizar':cirugia,
             'autTutor': check
         }
-        mascotaActual.setFichaDeOperacion(self.operacionFicha)
+  
+        terminalVet.agregarFichaOperacion(mascotaActual.getId(), self.operacionFicha)
         self.labelMensajeAgregadoSCrearFichaAuthCirugia.pack()
         
 
@@ -1483,7 +1484,7 @@ class screenFormularioCrearFichaHospt(ctk.CTkFrame): #Hospitalización
             'id':idFichahHosp,
             'motivo':motivo
         }
-        mascotaActual.setFichaDeHospitalizacion(hospDicc)
+        terminalVet.agregarFichaHospitalizacion(mascotaActual.getId(), hospDicc)
         self.labelMensajeAgregadoSCrearFichaHosp.pack()
         
 
@@ -1676,7 +1677,7 @@ class screenFormularioCrearFichaSedacion(ctk.CTkFrame):
             'id':idFichahSedacion,
             'autorizacion':check
         }
-        mascota.setFichaDeSefacion(sedacionDicc)
+        terminalVet.agregarFichaSedacion(mascota.getId(), sedacionDicc)
         self.labelMensajeAgregarSCrearFichaSedacion.pack()
 
 class screenCalendarioVacunacion(ctk.CTkFrame):
@@ -1853,6 +1854,157 @@ class screenAbstractMedico(ctk.CTkFrame):
         
         self.botonVolverSAbstract = ctk.CTkButton(self, width= 25, height= 3,text='Volver')
         self.botonVolverSAbstract.place(x='530', y='620')
+
+class screenAbstractMedico(ctk.CTkFrame):
+    def __init__(self, parent, container):
+        super().__init__(container, fg_color="#C5DEDD")
+
+        mascotaActual:Mascota = parent.getMascotaApp()
+        if(mascotaActual is not None):
+            textodatosDueno = f'Nombre Dueño: {mascotaActual.getNombreTutor()}\nTelefono: {mascotaActual.getNumeroTelefono()}\nDireccion: {mascotaActual.getDireccion()}'
+            textoinfoBasicaMascota = f'Nombre Mascota: {mascotaActual.getNombreMascota()}\nRaza: {mascotaActual.getRaza()}'
+            textoVacunasAlergias = self.setCadenaVacunasAlergias(mascotaActual)
+            textoOperaciones = self.setCadenaOperaciones(mascotaActual)
+            textoMedicamentos = self.setCadenaMedicamentos(mascotaActual)
+
+            #-----------FRAME DATOS DUENO--------------------------------------
+            self.titleDatosDueno = ctk.CTkLabel(self, text="Datos del dueño", text_color="Black", text_font=("Helvetica", "13"), fg_color="#AC99DE")
+            
+            self.titleDatosDueno.place(x=20, y=18)
+            
+            self.frameDatosDueno = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
+            self.frameDatosDueno.grid(row=0, column=0, padx=20, pady=(50,20))
+
+            self.textDatosDuenoSAbstract = tk.Text(self.frameDatosDueno, width = 36, height= 5, background="#F0EFEB", font=("Helvetica", 13), state=NORMAL)
+            self.textDatosDuenoSAbstract.pack(padx=20, pady=20)
+
+            self.textDatosDuenoSAbstract.delete(1.0, END)
+            self.textDatosDuenoSAbstract.pack(padx=20, pady=20)
+            self.textDatosDuenoSAbstract.insert(END, textodatosDueno)
+            self.textDatosDuenoSAbstract.configure(state="disabled", background="#99C1DE", border=0)
+            #-----------FRAME DATOS DUENO--------------------------------------
+
+            #-----------FRAME INFO BASICA--------------------------------------
+            self.titleInfoBasica = ctk.CTkLabel(self, text="Datos básicos mascota", text_color="Black", text_font=("Helvetica", "13"), padx=8, bg_color="#AC99DE")
+            self.titleInfoBasica.place(x=20, y=220)
+
+            self.frameInfoBasica = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
+            self.frameInfoBasica.grid(row=1,column=0,padx=20, pady=45)
+
+            self.textInfoBasicaMascota = tk.Text(self.frameInfoBasica, width = 36, height= 5, background="#F0EFEB", font=("Helvetica", 13), state=NORMAL)
+            self.textInfoBasicaMascota.pack(padx=20, pady=20)
+
+            self.textInfoBasicaMascota.delete(1.0, END)
+            self.textInfoBasicaMascota.pack(padx=20, pady=20)
+            self.textInfoBasicaMascota.insert(END, textoinfoBasicaMascota)
+            self.textInfoBasicaMascota.configure(state="disabled", background="#99C1DE", border=0)
+            #-----------FRAME INFO BASICA--------------------------------------
+
+            #-----------FRAME VACUNAS--------------------------------------
+            self.titleVacunasAlergias = ctk.CTkLabel(self, text="Vacunas y alergias mascota", text_color="Black", text_font=("Helvetica", "13"), padx=8, bg_color="#AC99DE")
+            self.titleVacunasAlergias.place(x=20, y=422)
+
+            self.frameVacunas = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
+            self.frameVacunas.grid(row=2,column=0,padx=20, pady=20)
+
+            self.textVacunasAlergiasMascota = tk.Text(self.frameVacunas, width = 36, height= 5, background="#F0EFEB", font=("Helvetica", 13), state=NORMAL)
+            self.textVacunasAlergiasMascota.pack(padx=20, pady=20)
+
+            self.textVacunasAlergiasMascota.delete(1.0, END)
+            self.textVacunasAlergiasMascota.pack(padx=20, pady=20)
+            self.textVacunasAlergiasMascota.insert(END, textoVacunasAlergias)
+            self.textVacunasAlergiasMascota.configure(state="disabled", background="#99C1DE", border=0, wrap=WORD)
+            #-----------FRAME VACUNAS--------------------------------------
+
+            #-----------FRAME OPERACIONES--------------------------------------
+            self.titleOperaciones = ctk.CTkLabel(self, text="Operaciones mascota", text_color="Black", text_font=("Helvetica", "13"), padx=8, bg_color="#AC99DE")
+            self.titleOperaciones.place(x=428, y=18)
+
+            self.frameOperaciones = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
+            self.frameOperaciones.grid(row=0,column=1,padx=20, pady=(50,20))
+
+            self.textOperaciones = tk.Text(self.frameOperaciones, width = 36, height= 5, background="#F0EFEB", font=("Helvetica", 13), state=NORMAL)
+            self.textOperaciones.pack(padx=20, pady=20)
+            
+            self.textOperaciones.delete(1.0, END)
+            self.textOperaciones.pack(padx=20, pady=20)
+            self.textOperaciones.insert(END, textoOperaciones)
+            self.textOperaciones.configure(state="disabled", background="#99C1DE", border=0, wrap=WORD)
+            #-----------FRAME OPERACIONES--------------------------------------
+
+            #-----------FRAME MEDICAMENTOS--------------------------------------
+            self.titleMedicamentos = ctk.CTkLabel(self, text="Medicamentos mascota", text_color="Black", text_font=("Helvetica", "13"), padx=8, bg_color="#AC99DE")
+            self.titleMedicamentos.place(x=428, y=220)
+
+            self.frameMedicamentos = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
+            self.frameMedicamentos.grid(row=1,column=1,padx=20, pady=45)
+
+            self.textMedicamentos = tk.Text(self.frameMedicamentos, width = 36, height= 5, background="#F0EFEB", font=("Helvetica", 13), state=NORMAL)
+            self.textMedicamentos.pack(padx=20, pady=20)
+
+            self.textMedicamentos.delete(1.0, END)
+            self.textMedicamentos.pack(padx=20, pady=20)
+            self.textMedicamentos.insert(END, textoMedicamentos)
+            self.textMedicamentos.configure(state="disabled", background="#99C1DE", border=0, wrap=WORD)
+            #-----------FRAME MEDICAMENTOS--------------------------------------
+
+            self.botonVolverSAbstract = ctk.CTkButton(self, width= 150, height= 100,text='Volver', text_font=("Helvetica", "13"), command=lambda: parent.update_frame(parent.screenBuscarMascota, parent, container))
+            self.botonVolverSAbstract.grid(row=1, column=2, padx=20, pady=20)
+
+    def setCadenaVacunasAlergias(self, mascotaActual:Mascota):
+        vacunasTabla = mascotaActual.getVacunasSuministradas()
+        vacunas = ''
+        i = 0
+        while(i <= (len(vacunasTabla)-1)):
+            if(i == (len(vacunasTabla)-1)):
+                vacunas = vacunas + str(vacunasTabla[i]['nomVacuna']) + '.'
+            else:
+                vacunas = vacunas + str(vacunasTabla[i]['nomVacuna']) + ', '
+            i += 1
+        vacunasString = f'Vacunas: \n{vacunas}'
+
+        i = 0
+        alergiasTabla = mascotaActual.getAlergias()
+        alergias = ''
+        while(i <= (len(alergiasTabla)-1)):
+            if(i==(len(alergiasTabla)-1)):
+                alergias = alergias + str(alergiasTabla[i]['nombre']) + '.'
+            else:
+                alergias = alergias + str(alergiasTabla[i]['nombre']) + ', '
+            i += 1
+        alergiasString = f'Alergias: \n{alergias}'
+
+        stringRetorno = vacunasString + '\n' + alergiasString
+
+        return stringRetorno
+
+    def setCadenaOperaciones(self, mascotaActual:Mascota):
+        operacionesTabla = mascotaActual.getRegistroDeOperaciones()
+        operaciones = ''
+        i = 0
+        while(i <= (len(operacionesTabla)-1)):
+            if(i==(len(operacionesTabla)-1)):
+                operaciones = operaciones + str(operacionesTabla[i]['operacion']) + '.'
+            else:
+                operaciones = operaciones + str(operacionesTabla[i]['operacion']) + ', '
+            i += 1
+        operacionesString = f'Operaciones: {operaciones}'
+
+        return operacionesString
+
+    def setCadenaMedicamentos(self, mascotaActual:Mascota):
+        idsFichas = mascotaActual.getIdsFichas()
+        medicamentos = ''
+        i = 0
+        while(i <= (len(idsFichas)-1)):
+            listaMedicamanetos = mascotaActual.getMedicamentosConsulta(idsFichas[i])
+            if(len(listaMedicamanetos)>0):
+                for medicamento in listaMedicamanetos:
+                    medicamentos = medicamentos + str(medicamento['nomMedicamento']) + '\n'
+                
+            i += 1
+        
+        return medicamentos
 
 app = App()
 app.mainloop()
