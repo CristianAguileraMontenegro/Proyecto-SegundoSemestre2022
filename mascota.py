@@ -1,16 +1,6 @@
 import mysql.connector
 from tablaMedica import TablaMedica
 
-db = mysql.connector.connect(
-    user='root',
-    password='root',
-    host='localhost',
-    database='mydb',
-    port='3306'
-)
-
-mycursor = db.cursor()
-
 class Mascota:
 
     #self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, tablaMedica
@@ -41,24 +31,25 @@ class Mascota:
             self.tablaMedica:TablaMedica = args[9]
             self.FechaNacimiento = args[10]
     
-    def agregarMascotaEnBaseDeDatos(self):
+    def agregarMascotaEnBaseDeDatos(self, myCursor, dB):
         sql = "INSERT INTO mascota (idMascota, nombreMascota, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, Dirección, TablaMedica_idTablaMedica,  FechaDeNacimiento) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        mycursor.execute(sql, (str(self.id), str(self.nombre), str(self.especie), str(self.color), str(self.raza), str(self.nombreTutor), str(self.rutTutor), str(self.numeroTelefono), str(self.direccion), str(self.tablaMedica.getId()), str(self.FechaNacimiento)))
-        db.commit()
+        myCursor.execute(sql, (str(self.id), str(self.nombre), str(self.especie), str(self.color), str(self.raza), str(self.nombreTutor), str(self.rutTutor), str(self.numeroTelefono), str(self.direccion), str(self.tablaMedica.getId()), str(self.FechaNacimiento)))
+        dB.commit()
     
-    def agregarTablaMascota(self, idTerminal):
+    
+    def agregarTablaMascota(self, idTerminal, myCursor, dB):
         sql = "INSERT INTO mascota_has_terminalveterinario values (%s, %s)"
-        mycursor.execute(sql, (str(self.id), str(idTerminal)))
-        db.commit()
+        myCursor.execute(sql, (str(self.id), str(idTerminal)))
+        dB.commit()
 
-    def solicitarFichasEnBaseDeDatos(self):
-        self.tablaMedica.solicitarFichasEnBaseDeDatos()
+    def solicitarFichasEnBaseDeDatos(self, myCursor):
+        self.tablaMedica.solicitarFichasEnBaseDeDatos(myCursor)
     
-    def solicitarFichasParcialesEnBaseDeDatos(self):
-        self.tablaMedica.solicitarFichasParcialesEnBaseDeDatos()
+    def solicitarFichasParcialesEnBaseDeDatos(self, myCursor):
+        self.tablaMedica.solicitarFichasParcialesEnBaseDeDatos(myCursor)
     
-    def completarFichaParcial(self, idFicha):
-        self.tablaMedica.completarFichaParcial(idFicha)
+    def completarFichaParcial(self, idFicha, myCursor):
+        self.tablaMedica.completarFichaParcial(idFicha, myCursor)
 
     def getId(self):
         return self.id
@@ -127,14 +118,14 @@ class Mascota:
         self.tablaMedica = TablaMedica(id)
         #self.guardarTablaEnBaseDeDatos()
 
-    def guardarTablaEnBaseDeDatos(self):
-        self.tablaMedica.guardarTablaEnBaseDeDatos()
+    def guardarTablaEnBaseDeDatos(self, myCursor, dB):
+        self.tablaMedica.guardarTablaEnBaseDeDatos(myCursor, dB)
 
     def setAlergias(self, alergias):
         self.tablaMedica.setAlergias(alergias)
 
-    def setAlergiasBas(self, alergias):
-        self.tablaMedica.setAlergiasBas(alergias)
+    def setAlergiasBas(self, alergias, myCursor, dB):
+        self.tablaMedica.setAlergiasBas(alergias, myCursor, dB)
     
     def agregarAlergias(self, alergia):
         self.tablaMedica.agregarAlergias(alergia)
@@ -142,14 +133,17 @@ class Mascota:
     def setRegistroDeOperaciones(self, operaciones):
         self.tablaMedica.setRegistroDeOperaciones(operaciones)
     
-    def agregarOperaciones(self, operacion):
-        self.tablaMedica.agregarOperaciones(operacion)
+    def setRegistroDeOperacionesBas(self, operaciones, myCursor, dB):
+        self.tablaMedica.setRegistroDeOperacionesBas(operaciones, myCursor, dB)
+    
+    def agregarOperaciones(self, operacion, myCursor, dB):
+        self.tablaMedica.agregarOperaciones(operacion, myCursor, dB)
 
     def setRegistroDeVacunas(self, vacunas):
         self.tablaMedica.setRegistroDeVacunas(vacunas)
     
-    def agregarVacunas(self, vacuna):
-        self.tablaMedica.agregarVacunas(vacuna)
+    def agregarVacunas(self, vacuna, myCursor, dB):
+        self.tablaMedica.agregarVacunas(vacuna, myCursor, dB)
 
     #metodos de bajada para la tabla
 
@@ -169,8 +163,8 @@ class Mascota:
 
     # metodos de bajada para ficha
 
-    def agregarFichaMedicaConsultaATabla(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp):
-        self.tablaMedica.agregarFichaMedicaConsultaATabla(idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp)
+    def agregarFichaMedicaConsultaATabla(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, myCursor, dB):
+        self.tablaMedica.agregarFichaMedicaConsultaATabla(idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, myCursor, dB)
         
 
     def setIdFicha(self, idFicha): 
@@ -200,14 +194,14 @@ class Mascota:
     def setTempFicha(self, temp):
         self.tablaMedica.setTempFicha(temp)
 
-    def setFichaDeOperacion(self, opFicha): #se ocupa el id para identificar la ficha especifica a la que añadir
-        self.tablaMedica.setFichaDeOperacion(opFicha)
+    def setFichaDeOperacion(self, opFicha, myCursor, dB): #se ocupa el id para identificar la ficha especifica a la que añadir
+        self.tablaMedica.setFichaDeOperacion(opFicha, myCursor, dB)
     
-    def setFichaDeHospitalizacion(self, hospFicha): #se ocupa el id para identificar
-        self.tablaMedica.setFichaDeHospitalizacion(hospFicha)
+    def setFichaDeHospitalizacion(self, hospFicha, myCursor, dB): #se ocupa el id para identificar
+        self.tablaMedica.setFichaDeHospitalizacion(hospFicha, myCursor, dB)
     
-    def setFichaDeSefacion(self, sedFicha): #se ocupa el id
-        self.tablaMedica.setFichaDeSefacion(sedFicha)
+    def setFichaDeSefacion(self, sedFicha, myCursor, dB): #se ocupa el id
+        self.tablaMedica.setFichaDeSefacion(sedFicha, myCursor, dB)
     
     def setOperacionFicha(self, operacion): #indicadores de que existe una ficha de cada tipo
         self.tablaMedica.setOperacionFicha(operacion)
@@ -218,14 +212,14 @@ class Mascota:
     def setSedacionFicha(self, sedacion):
         self.tablaMedica.setSedacionFicha(sedacion)
 
-    def setTratamientos(self, tratamiento):
-        self.tablaMedica.setTratamientos(tratamiento)
+    def setTratamientos(self, tratamiento, myCursor, dB):
+        self.tablaMedica.setTratamientos(tratamiento, myCursor, dB)
 
-    def setMedicamentos(self, medicamentos):
-        self.tablaMedica.setMedicamentos(medicamentos)
+    def setMedicamentos(self, medicamentos, myCursor, dB):
+        self.tablaMedica.setMedicamentos(medicamentos, myCursor, dB)
 
-    def setVacunas(self, vacunas):
-        self.tablaMedica.setVacunas(vacunas)
+    def setVacunas(self, vacunas, myCursor, dB):
+        self.tablaMedica.setVacunas(vacunas, myCursor, dB)
         
 
     # metodos de subida para ficha

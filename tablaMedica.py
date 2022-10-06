@@ -2,17 +2,6 @@ import mysql.connector
 
 from fichaMedica import FichaMedica #importamos la clase 
 
-db = mysql.connector.connect(
-    user='root',
-    password='root',
-    host='localhost',
-    database='mydb',
-    port='3306'
-)
-
-
-mycursor = db.cursor()
-
 class TablaMedica:
 
     listaDeFichasCorrespondientesTablaMedica = []
@@ -25,50 +14,48 @@ class TablaMedica:
         self.vacunasSuministradas = [] #diccionario
     
 
-    def solicitarFichasEnBaseDeDatos(self):
+    def solicitarFichasEnBaseDeDatos(self, myCursor):
         sql = 'SELECT * FROM fichaMedica WHERE Tablamedica_idTablamedica = (%s)'
-        mycursor.execute(sql, (str(self.id),))
-        fichas = mycursor.fetchall()
+        myCursor.execute(sql, (str(self.id),))
+        fichas = myCursor.fetchall()
         for ficha in fichas: #se recorren todas las ficha correspondientes a la tabla medica en particular 
             #las posiciones son correspondientes a el dato en la clase fichaMedica, se realiza de esta manera ya que lo que se entrega desde la base de datos es un aareglo de string por lo tanto se debe acceder a cada
             #posicion a fin de obtener los datos del mismo 
 
             #solicitamos todos los datos asociados en la base de datos
             
-            self.agregarFichaMedicaExistente(ficha[0],ficha[2],ficha[3],ficha[4],ficha[5],ficha[6],ficha[7],ficha[8],ficha[9],ficha[10],ficha[11], ficha[12])
+            self.agregarFichaMedicaExistente(ficha[0],ficha[2],ficha[3],ficha[4],ficha[5],ficha[6],ficha[7],ficha[8],ficha[9],ficha[10],ficha[11], ficha[12], myCursor)
             #self.fichas.append(fichaMedica)
     
-    def solicitarFichasParcialesEnBaseDeDatos(self):
+    def solicitarFichasParcialesEnBaseDeDatos(self, myCursor):
         sql = 'SELECT idFichaMedica, fechaConsulta FROM fichaMedica WHERE Tablamedica_idTablamedica = (%s)' #seleccionamos solo el id y la fecha de creacion
-        mycursor.execute(sql, (str(self.id),))
-        fichas = mycursor.fetchall()
+        myCursor.execute(sql, (str(self.id),))
+        fichas = myCursor.fetchall()
         for ficha in fichas: #se recorren todas las ficha correspondientes a la tabla medica en particular 
             
             self.agregarFichaMedicaParcial(ficha[0],ficha[1])
             #self.fichas.append(fichaMedica)
 
 
-    def guardarTablaEnBaseDeDatos(self):
+    def guardarTablaEnBaseDeDatos(self, myCursor, dB):
         sql = "INSERT INTO tablamedica values (%s)"
-        mycursor.execute(sql, (str(self.id),))
-        db.commit()
+        myCursor.execute(sql, (str(self.id),))
+        dB.commit()
 
-        print("soy table y me")
-
-    def agregarFichaMedicaConsultaATabla(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp):
+    def agregarFichaMedicaConsultaATabla(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, myCursor, dB):
         fichaMedicaConsulta = FichaMedica(idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp)
         self.fichas.append(fichaMedicaConsulta)
-        self.guardarFichaGeneralEnBaseDeDatos(fichaMedicaConsulta)
+        self.guardarFichaGeneralEnBaseDeDatos(fichaMedicaConsulta, myCursor, dB)
 
-    def agregarFichaMedicaExistente(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp):
+    def agregarFichaMedicaExistente(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, myCursor):
         fichaMedicaConsulta = FichaMedica(idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp)
         #print(fichaMedicaConsulta.getId())
-        fichaMedicaConsulta.solicitarFichaDeHospitalizacionEnBaseDeDatos()
-        fichaMedicaConsulta.solicitarMedicamentosConsultaEnBaseDeDatos()
-        fichaMedicaConsulta.solicitarVacunacionEnBaseDeDatos()
-        fichaMedicaConsulta.solicitarFichaDeOperacionEnBaseDeDatos()
-        fichaMedicaConsulta.solicitarFichaDeSedacionEnBaseDeDatos()
-        fichaMedicaConsulta.solicitarTratamientosConsultaBaseDeDatos()
+        fichaMedicaConsulta.solicitarFichaDeHospitalizacionEnBaseDeDatos(myCursor)
+        fichaMedicaConsulta.solicitarMedicamentosConsultaEnBaseDeDatos(myCursor)
+        fichaMedicaConsulta.solicitarVacunacionEnBaseDeDatos(myCursor)
+        fichaMedicaConsulta.solicitarFichaDeOperacionEnBaseDeDatos(myCursor)
+        fichaMedicaConsulta.solicitarFichaDeSedacionEnBaseDeDatos(myCursor)
+        fichaMedicaConsulta.solicitarTratamientosConsultaBaseDeDatos(myCursor)
         self.fichas.append(fichaMedicaConsulta)
     
     def agregarFichaMedicaParcial(self, idFicha, fechaConsulta):
@@ -76,13 +63,13 @@ class TablaMedica:
         #print(fichaMedicaConsulta.getId())
         self.fichas.append(fichaMedicaConsulta)
     
-    def completarFichaParcial(self, idFicha):
+    def completarFichaParcial(self, idFicha, myCursor):
         for ficha in self.fichas:
             if(ficha.getId() == idFicha):
 
                 sql = 'SELECT * FROM fichaMedica WHERE idFichaMedica = (%s)'
-                mycursor.execute(sql, (str(idFicha),))
-                fichas = mycursor.fetchall()
+                myCursor.execute(sql, (str(idFicha),))
+                fichas = myCursor.fetchall()
 
                 print(str(fichas))
 
@@ -97,17 +84,17 @@ class TablaMedica:
                 ficha.setSedacion(fichas[0][11])
                 ficha.setTemp(fichas[0][12])
 
-                ficha.solicitarFichaDeHospitalizacionEnBaseDeDatos()
-                ficha.solicitarMedicamentosConsultaEnBaseDeDatos()
-                ficha.solicitarVacunacionEnBaseDeDatos()
-                ficha.solicitarFichaDeOperacionEnBaseDeDatos()
-                ficha.solicitarFichaDeSedacionEnBaseDeDatos()
-                ficha.solicitarTratamientosConsultaBaseDeDatos()
+                ficha.solicitarFichaDeHospitalizacionEnBaseDeDatos(myCursor)
+                ficha.solicitarMedicamentosConsultaEnBaseDeDatos(myCursor)
+                ficha.solicitarVacunacionEnBaseDeDatos(myCursor)
+                ficha.solicitarFichaDeOperacionEnBaseDeDatos(myCursor)
+                ficha.solicitarFichaDeSedacionEnBaseDeDatos(myCursor)
+                ficha.solicitarTratamientosConsultaBaseDeDatos(myCursor)
 
                 break
 
-    def guardarFichaGeneralEnBaseDeDatos(self, fichaMedicaConsulta:FichaMedica):
-        fichaMedicaConsulta.guardarFichaGeneralEnBaseDeDatos(self.getId())
+    def guardarFichaGeneralEnBaseDeDatos(self, fichaMedicaConsulta:FichaMedica, myCursor, dB):
+        fichaMedicaConsulta.guardarFichaGeneralEnBaseDeDatos(self.getId(), myCursor, dB)
 
     def editarFichaMedicaConsulta(self):
         pass
@@ -138,14 +125,14 @@ class TablaMedica:
         self.alergias = alergias
         #self.guardarAlergiasEnBaseDeDatos()
     
-    def setAlergiasBas(self, alergias):
+    def setAlergiasBas(self, alergias, myCursor, dB):
         self.alergias = alergias
-        self.guardarAlergiasEnBaseDeDatos()
+        self.guardarAlergiasEnBaseDeDatos(myCursor, dB)
 
-    def solicitarAlergiasEnBaseDeDatos(self):
+    def solicitarAlergiasEnBaseDeDatos(self, myCursor):
         sql = 'SELECT * FROM Alergias WHERE TablaMedica_idTablaMedica = (%s)'
-        mycursor.execute(sql, (str(self.getId()),))
-        alergiasMascota = mycursor.fetchall()
+        myCursor.execute(sql, (str(self.getId()),))
+        alergiasMascota = myCursor.fetchall()
         alergia = {}
         alergiasFinal = []
         for alergiaMascota in alergiasMascota:
@@ -156,11 +143,11 @@ class TablaMedica:
             alergiasFinal.append(alergia)
         self.alergias = alergiasFinal
 
-    def guardarAlergiasEnBaseDeDatos(self):
+    def guardarAlergiasEnBaseDeDatos(self, myCursor, dB):
         for alergia in self.getAlergias():
             sql = "INSERT INTO alergias values (%s, %s, %s)"
-            mycursor.execute(sql, (str(alergia['id']), str(alergia['nombre']), str(self.getId())))
-            db.commit()
+            myCursor.execute(sql, (str(alergia['id']), str(alergia['nombre']), str(self.getId())))
+            dB.commit()
 
     def getAlergias(self):
         return self.alergias
@@ -169,17 +156,24 @@ class TablaMedica:
 
 #Registro de operaciones 
 
-    def agregarOperaciones(self, operacion):
+    def agregarOperaciones(self, operacion, myCursor, dB):
         self.registroDeOperaciones.append(operacion)
 
-    def setRegistroDeOperaciones(self, operaciones): #local
+        sql = 'Insert INTO registroDeOperaciones VALUES (%s, %s,%s)'
+        myCursor.execute(sql, (str(operacion['id']), str(operacion['operacion']),  str(self.getId())))
+        dB.commit()
+    
+    def setRegistroDeOperaciones(self, operacion):
+        self.registroDeOperaciones = operacion
+    
+    def setRegistroDeOperacionesBas(self, operaciones, myCursor, dB): #local
         self.registroDeOperaciones = operaciones
-        print(str(len(operaciones))+" en tabla de operaciones")
+        self.guardarOperacionesEnBaseDeDatos(myCursor, dB)
 
-    def solicitarRegistroDeOperacionesEnBaseDeDatos(self):
+    def solicitarRegistroDeOperacionesEnBaseDeDatos(self, myCursor):
         sql = 'SELECT * FROM RegistroDeOperaciones WHERE TablaMedica_idTablaMedica = (%s)'
-        mycursor.execute(sql, (str(self.getId()),))
-        registroOperaciones = mycursor.fetchall()
+        myCursor.execute(sql, (str(self.getId()),))
+        registroOperaciones = myCursor.fetchall()
 
         for operaciones in registroOperaciones:
             operacion = {
@@ -188,11 +182,11 @@ class TablaMedica:
             }
             self.agregarOperaciones.append(operacion)
 
-    def guardarOperacionesEnBaseDeDatos(self):
+    def guardarOperacionesEnBaseDeDatos(self, myCursor, dB):
         for operacion in self.getRegistroDeOperaciones():
             sql = 'Insert INTO registroDeOperaciones VALUES (%s, %s,%s)'
-            mycursor.execute(sql, (str(operacion['id']), str(operacion['operacion']),  str(self.getId())))
-            db.commit()
+            myCursor.execute(sql, (str(operacion['id']), str(operacion['operacion']),  str(self.getId())))
+            dB.commit()
 
     def getRegistroDeOperaciones(self):
         return self.registroDeOperaciones
@@ -201,21 +195,21 @@ class TablaMedica:
 
 #Vacunas suministradas 
 
-    def agregarVacunas(self, vacunas):
+    def agregarVacunas(self, vacunas, myCursor, dB):
 
         self.vacunasSuministradas.append(vacunas) #agregamos tanto las vacunas a la tabla como a la base de datos
 
         sql = 'INSERT INTO registrovacunassuministradas (idVacunasSuministradas, nombreVacuna, TablaMedica_idTablaMedica) VALUES (%s, %s, %s)'
-        mycursor.execute(sql, (str(vacunas['id']), str(vacunas['nomVacuna']), str(self.getId())))
-        db.commit()
+        myCursor.execute(sql, (str(vacunas['id']), str(vacunas['nomVacuna']), str(self.getId())))
+        dB.commit()
 
     def setRegistroDeVacunas(self, vacunas):
         self.vacunasSuministradas = vacunas 
     
-    def solicitarVacunasEnBaseDeDatos(self):
+    def solicitarVacunasEnBaseDeDatos(self, myCursor):
         sql = 'SELECT * FROM RegistroVacunasSuministradas WHERE TablaMedica_idTablaMedica = (%s)'
-        mycursor.execute(sql, (str(self.getId()),))
-        registroVacunas = mycursor.fetchall()
+        myCursor.execute(sql, (str(self.getId()),))
+        registroVacunas = myCursor.fetchall()
 
         for vacunas in registroVacunas:
             vacuna = {
@@ -224,11 +218,11 @@ class TablaMedica:
             }
             self.vacunasSuministradas.append(vacuna)
 
-    def guardarRegistroVacunasEnBaseDeDatos(self):
+    def guardarRegistroVacunasEnBaseDeDatos(self, myCursor, dB):
         for vacunas in self.getVacunasSuministradas():
             sql = 'INSERT INTO registrovacunassuministradas (idVacunasSuministradas, nombreVacuna, TablaMedica_idTablaMedica) VALUES (%s, %s, %s)'
-            mycursor.execute(sql, (str(vacunas['id']), str(vacunas['nomVacuna']), str(self.getId())))
-            db.commit()
+            myCursor.execute(sql, (str(vacunas['id']), str(vacunas['nomVacuna']), str(self.getId())))
+            dB.commit()
 
     def getVacunasSuministradas(self):
         return self.vacunasSuministradas
@@ -239,14 +233,14 @@ class TablaMedica:
 #todos los set se realizaran sobre la ultima ficha agregada, esto debido a que solo la utima puede llegar a ser modificada o se agregaran datos 
 #metodos de bajada de datos a clase inferior, fichas extra 
 
-    def setFichaDeOperacion(self, opFicha): #se ocupa el id para identificar la ficha especifica a la que añadir
-        self.fichas[len(self.fichas)-1].setFichaOperacion(opFicha) #siempre se agrega a la ultima ficha generada
+    def setFichaDeOperacion(self, opFicha, myCursor, dB): #se ocupa el id para identificar la ficha especifica a la que añadir
+        self.fichas[len(self.fichas)-1].setFichaOperacion(opFicha, myCursor, dB) #siempre se agrega a la ultima ficha generada
     
-    def setFichaDeHospitalizacion(self, hospFicha): #se ocupa el id para identificar
-        self.fichas[len(self.fichas)-1].setFichaDeHospitalizacion(hospFicha)
+    def setFichaDeHospitalizacion(self, hospFicha, myCursor, dB): #se ocupa el id para identificar
+        self.fichas[len(self.fichas)-1].setFichaDeHospitalizacion(hospFicha, myCursor, dB)
     
-    def setFichaDeSefacion(self, sedFicha): #se ocupa el id
-        self.fichas[len(self.fichas)-1].setFichaDeSefacion(sedFicha)
+    def setFichaDeSefacion(self, sedFicha, myCursor, dB): #se ocupa el id
+        self.fichas[len(self.fichas)-1].setFichaDeSefacion(sedFicha, myCursor, dB)
     
     def setOperacionFicha(self, operacion): #indicadores de que existe una ficha de cada tipo
         self.fichas[len(self.fichas)-1].setOperacion(operacion)
@@ -288,14 +282,14 @@ class TablaMedica:
     def setTempFicha(self, temp):
         self.fichas[len(self.fichas)-1].setTempFicha(temp)
     
-    def setTratamientos(self, tratamiento):
-        self.fichas[len(self.fichas)-1].setTratamientosConsulta(tratamiento)
+    def setTratamientos(self, tratamiento, myCursor, dB):
+        self.fichas[len(self.fichas)-1].setTratamientosConsulta(tratamiento, myCursor, dB)
 
-    def setMedicamentos(self, medicamentos):
-        self.fichas[len(self.fichas)-1].setMedicamentosConsulta(medicamentos)
+    def setMedicamentos(self, medicamentos, myCursor, dB):
+        self.fichas[len(self.fichas)-1].setMedicamentosConsulta(medicamentos, myCursor, dB)
 
-    def setVacunas(self, operacion):
-        self.fichas[len(self.fichas)-1].setVacunacion(operacion)
+    def setVacunas(self, operacion, myCursor, dB):
+        self.fichas[len(self.fichas)-1].setVacunacion(operacion, myCursor, dB)
   
 
 # metodos de bajada de datos a clase inferior ne ficha general
