@@ -37,12 +37,23 @@ class TablaMedica:
             
             self.agregarFichaMedicaExistente(ficha[0],ficha[2],ficha[3],ficha[4],ficha[5],ficha[6],ficha[7],ficha[8],ficha[9],ficha[10],ficha[11], ficha[12])
             #self.fichas.append(fichaMedica)
+    
+    def solicitarFichasParcialesEnBaseDeDatos(self):
+        sql = 'SELECT idFichaMedica, fechaConsulta FROM fichaMedica WHERE Tablamedica_idTablamedica = (%s)' #seleccionamos solo el id y la fecha de creacion
+        mycursor.execute(sql, (str(self.id),))
+        fichas = mycursor.fetchall()
+        for ficha in fichas: #se recorren todas las ficha correspondientes a la tabla medica en particular 
+            
+            self.agregarFichaMedicaParcial(ficha[0],ficha[1])
+            #self.fichas.append(fichaMedica)
 
 
     def guardarTablaEnBaseDeDatos(self):
         sql = "INSERT INTO tablamedica values (%s)"
         mycursor.execute(sql, (str(self.id),))
         db.commit()
+
+        print("soy table y me")
 
     def agregarFichaMedicaConsultaATabla(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp):
         fichaMedicaConsulta = FichaMedica(idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp)
@@ -59,6 +70,41 @@ class TablaMedica:
         fichaMedicaConsulta.solicitarFichaDeSedacionEnBaseDeDatos()
         fichaMedicaConsulta.solicitarTratamientosConsultaBaseDeDatos()
         self.fichas.append(fichaMedicaConsulta)
+    
+    def agregarFichaMedicaParcial(self, idFicha, fechaConsulta):
+        fichaMedicaConsulta = FichaMedica(idFicha, fechaConsulta)
+        #print(fichaMedicaConsulta.getId())
+        self.fichas.append(fichaMedicaConsulta)
+    
+    def completarFichaParcial(self, idFicha):
+        for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+
+                sql = 'SELECT * FROM fichaMedica WHERE idFichaMedica = (%s)'
+                mycursor.execute(sql, (str(idFicha),))
+                fichas = mycursor.fetchall()
+
+                print(str(fichas))
+
+                ficha.setSucursalVeterinaria(fichas[0][2])
+                ficha.setVeterinarioACargo(fichas[0][3])
+                ficha.setOperacion(fichas[0][5])
+                ficha.setFrecRespiratoria(fichas[0][6])
+                ficha.setFrecCardiaca(fichas[0][7])
+                ficha.setPeso(fichas[0][8])
+                ficha.setEdad(fichas[0][9])
+                ficha.setHospitalizacion(fichas[0][10])
+                ficha.setSedacion(fichas[0][11])
+                ficha.setTemp(fichas[0][12])
+
+                ficha.solicitarFichaDeHospitalizacionEnBaseDeDatos()
+                ficha.solicitarMedicamentosConsultaEnBaseDeDatos()
+                ficha.solicitarVacunacionEnBaseDeDatos()
+                ficha.solicitarFichaDeOperacionEnBaseDeDatos()
+                ficha.solicitarFichaDeSedacionEnBaseDeDatos()
+                ficha.solicitarTratamientosConsultaBaseDeDatos()
+
+                break
 
     def guardarFichaGeneralEnBaseDeDatos(self, fichaMedicaConsulta:FichaMedica):
         fichaMedicaConsulta.guardarFichaGeneralEnBaseDeDatos(self.getId())
@@ -128,6 +174,7 @@ class TablaMedica:
 
     def setRegistroDeOperaciones(self, operaciones): #local
         self.registroDeOperaciones = operaciones
+        print(str(len(operaciones))+" en tabla de operaciones")
 
     def solicitarRegistroDeOperacionesEnBaseDeDatos(self):
         sql = 'SELECT * FROM RegistroDeOperaciones WHERE TablaMedica_idTablaMedica = (%s)'

@@ -1,4 +1,5 @@
 import mysql.connector
+from numpy import array
 
 
 db = mysql.connector.connect(
@@ -13,35 +14,58 @@ mycursor = db.cursor()
 
 class FichaMedica:
 
-    def __init__(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp): #debido al funcionamiento de python
+    #idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp
+    def __init__(self, *args): #debido al funcionamiento de python
         #solo manejaremos un constructor que sera ocupado para principalmente el manejo en base de datos, pero tambien para el ingresao normal 
-        
-        self.idFicha = idFicha
-        self.idSucursalVeterinaria = sucursalVeterinaria
-        self.veterinarioACargo = veterinarioACargo
-        self.fechaConsulta = fechaConsulta
+        if(len(args) == 2):
+            self.idFicha = args[0]
+            self.fechaConsulta = args[1]
+            self.idSucursalVeterinaria = None
+            self.veterinarioACargo = None
 
-        self.medicamentosConsulta = [] #arreglo de diccionario porque pueden ser mas de uno 
-        self.vacunasSuministradasConsulta = []
-        self.tratamientoConsulta = []
+            self.medicamentosConsulta = [] #arreglo de diccionario porque pueden ser mas de uno 
+            self.vacunasSuministradasConsulta = []
+            self.tratamientoConsulta = []
 
-        self.frecRespiratoria = frecRespiratoria
-        self.frecCardiaca = frecCardiaca
-        self.peso = peso
-        self.edad = edad
-        self.temperatura = temp
+            self.frecRespiratoria = None
+            self.frecCardiaca = None
+            self.peso = None
+            self.edad = None
+            self.temperatura = None
 
-        self.operacion = operacion #indicar boolean
-        self.operacionFicha = None #diccionario
-        self.hospitalizacion = hospitalizacion #indicar boolean
-        self.hospitalizacionFicha = None #diccionario
-        self.sedacion = sedacion #indicar boolean
-        self.sedacionFicha = None #diccionario
+            self.operacion = None #indicar boolean
+            self.operacionFicha = None #diccionario
+            self.hospitalizacion = None #indicar boolean
+            self.hospitalizacionFicha = None #diccionario
+            self.sedacion = None #indicar boolean
+            self.sedacionFicha = None #diccionario
 
-        self.fichaActual = False
+            self.fichaActual = False
 
-        
-        
+        elif(len(args) == 12):
+            self.idFicha = args[0]
+            self.idSucursalVeterinaria = args[1]
+            self.veterinarioACargo = args[2]
+            self.fechaConsulta = args[3]
+
+            self.medicamentosConsulta = [] #arreglo de diccionario porque pueden ser mas de uno 
+            self.vacunasSuministradasConsulta = []
+            self.tratamientoConsulta = []
+
+            self.frecRespiratoria = args[5]
+            self.frecCardiaca = args[6]
+            self.peso = args[7]
+            self.edad = args[8]
+            self.temperatura = args[11]
+
+            self.operacion = args[4] #indicar boolean
+            self.operacionFicha = None #diccionario
+            self.hospitalizacion = args[9] #indicar boolean
+            self.hospitalizacionFicha = None #diccionario
+            self.sedacion = args[10] #indicar boolean
+            self.sedacionFicha = None #diccionario
+
+            self.fichaActual = False   
 
     def editarFichaMedica(self):
         pass
@@ -279,14 +303,14 @@ class FichaMedica:
             'nombreTratamiento': tratamiento[1],
             'causaVisita' : tratamiento[2],
             }
-            self.tratamientoConsulta.append(trat)
+            tratamientosArray.append(trat)
+        self.tratamientoConsulta = tratamientosArray
     
     def guargarTratamientosConsultaEnBaseDeDatos(self):
         for tratamiento in self.getTratamiento(): #recorremos todos los tratamientos aplicados en la consulta y los guardamos en la base de datos 
             sql = 'INSERT INTO TratamientosConsulta VALUES (%s, %s, %s, %s)' #(idTratamientosConsulta, nombreTratamientos, caudaDeLaVisita, FichaMedica_idFichaMedica, FichaMedica_TablaMedica_idTablaMedica)
             mycursor.execute(sql, (str(tratamiento['id']), str(tratamiento['nombreTratamiento']), str(tratamiento['causaVisita']), str(self.getId())))
             db.commit()
-
 
     def setTratamientosConsulta(self, tratamiento): 
         self.tratamientoConsulta = tratamiento
@@ -302,12 +326,14 @@ class FichaMedica:
         sql = 'SELECT * FROM medicamentosconsulta WHERE FichaMedica_idFichaMedica = (%s)'
         mycursor.execute(sql, (str(self.getId()),))
         medicamentos = mycursor.fetchall()
+        medicamentosArray = []
         for medicamento in medicamentos:
             med = {
             'id' : medicamento[0],
             'nomMedicamento' : medicamento[1],
             }
-            self.medicamentosConsulta.append(med)
+            medicamentosArray.append(med)
+        self.medicamentosConsulta = medicamentosArray
 
     def guardarMedicamentosConsultaEnBaseDeDatos(self): 
         for medicamento in self.getMedicamentosConsulta():
@@ -328,12 +354,14 @@ class FichaMedica:
         sql = 'SELECT * FROM VacunasSuministradasConsulta WHERE FichaMedica_idFichaMedica = (%s)'
         mycursor.execute(sql, (str(self.getId()),))
         vacunas = mycursor.fetchall()
+        vacunasArray = []
         for vacuna in vacunas:
             vac = {
             'id' : vacuna[0],
             'nomVacuna' : vacuna[1],
             }
-            self.vacunasSuministradasConsulta.append(vac)
+            vacunasArray.append(vac) 
+        self.vacunasSuministradasConsulta = vacunasArray
     
     def guardarVacunacionEnBaseDeDatos(self):
         for vacuna in self.getVacunasSuministradasConsulta():
