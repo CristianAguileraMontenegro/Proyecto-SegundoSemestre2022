@@ -15,8 +15,8 @@ from tablaMedica import TablaMedica
 from fichaMedica import FichaMedica
 
 db = mysql.connector.connect(
-    user='root',
-    password='root',
+    user='piero',
+    password='pieron123',
     host='localhost',
     database='mydb',
     port='3306'
@@ -283,13 +283,13 @@ if __name__ != "__main__":
                 if(flagMascotaEnc):
                     mascotaBuscada = self.buscarMascotaLocal(idMascotaBuscada)
                     listRetorno.append(mascotaLocal)
-                    listRetorno.append(mascotaBuscada)
+                    listRetorno.append(idMascotaBuscada)
                     return listRetorno
                 elif(flagMascotaEnc == False):
                     mascotaBuscada = self.buscarMascotaRemota(idMascotaBuscada)
                     if(mascotaBuscada != None):
                         listRetorno.append(mascotaRemote)
-                        listRetorno.append(mascotaBuscada)
+                        listRetorno.append(idMascotaBuscada)
                         return listRetorno
                 
                 sql = 'SELECT idMascota FROM mascota WHERE idMascota = (%s)'
@@ -376,3 +376,12 @@ if __name__ != "__main__":
                     idRand = uuid.uuid4()
                     f.write(f"{idRand}")
                     return str(idRand)
+
+        def getDatosBasicosMascota(self, idMascota):
+            sql = 'SELECT * FROM mascota WHERE idMascota = (%s)' #muestra informacion bascia buscar 
+            mycursor.execute(sql, (idMascota,))
+            resultado = mycursor.fetchone()
+            return resultado
+
+
+
