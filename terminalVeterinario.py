@@ -465,14 +465,14 @@ if __name__ != "__main__":
                     mascotaBuscada = self.buscarMascotaLocal(idMascotaBuscada)
                     print(str(mascotaBuscada.getId()))
                     listRetorno.append(mascotaLocal)
-                    listRetorno.append(mascotaBuscada)
+                    listRetorno.append(idMascotaBuscada)
                     return listRetorno
                 elif(flagMascotaEnc == False):
                     mascotaBuscada = self.buscarMascotaRemota(idMascotaBuscada)
                     print(str(mascotaBuscada))
                     if(mascotaBuscada != None):
                         listRetorno.append(mascotaRemote)
-                        listRetorno.append(mascotaBuscada)
+                        listRetorno.append(idMascotaBuscada)
                         return listRetorno
                 
                 sql = 'SELECT idMascota FROM mascota WHERE idMascota = (%s)'
@@ -560,5 +560,10 @@ if __name__ != "__main__":
                     f.write(f"{idRand}")
                     return str(idRand)
 
+        def getDatosBasicosMascota(self, idMascota):
+            sql = 'SELECT * FROM mascota WHERE idMascota = (%s)' #muestra informacion bascia buscar 
+            mycursor.execute(sql, (idMascota,))
+            resultado = mycursor.fetchone()
+            return resultado
 
                 
