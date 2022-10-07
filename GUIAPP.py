@@ -42,8 +42,10 @@ class App(ctk.CTk):
         self.screenFormularioCrearFicha = screenFormularioCrearFicha
         self.screenFormularioAgregarMascota = screenFormularioAgregarMascota
         self.screenFormularioFichaAuthCirugia = screenFormularioFichaAuthCirugia
+        self.screenFormularioEditarFichaAuthCirugia = screenFormularioEditarFichaAuthCirugia
         self.screenFormularioCrearFichaAuthCirugia = screenFormularioCrearFichaAuthCirugia
         self.screenFormularioFichaHospt = screenFormularioFichaHospt
+        self.screenFormularioEditarFichaHospt = screenFormularioEditarFichaHospt
         self.screenFormularioCrearFichaHospt = screenFormularioCrearFichaHospt
         self.screenFormularioFichaSedacion = screenFormularioFichaSedacion
         self.screenFormularioCrearFichaSedacion = screenFormularioCrearFichaSedacion
@@ -51,8 +53,8 @@ class App(ctk.CTk):
 
         self.framesTotales = {screenIngresoLlave, screenBuscarMascota, screenDatosTotalMascota, 
         screenFormularioVerFicha, screenFormularioEditarFicha, screenFormularioCrearFicha,
-        screenFormularioAgregarMascota, screenFormularioFichaAuthCirugia, 
-        screenFormularioCrearFichaAuthCirugia, screenFormularioFichaHospt, 
+        screenFormularioAgregarMascota, screenFormularioFichaAuthCirugia, screenFormularioEditarFichaAuthCirugia,
+        screenFormularioCrearFichaAuthCirugia, screenFormularioEditarFichaHospt, screenFormularioFichaHospt, 
         screenFormularioCrearFichaHospt, screenFormularioFichaSedacion, 
         screenFormularioCrearFichaSedacion, screenAbstractMedico}
         
@@ -91,6 +93,49 @@ class App(ctk.CTk):
         
     def getIdNuevaMascota(self):
         return self.idNuevaMascota
+
+    def filtroNoValidChar(self, texto):
+        regex = re.compile('[@_!#$%^&*()<>?/\|}{~:]')
+        if(regex.search(texto) == None):
+            return True
+        else: 
+            return False
+        
+    def filtroNum(self, texto):
+        try:
+            textoInt = int(texto)
+        except:
+            return False
+        else:
+            return True
+
+    def validarRut(self, rutTutor):
+
+        if(len(rutTutor) >= 7 and len(rutTutor)<=11):
+            rut = rutTutor
+            rut = rut.upper()
+            rut = rut.replace("-","")
+            rut = rut.replace(".","")
+            for i in rut:
+                if(i != "k"):
+                    try:
+                        letra = int(i)
+                    except:
+                        return False
+            aux = rut[:-1]
+            dv = rut[-1:]
+
+            revertido = map(int, reversed(str(aux)))
+            factors = cycle(range(2,8))
+            s = sum(d * f for d, f in zip(revertido,factors))
+            res = (-s)%11
+
+            if str(res) == dv:
+                return True
+            elif (dv=="K" and res==10):
+                return True
+            else:
+                return False
 
 
 class screenIngresoLlave(ctk.CTkFrame):
@@ -135,11 +180,22 @@ class screenBuscarMascota(ctk.CTkFrame):
         self.labelCodigoInvalido = ctk.CTkLabel(self.frameMensajes, text="Ingrese un código válido", text_font=Font_tuple, text_color='red')
         self.labelNoExiste =  ctk.CTkLabel(self.frameMensajes, justify='left', text= "Mascota no registrada en el sistema", text_font=Font_tuple, text_color='black', width=100)
 
-        self.botonEntrar = ctk.CTkButton(self.searchFrame, width=8, text='Ingresar', text_font=Font_tuple, fg_color="#28587A", command=lambda: parent.update_frame(parent.screenDatosTotalMascota, parent, container))
+        self.botonEntrar = ctk.CTkButton(self.searchFrame, width=8, text='Ver Datos Mascota', text_font=Font_tuple, fg_color="#28587A", command=lambda: parent.update_frame(parent.screenDatosTotalMascota, parent, container))
         self.botonEntrarAbstract = ctk.CTkButton(self.searchFrame, width=8, text='Ver Abstract', text_font=Font_tuple, fg_color="#28587A", command=lambda: parent.update_frame(parent.screenAbstractMedico, parent, container))
         self.botonCrearMascota = ctk.CTkButton(self.searchFrame, width=8, text='Registrar Mascota', text_font=Font_tuple, fg_color="#28587A", command=lambda: parent.update_frame(parent.screenFormularioAgregarMascota, parent, container))
         
         self.labelInfoBasica = ctk.CTkLabel(self.frameMensajes, justify='left', text_font=Font_tuple, text_color='black', width=100)
+    
+    def validarDatos(self, parent, container):
+        flag = False
+        codigoMascota = self.entradaBuscar.get()
+        if(parent.filtroNum(codigoMascota) is not True) or (parent.filtroNoValidChar(codigoMascota) is not True) or (len(codigoMascota) == 0):
+            flag = False
+            self.labelCodigoInvalido.grid(row=0, column=0,padx=10, pady=10)
+
+        if(flag):
+            self.clickBuscar(parent, container)
+
 
     def clickBuscar(self, parent, container):
         codigoMascota = self.entradaBuscar.get()
@@ -154,9 +210,7 @@ class screenBuscarMascota(ctk.CTkFrame):
             idMascota = resultado[1]
             datosMascota = terminalVet.getDatosBasicosMascota(idMascota)
 
-            mascotaLol = Mascota(idMascota)
-
-            terminalVet.setMascotaEspecifica(idMascota, mascotaLol)
+            mascotaLol = terminalVet.buscarMascotaRemota(idMascota)
 
             parent.setMascotaApp(mascotaLol)
             
@@ -176,9 +230,7 @@ class screenBuscarMascota(ctk.CTkFrame):
             idMascota = resultado[1]
             datosMascota = terminalVet.getDatosBasicosMascota(idMascota)
 
-            mascotaLol = Mascota(idMascota)
-
-            terminalVet.setMascotaEspecifica(idMascota, mascotaLol)
+            mascotaLol = terminalVet.buscarMascotaRemota(idMascota)
 
             parent.setMascotaApp(mascotaLol)
             
@@ -544,7 +596,7 @@ class screenFormularioEditarFicha(ctk.CTkFrame):
             self.frameButtonsSEditarFicha.grid(row=0, column=1, padx=20, pady=20)
 
             self.labelSucursalSEditarFicha = ctk.CTkLabel(self.frameFormSEditarFicha, text="Sucursal Veterinaria", text_font=Font_tuple, text_color='black')
-            self.labelSucursalSVerFicha.grid(row = 0, column = 0, padx=20, pady=12)
+            self.labelSucursalSEditarFicha.grid(row = 0, column = 0, padx=20, pady=12)
             
             self.labelVetACargoSEditarFicha = ctk.CTkLabel(self.frameFormSEditarFicha, text="Veterinario a cargo", text_font=Font_tuple, text_color='black')
             self.labelVetACargoSEditarFicha.grid(row = 1, column = 0, padx=20, pady=12)
@@ -677,25 +729,37 @@ class screenFormularioEditarFicha(ctk.CTkFrame):
             self.entradaTemperaturaSEditarFicha.grid(row = 11, column = 1, padx=20, pady=12)
 
             #Agregar Buttons
+            self.botonAgregarFichaGeneralSCrearFicha = ctk.CTkButton(self.frameButtonsSEditarFicha, width=250, height=80, text='Agregar Ficha General', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.clickEditarFicha(self.entradaSucursalSEditarFicha.get(), 
+            self.entradaVetACargoSEditarFicha.get(), self.entradaFechaConsultaSEditarFicha.get(), 0, self.entradaFrecRespiratoriaSEditarFicha.get(),
+            self.entradaFrecCardiacaSEditarFicha.get(), self.entradaPesoSEditarFicha.get(), self.entradaEdadSEditarFicha.get(), 0, 0,  self.entradaTemperaturaSEditarFicha.get(), mascotaActual.getId(),
+            self.entradaTratamientosConsultaSEditarFicha.get(), self.entradaCausaVisitaSEditarFicha.get() ,self.entradaMedicamentosConsultaSEdiEditarFicha.get(), self.entradaVacSuministradasSEditarFicha.get(), terminalVet, mascotaActual))
+            
+            self.botonAgregarFichaGeneralSCrearFicha.pack(padx=10, pady=10)
+
             self.botonVolverSEditarFicha = ctk.CTkButton(self.frameButtonsSEditarFicha, width= 200, height= 80, text='Volver', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.volverSDTotalMascota(parent, container, mascotaActual, idFicha))
             self.botonVolverSEditarFicha.pack(padx= 10, pady = (33,40))
 
-            if (mascotaActual.getHospitalizacion(idFicha) == True):
-                self.botonEditarFichaHosp = ctk.CTkButton(self.frameButtonsSEditarFicha, width= 200, height= 80, text='Ver Ficha Hospitalizacion', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.update_frame(parent.screenFormularioFichaHospt, parent, container))
-                self.botonEditarFichaHosp.pack(padx= 10, pady = 40)
-            
-            if(mascotaActual.getSedacion(idFicha) == True):
-                self.botonEditarFichaSedacion = ctk.CTkButton(self.frameButtonsSEditarFicha, width= 200, height= 80, text='Ver Ficha Sedación', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.update_frame(parent.screenFormularioFichaSedacion, parent, container))
-                self.botonEditarFichaSedacion.pack(padx= 10, pady = 40)
+            self.botonEditarFichaHosp = ctk.CTkButton(self.frameButtonsSEditarFicha, width= 250, height= 80, text='Editar Ficha Hospitalizacion', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.update_frame(parent.screenFormularioEditarFichaHospt, parent, container), state=DISABLED) #hay que agregar cauda de la visita a la base de datos
+            self.botonEditarFichaHosp.pack(padx= 10, pady = 40)
 
-            if(mascotaActual.getOperacion(idFicha) == True):
-                self.botonEditarFichaOperacion = ctk.CTkButton(self.frameButtonsSEditarFicha, width= 200, height= 80, text='Ver Ficha Operación', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.update_frame(parent.screenFormularioFichaAuthCirugia, parent, container))
-                self.botonEditarFichaOperacion.pack(padx= 10, pady = (40, 33))
+            self.botonEditarFichaOperacion = ctk.CTkButton(self.frameButtonsSEditarFicha, width= 250, height= 80, text='Editar Ficha Operación', text_font=Font_tuple, hover_color="#142C3D", state=DISABLED, command=lambda: parent.update_frame(parent.screenFormularioEditarFichaAuthCirugia, parent, container))
+            self.botonEditarFichaOperacion.pack(padx= 10, pady = (40, 33))
 
+    def clickEditarFicha(self, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, idMascota, tratamientos, causaVisita, medicamentos, vacunas, terminalVet, mascotaActual):
+        terminalVet.agregarFichaMedica(sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, idMascota, tratamientos, causaVisita, medicamentos, vacunas)
+        self.botonAgregarFichaGeneralSCrearFicha.configure(state=DISABLED)
+
+        self.botonEditarFichaOperacion.configure(state=NORMAL)
+        self.botonEditarFichaHosp.configure(state=NORMAL)
+        #self.labelMensajeEditarSCrearFicha.pack()
+
+        mascotaActual.setActualFichaMedicaConsulta(str(fechaConsulta))
+        
     def volverSDTotalMascota(self, parent, container, mascotaActual, idFicha):
         mascotaActual.quitarActualFichaMedicaConsulta(idFicha)
         parent.update_frame(parent.screenDatosTotalMascota, parent, container)
     
+
 class screenFormularioCrearFicha(ctk.CTkFrame):
     def __init__(self, parent, container):
         super().__init__(container, fg_color="#C5DEDD")
@@ -810,12 +874,36 @@ class screenFormularioCrearFicha(ctk.CTkFrame):
         self.botonAgregarFichaHosp = ctk.CTkButton(self.frameButtonsSCrearFicha, width= 250, height= 80, text='Agregar Ficha Hospitalizacion', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.update_frame(parent.screenFormularioCrearFichaHospt, parent, container), state=DISABLED) #hay que agregar cauda de la visita a la base de datos
         self.botonAgregarFichaHosp.pack(padx= 10, pady = 40)
         
-        #sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, idMascota)
         self.botonAgregarFichaSedacion = ctk.CTkButton(self.frameButtonsSCrearFicha, width= 250, height= 80, text='Agregar Ficha Sedación', text_font=Font_tuple, hover_color="#142C3D", state=DISABLED, command=lambda: parent.update_frame(parent.screenFormularioCrearFichaSedacion, parent, container))
         self.botonAgregarFichaSedacion.pack(padx= 10, pady = 40)
         
         self.botonAgregarFichaOperacion = ctk.CTkButton(self.frameButtonsSCrearFicha, width= 250, height= 80, text='Agregar Ficha Operación', text_font=Font_tuple, hover_color="#142C3D", state=DISABLED, command=lambda: parent.update_frame(parent.screenFormularioCrearFichaAuthCirugia, parent, container))
         self.botonAgregarFichaOperacion.pack(padx= 10, pady = (40, 33))
+
+    def validarDatosFicha(self, parent, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, idMascota, tratamientos, causaVisita, medicamentos, vacunas, terminalVet, mascotaActual):
+        flag = True
+
+        if(parent.filtroNoValidChar(veterinarioACargo) is not True or parent.filtroNum(veterinarioACargo) is not False or len(veterinarioACargo) == 0):
+            flag = False
+            #Mostrar Label Error
+        if(parent.filtroNoValidChar(frecRespiratoria) is not True or parent.filtroNum(frecRespiratoria) is not True or len(frecRespiratoria) == 0):
+            flag = False
+            #Mostrar Label Error
+        if(parent.filtroNoValidChar(frecCardiaca) is not True or parent.filtroNum(frecCardiaca) is not True or len(frecCardiaca) == 0):
+            flag = False
+            #Mostrar Label Error
+        if(parent.filtroNoValidChar(peso) is not True or parent.filtroNum(peso) is not True or len(peso) == 0):
+            flag = False
+            #Mostrar Label Error
+        if(parent.filtroNoValidChar(edad) is not True or parent.filtroNum(edad) is not True or len(edad) == 0):
+            flag = False
+            #Mostrar Label Error
+        if(parent.filtroNoValidChar(temp) is not True or parent.filtroNum(temp) is not False or len(temp) == 0):
+            flag = False
+            #Mostrar Label Error
+        
+        if(flag is True):
+            self.clickAgregarFicha(sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, idMascota, tratamientos, causaVisita, medicamentos, vacunas, terminalVet, mascotaActual)
 
     def clickAgregarFicha(self, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, idMascota, tratamientos, causaVisita, medicamentos, vacunas, terminalVet, mascotaActual):
         terminalVet.agregarFichaMedica(sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, idMascota, tratamientos, causaVisita, medicamentos, vacunas)
@@ -901,15 +989,24 @@ class screenFormularioAgregarMascota(ctk.CTkFrame):
         self.entradaNumeroTelefonoSAgregarMascota = ctk.CTkEntry(self.frameFormSAgregarMascota, width = 400, text_font=Font_tuple, text_color="grey", fg_color="#F0EFEB")
         self.entradaNumeroTelefonoSAgregarMascota.grid(row=6, column=1, padx=20, pady=20)
 
-        self.entradaAlergiasSAgregarMascota = ctk.CTkEntry(self.frameFormSAgregarMascota, width = 400, text_font=Font_tuple, text_color="grey", fg_color="#F0EFEB")
-        self.entradaAlergiasSAgregarMascota.grid(row=7, column=1, padx=20, pady=20)
-
         self.entradaDireccionTutorSAgregarMascota = ctk.CTkEntry(self.frameFormSAgregarMascota, width = 400, text_font=Font_tuple, text_color="grey", fg_color="#F0EFEB")
-        self.entradaDireccionTutorSAgregarMascota.grid(row=8, column=1, padx=20, pady=20)
+        self.entradaDireccionTutorSAgregarMascota.grid(row=7, column=1, padx=20, pady=20)
 
-        self.entradaFechaNacSAgregarMascota = DateEntry(self.frameFormSAgregarMascota, width = 10)
+        self.entradaAlergiasSAgregarMascota = ctk.CTkEntry(self.frameFormSAgregarMascota, width = 400, text_font=Font_tuple, text_color="grey", fg_color="#F0EFEB")
+        self.entradaAlergiasSAgregarMascota.grid(row=8, column=1, padx=20, pady=20)
+
+        self.entradaFechaNacSAgregarMascota = DateEntry(self.frameFormSAgregarMascota, width = 20)
         self.entradaFechaNacSAgregarMascota.grid(row=9, column=1, padx=20, pady=20)
         
+        self.labelErrorNombreMascota = ctk.CTkLabel(self.frameFormSAgregarMascota, text="Ingrese nombre válido (Solo letras)", text_font=Font_tuple, text_color="red")
+        self.labelErrorEspecie = ctk.CTkLabel(self.frameFormSAgregarMascota, text="Ingrese espeice válida (Solo letras)", text_font=Font_tuple, text_color="red")
+        self.labelErrorColor = ctk.CTkLabel(self.frameFormSAgregarMascota, text="Ingrese color válido (Solo letras)", text_font=Font_tuple, text_color="red")
+        self.labelErrorRaza = ctk.CTkLabel(self.frameFormSAgregarMascota, text="Ingrese raza válida (Solo letras)", text_font=Font_tuple, text_color="red")
+        self.labelErrorNombreTutor = ctk.CTkLabel(self.frameFormSAgregarMascota, text="Ingrese nombre tutor válido (Solo letras)", text_font=Font_tuple, text_color="red")
+        self.labelErrorRutTutor = ctk.CTkLabel(self.frameFormSAgregarMascota, text="Ingrese rut válido", text_font=Font_tuple, text_color="red")
+        self.labelErrorNumeroTelefono = ctk.CTkLabel(self.frameFormSAgregarMascota, text="Ingrese número válido (Solo números)", text_font=Font_tuple, text_color="red")
+        self.labelErrorDireccion = ctk.CTkLabel(self.frameFormSAgregarMascota, text="Ingrese dirección válida (Solo letras y números)", text_font=Font_tuple, text_color="red")
+        self.labelErrorAlergias = ctk.CTkLabel(self.frameFormSAgregarMascota, text="Ingrese alergias válidas(Solo letras y ;)", text_font=Font_tuple, text_color="red")
 
         #Agregar buttons
         self.botonVolverSCrearFicha = ctk.CTkButton(self.frameButtonsSAgregarMascota, width= 200, height= 120,text='Volver', hover_color="#142C3D", command=lambda: parent.update_frame(parent.screenBuscarMascota, parent, container))
@@ -926,76 +1023,46 @@ class screenFormularioAgregarMascota(ctk.CTkFrame):
         
         flag = True
 
-        if(self.validarRut(rutTutor) is not True):
+        if(parent.validarRut(rutTutor) is not True):
             flag = False
-            # Activar mensaje correspondiente
-        if(self.filtroNoValidChar(nombreMascota) is not True or self.filtroNum(nombreMascota) is not False or len(nombreMascota) == 0):
+            self.labelErrorRutTutor.place(x="500", y="180")
+
+        if((parent.filtroNoValidChar(nombreMascota) is not True) or (parent.filtroNum(nombreMascota) is not False) or (len(nombreMascota) < 3)):
             flag = False
-            # Activar mensaje correspondiente
-        if(self.filtroNoValidChar(especie) is not True or self.filtroNum(especie) is not False or len(especie) == 0):
+            self.labelErrorNombreMascota.place(x="500", y="20")
+
+        if((parent.filtroNoValidChar(especie) is not True) or (parent.filtroNum(especie) is not False) or (len(especie) == 0)):
             flag = False
-            # Activar mensaje correspondiente
-        if(self.filtroNoValidChar(color) is not True or self.filtroNum(color) is not False or len(color) == 0):
+            self.labelErrorEspecie.place(x="500", y="60")
+
+        if((parent.filtroNoValidChar(color) is not True) or (parent.filtroNum(color) is not False) or (len(color) == 0)):
             flag = False
-            # Activar mensaje correspondiente
-        if(self.filtroNoValidChar(raza) is not True or self.filtroNum(raza) is not False or len(raza) == 0):
+            self.labelErrorColor.place(x="500", y="100")
+
+        if((parent.filtroNoValidChar(raza) is not True) or (parent.filtroNum(raza) is not False) or (len(raza) == 0)):
             flag = False
-            # Activar mensaje correspondiente
-        if(self.filtroNum(numTel) is not True or self.filtroNoValidChar(numTel) is not True or len(numTel) == 0):
+            self.labelErrorRaza.place(x="500", y="140")
+
+        if((parent.filtroNum(numTel) is not True) or (parent.filtroNoValidChar(numTel) is not True) or (len(numTel) < 9)):
             flag = False
-            # Activar mensaje correspondiente
-        if(self.filtroNoValidChar(alergias) is not True or self.filtroNum(alergias) is not False or len(alergias) == 0):
+            self.labelErrorNumeroTelefono.place(x="500", y="220")
+
+        if((parent.filtroNoValidChar(alergias) is not True) or (parent.filtroNum(alergias) is not False) or (len(alergias) == 0)):
             flag = False
-            # Activar mensaje correspondiente
-        if(self.filtroNoValidChar(direccion) is not True or len(direccion) == 0):
+            self.labelErrorAlergias.place(x="500", y="260")
+            
+        if((parent.filtroNoValidChar(direccion) is not True) or (len(direccion) == 0)):
             flag = False
-            # Activar mensaje correspondiente
+            self.labelErrorDireccion.place(x="500", y="300")
         
+        if((parent.filtroNoValidChar(nombreTutor) is not True) or (parent.filtroNum(nombreTutor) is not False) or (len(nombreTutor) < 3)):
+            flag = False
+            self.labelErrorNombreTutor.place(x="500", y="340")
+    
         if(flag):
             self.clickAgregarMascota(parent, nombreMascota, especie, color, raza, nombreTutor, rutTutor, numTel, alergias, direccion, fechaNac)
 
-    def filtroNoValidChar(self, texto):
-        regex = re.compile('[@_!#$%^&*()<>?/\|}{~:]')
-        if(regex.search(texto) == None):
-            return True
-        else: 
-            return False
-        
-    def filtroNum(self, texto):
-        try:
-            textoInt = int(texto)
-        except:
-            return False
-        else:
-            return True
 
-    def validarRut(self, rutTutor):
-
-        if(len(rutTutor) >= 7 and len(rutTutor)<=11):
-            rut = rutTutor
-            rut = rut.upper()
-            rut = rut.replace("-","")
-            rut = rut.replace(".","")
-            for i in rut:
-                if(i != "k"):
-                    try:
-                        letra = int(i)
-                    except:
-                        return False
-            aux = rut[:-1]
-            dv = rut[-1:]
-
-            revertido = map(int, reversed(str(aux)))
-            factors = cycle(range(2,8))
-            s = sum(d * f for d, f in zip(revertido,factors))
-            res = (-s)%11
-
-            if str(res) == dv:
-                return True
-            elif (dv=="K" and res==10):
-                return True
-            else:
-                return False
 
     def clickAgregarMascota(self, parent, nombreMascota, especie, color, raza, nombreTutor, rutTutor, numTel, alergias, direccion, fechaNacimiento):
 
@@ -1143,6 +1210,160 @@ class screenFormularioFichaAuthCirugia(ctk.CTkFrame): #Ta weno ya
             self.botonVolverSFichaAuthCirugia.pack(padx= 10, pady = 40)
 
 
+class screenFormularioEditarFichaAuthCirugia(ctk.CTkFrame): #Ta weno ya
+    def __init__(self, parent, container):
+        super().__init__(container, fg_color="#C5DEDD")
+        Font_tuple = ("Helvetica", 13)
+        mascotaActual:Mascota = parent.getMascotaApp()
+        if(mascotaActual is not None):
+            
+            idFicha = mascotaActual.getidFichaActual()
+            self.frameFormSEditarFichaAuthCirugia = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
+            self.frameFormSEditarFichaAuthCirugia.grid(row=0, column=0, padx=20, pady=10)
+    
+            self.frameButtonsSEditarFichaAuthCirugia = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
+            self.frameButtonsSEditarFichaAuthCirugia.grid(row=0, column=1, padx=20, pady=10)
+    
+            self.frameText = ctk.CTkFrame(self.frameFormSEditarFichaAuthCirugia, corner_radius=0, fg_color="#4e5257")
+            self.frameText.grid(row=6, column=1, padx=20, pady=10)
+    
+            self.labelNombrePacienteSEditarFichaAuthCirugia = ctk.CTkLabel(self.frameFormSEditarFichaAuthCirugia, text="Nombre Paciente", text_font=Font_tuple, text_color="black")
+            self.labelNombrePacienteSEditarFichaAuthCirugia.grid(row=0, column=0, padx=20, pady=10)
+    
+            self.labelPesoSEditarFichaAuthCirugia = ctk.CTkLabel(self.frameFormSEditarFichaAuthCirugia, text="Peso", text_font=Font_tuple, text_color="black")
+            self.labelPesoSEditarFichaAuthCirugia.grid(row=1, column=0, padx=20, pady=10)
+    
+            self.labelEspecieSEditarFichaAuthCirugia = ctk.CTkLabel(self.frameFormSEditarFichaAuthCirugia, text="Especie", text_font=Font_tuple, text_color="black")
+            self.labelEspecieSEditarFichaAuthCirugia.grid(row=2, column=0, padx=20, pady=10)
+    
+            self.labelEdadSEditarFichaAuthCirugia = ctk.CTkLabel(self.frameFormSEditarFichaAuthCirugia, text="Edad", text_font=Font_tuple, text_color="black")
+            self.labelEdadSEditarFichaAuthCirugia.grid(row=3, column=0, padx=20, pady=10)
+            
+            self.labelRazaSEditarFichaAuthCirugia = ctk.CTkLabel(self.frameFormSEditarFichaAuthCirugia, text="Raza", text_font=Font_tuple, text_color="black")
+            self.labelRazaSEditarFichaAuthCirugia.grid(row=4, column=0, padx=20, pady=10)
+            
+            self.labelColorSEditarFichaAuthCirugia = ctk.CTkLabel(self.frameFormSEditarFichaAuthCirugia, text="Color", text_font=Font_tuple, text_color="black")
+            self.labelColorSEditarFichaAuthCirugia.grid(row=5, column=0, padx=20, pady=10)
+            
+            self.labelDiagnosticoSEditarFichaAuthCirugia = ctk.CTkLabel(self.frameFormSEditarFichaAuthCirugia, text="Diagnóstico", text_font=Font_tuple, text_color="black")
+            self.labelDiagnosticoSEditarFichaAuthCirugia.grid(row=6, column=0, padx=20, pady=10)
+            
+            self.labelCirugiaARealizarSEditarFichaAuthCirugia = ctk.CTkLabel(self.frameFormSEditarFichaAuthCirugia, text="Cirugía a Realizar", text_font=Font_tuple, text_color="black")
+            self.labelCirugiaARealizarSEditarFichaAuthCirugia.grid(row=7, column=0, padx=20, pady=10)
+            
+            self.labelNombreDelTutorSEditarFichaAuthCirugia = ctk.CTkLabel(self.frameFormSEditarFichaAuthCirugia, text="Nombre del Tutor", text_font=Font_tuple, text_color="black")
+            self.labelNombreDelTutorSEditarFichaAuthCirugia.grid(row=8, column=0, padx=20, pady=10)
+    
+            self.labelRutTutorSEditarFichaAuthCirugia = ctk.CTkLabel(self.frameFormSEditarFichaAuthCirugia, text="Rut Tutor", text_font=Font_tuple, text_color="black")
+            self.labelRutTutorSEditarFichaAuthCirugia.grid(row=9, column=0, padx=20, pady=10)
+            
+            self.labelNumeroTelefonoSEditarFichaAuthCirugia = ctk.CTkLabel(self.frameFormSEditarFichaAuthCirugia, text="Número de Teléfono", text_font=Font_tuple, text_color="black")
+            self.labelNumeroTelefonoSEditarFichaAuthCirugia.grid(row=10, column=0, padx=20, pady=10)
+    
+            self.labelDireccionSEditarFichaAuthCirugia = ctk.CTkLabel(self.frameFormSEditarFichaAuthCirugia, text="Dirección", text_font=Font_tuple, text_color="black")
+            self.labelDireccionSEditarFichaAuthCirugia.grid(row=11, column=0, padx=20, pady=10)
+    
+            self.labelAuthTutorSEditarFichaAuthCirugia = ctk.CTkLabel(self.frameFormSEditarFichaAuthCirugia, text="Autorizacion tutor", text_font=Font_tuple, text_color="black")
+            self.labelAuthTutorSEditarFichaAuthCirugia.grid(row=12, column=0, padx=20, pady=10)
+
+    
+            #Agregar Entrys
+            self.textVarNombrePaciente = tk.StringVar()
+            self.textVarPeso = tk.StringVar()
+            self.textVarEspecie = tk.StringVar()
+            self.textVarEdad = tk.StringVar()
+            self.textVarRaza = tk.StringVar()
+            self.textVarColor = tk.StringVar()
+            self.textVarCirugia = tk.StringVar()
+            self.textVarNombreTutor = tk.StringVar()
+            self.textVarRut = tk.StringVar()
+            self.textVarTelefono = tk.StringVar()
+            self.textVarDireccion = tk.StringVar()
+            
+            self.textVarNombrePaciente.set(mascotaActual.getNombreMascota())
+            self.entradaNombrePacienteSEditarFichaAuthCirugia = ctk.CTkEntry(self.frameFormSEditarFichaAuthCirugia, width = 400, text_font=Font_tuple, text_color="black", fg_color="#F0EFEB", text=self.textVarNombrePaciente,  state=DISABLED)
+            self.entradaNombrePacienteSEditarFichaAuthCirugia.grid(row=0, column=1, padx=20, pady=10)
+
+            self.textVarPeso.set(mascotaActual.getPeso(idFicha))
+            self.entradaPesoSEditarFichaAuthCirugia = ctk.CTkEntry(self.frameFormSEditarFichaAuthCirugia, width = 400, text_font=Font_tuple, text_color="black", fg_color="#F0EFEB", text=self.textVarPeso,  state=DISABLED)
+            self.entradaPesoSEditarFichaAuthCirugia.grid(row=1, column=1, padx=20, pady=10)
+
+            self.textVarEspecie.set(mascotaActual.getEspecie())
+            self.entradaEspecieSEditarFichaAuthCirugia = ctk.CTkEntry(self.frameFormSEditarFichaAuthCirugia, width = 400, text_font=Font_tuple, text_color="black", fg_color="#F0EFEB", text=self.textVarEspecie,  state=DISABLED)
+            self.entradaEspecieSEditarFichaAuthCirugia.grid(row=2, column=1, padx=20, pady=10)
+
+            self.textVarEdad.set(mascotaActual.getEdad(idFicha))
+            self.entradaEdadConsultaSEditarFichaAuthCirugia = ctk.CTkEntry(self.frameFormSEditarFichaAuthCirugia, width = 400, text_font=Font_tuple, text_color="black", fg_color="#F0EFEB", text=self.textVarEdad,  state=DISABLED)
+            self.entradaEdadConsultaSEditarFichaAuthCirugia.grid(row=3, column=1, padx=20, pady=10)
+            
+            self.textVarRaza.set(mascotaActual.getRaza())
+            self.entradaRazaSEditarFichaAuthCirugia = ctk.CTkEntry(self.frameFormSEditarFichaAuthCirugia, width = 400, text_font=Font_tuple, text_color="black", fg_color="#F0EFEB", text=self.textVarRaza,  state=DISABLED)
+            self.entradaRazaSEditarFichaAuthCirugia.grid(row=4, column=1, padx=20, pady=10)
+
+            self.textVarColor.set(mascotaActual.getColorMascota())
+            self.entradaColorSEditarFichaAuthCirugia = ctk.CTkEntry(self.frameFormSEditarFichaAuthCirugia, width = 400, text_font=Font_tuple, text_color="black", fg_color="#F0EFEB", text=self.textVarColor,  state=DISABLED)
+            self.entradaColorSEditarFichaAuthCirugia.grid(row=5, column=1, padx=20, pady=10)
+
+            operacion = mascotaActual.getOperacionFicha(idFicha)
+
+            self.entradaDiagnosticoSEditarFichaAuthCirugia = tk.Text(self.frameText, width = 44, height= 3, background="#F0EFEB", font=("Helvetica", 12), state=NORMAL)
+            self.entradaDiagnosticoSEditarFichaAuthCirugia.delete(1.0, END)
+            self.entradaDiagnosticoSEditarFichaAuthCirugia.grid(row=0, column=0, padx=2, pady=2)
+            self.entradaDiagnosticoSEditarFichaAuthCirugia.insert(END, operacion['diagnostico'])
+            self.entradaDiagnosticoSEditarFichaAuthCirugia.configure(state="disabled")
+
+
+            self.textVarCirugia.set(operacion['cirugiaARealizar'])
+            self.entradaCirugiaARealizarSEditarFichaAuthCirugia = ctk.CTkEntry(self.frameFormSEditarFichaAuthCirugia, width = 400, text_font=Font_tuple, text_color="black", fg_color="#F0EFEB", text=self.textVarCirugia,  state=DISABLED)
+            self.entradaCirugiaARealizarSEditarFichaAuthCirugia.grid(row=7, column=1, padx=20, pady=10)
+
+            self.textVarNombreTutor.set(mascotaActual.getNombreTutor())
+            self.entradaNombreTutorSEditarFichaAuthCirugia = ctk.CTkEntry(self.frameFormSEditarFichaAuthCirugia, width = 400, text_font=Font_tuple, text_color="black", fg_color="#F0EFEB", text=self.textVarNombreTutor,  state=DISABLED)
+            self.entradaNombreTutorSEditarFichaAuthCirugia.grid(row=8, column=1, padx=20, pady=10)
+
+            self.textVarRut.set(mascotaActual.getRutTutor())
+            self.entradaRutSEditarFichaAuthCirugia = ctk.CTkEntry(self.frameFormSEditarFichaAuthCirugia, width = 400, text_font=Font_tuple, text_color="black", fg_color="#F0EFEB", text=self.textVarRut,  state=DISABLED)
+            self.entradaRutSEditarFichaAuthCirugia.grid(row=9, column=1, padx=20, pady=10)
+
+            self.textVarTelefono.set(mascotaActual.getNumeroTelefono())
+            self.entradaNumTelefonoSEditarFichaAuthCirugia = ctk.CTkEntry(self.frameFormSEditarFichaAuthCirugia, width = 400, text_font=Font_tuple, text_color="black", fg_color="#F0EFEB", text=self.textVarTelefono,  state=DISABLED)
+            self.entradaNumTelefonoSEditarFichaAuthCirugia.grid(row=10, column=1, padx=20, pady=10)
+
+            self.textVarDireccion.set(mascotaActual.getDireccion())
+            self.entradaDireccionSEditarFichaAuthCirugia = ctk.CTkEntry(self.frameFormSEditarFichaAuthCirugia, width = 400, text_font=Font_tuple, text_color="black", fg_color="#F0EFEB", text=self.textVarDireccion,  state=DISABLED)
+            self.entradaDireccionSEditarFichaAuthCirugia.grid(row=11, column=1, padx=20, pady=10)
+
+            var = tk.IntVar()
+            var.set(1)
+
+            if(operacion['autTutor'] == True):
+                self.entradaAuthTutorSFichaAuthCirugia = ctk.CTkCheckBox(self.frameFormSEditarFichaAuthCirugia, fg_color="#0D1D29", border_width=2, border_color="black", variable=var, onvalue=1, text="", state=DISABLED)
+            else:
+                self.entradaAuthTutorSFichaAuthCirugia = ctk.CTkCheckBox(self.frameFormSEditarFichaAuthCirugia, fg_color="#0D1D29", border_width=2, border_color="black", variable=var, offvalue=0, state=DISABLED, text="")
+            self.entradaAuthTutorSFichaAuthCirugia.grid(row=12, column=1, padx=20, pady=10)
+    
+            #Agregar botones
+            self.botonEditarSFichaAuthCirugia = ctk.CTkButton(self.frameButtonsSEditarFichaAuthCirugia, width= 250, height= 120, text='Edita Ficha', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.editarFichaCirugia(mascotaActual))
+            self.botonEditarSFichaAuthCirugia.pack(padx= 10, pady = 40)
+            self.botonVolverSFichaAuthCirugia = ctk.CTkButton(self.frameButtonsSEditarFichaAuthCirugia, width= 250, height= 120, text='Volver', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.update_frame(parent.screenFormularioVerFicha, parent, container))
+            self.botonVolverSFichaAuthCirugia.pack(padx= 10, pady = 40)
+
+    def editarFichaCirugia(self, mascotaActual):
+        idFichahOp = uuid.uuid4()
+        diagnostico = self.entradaDiagnosticoSEditarFichaAuthCirugia.get("1.0",END)
+        cirugia = self.entradaCirugiaARealizarSEditarFichaAuthCirugia.get()
+        check = self.entradaAuthTutorSFichaAuthCirugia.get()
+        # self.operacionFicha = { #al ser una ficha se guarda directamente en el tributo relerente al diccionario
+        #     'id':idFichahOp,
+        #     'diagnostico':diagnostico,
+        #     'cirugiaARealizar':cirugia,
+        #     'autTutor': check
+        # }
+  
+        #terminalVet.agregarFichaOperacion(mascotaActual.getId(), self.operacionFicha) METODO UPDATEFICHA
+        #self.labelMensajeAgregadoSCrearFichaAuthCirugia.pack()
+
+
 class screenFormularioCrearFichaAuthCirugia(ctk.CTkFrame): 
     def __init__(self, parent, container):
         super().__init__(container, fg_color="#C5DEDD")
@@ -1264,13 +1485,35 @@ class screenFormularioCrearFichaAuthCirugia(ctk.CTkFrame):
             self.entradaAuthTutorSCrearFichaAuthCirugia = ctk.CTkCheckBox(self.frameFormSCrearFichaAuthCirugia, text="", fg_color="#0D1D29", border_width=2, border_color="grey")
             self.entradaAuthTutorSCrearFichaAuthCirugia.grid(row=12, column=1, padx=20, pady=10)
 
+            self.labelErrorDiagnostico = ctk.CTkLabel(self.frameFormSCrearFichaAuthCirugia, text="Ingrese diagnostico en formato correcto (Solo letras)", text_font=Font_tuple, text_color="red")
+            self.labelErrorCirugia = ctk.CTkLabel(self.frameFormSCrearFichaAuthCirugia, text="Ingrese cirugia en formato correcto (Solo letras)", text_font=Font_tuple, text_color="red")
+
+
             #Agregar botones
-            self.botonAgregarFichaSCrearFichaAuthCirugia = ctk.CTkButton(self.frameButtonsSCrearFichaAuthCirugia, width= 250, height= 120, text='Agregar Ficha Operación', hover_color="#142C3D", command=lambda: self.agregarFichaCirugia(mascotaActual))
+            self.botonAgregarFichaSCrearFichaAuthCirugia = ctk.CTkButton(self.frameButtonsSCrearFichaAuthCirugia, width= 250, height= 120, text='Agregar Ficha Operación', hover_color="#142C3D", command=lambda: self.validarDatos(parent, mascotaActual))
             self.botonAgregarFichaSCrearFichaAuthCirugia.pack(padx= 10, pady = 40)
 
             self.botonVolverSCrearFichaAuthCirugia = ctk.CTkButton(self.frameButtonsSCrearFichaAuthCirugia, width= 250, height= 120, text='Volver', hover_color="#142C3D", command=lambda: parent.show_frame(parent.screenFormularioCrearFicha))
             self.botonVolverSCrearFichaAuthCirugia.pack(padx= 10, pady = 40)
     
+    def validarDatos(self, parent, mascotaActual):
+        
+        flag = True
+        diagnostico = self.entradaDiagnosticoSFichaAuthCirugia.get("1.0",END)
+
+        cirugia = self.entradaCirugiaARealizarSCrearFichaAuthCirugia.get()
+
+        if(parent.filtroNoValidChar(diagnostico) is not True or (parent.filtroNum(diagnostico) is not False) or (len(diagnostico) < 6)):
+            flag = False
+            self.labelErrorDiagnostico.place(x="500", y="250")
+
+        if((parent.filtroNoValidChar(cirugia) is not True) or (parent.filtroNum(cirugia) is not False) or (len(cirugia) < 3)):
+            flag = False
+            self.labelErrorCirugia.place(x="500", y="350")
+        
+        if(flag is True):
+            self.agregarFichaCirugia(mascotaActual)
+
     def agregarFichaCirugia(self, mascotaActual):
         idFichahOp = uuid.uuid4()
         diagnostico = self.entradaDiagnosticoSFichaAuthCirugia.get("1.0",END)
@@ -1286,7 +1529,6 @@ class screenFormularioCrearFichaAuthCirugia(ctk.CTkFrame):
         terminalVet.agregarFichaOperacion(mascotaActual.getId(), self.operacionFicha)
         self.labelMensajeAgregadoSCrearFichaAuthCirugia.pack()
         
-
 
 class screenFormularioFichaHospt(ctk.CTkFrame): #Muesta datos cambiados
     def __init__(self, parent, container):
@@ -1487,12 +1729,27 @@ class screenFormularioCrearFichaHospt(ctk.CTkFrame): #Hospitalización
             self.entradaMotivoHospSCrearFichaHosp = tk.Text(self.frameText1, width = 40, height=6, font=("Helvetica", "12"), background="#F0EFEB")
             self.entradaMotivoHospSCrearFichaHosp.grid(row=0, column=0, padx=2, pady=2)
             
+            self.labelErrorMotivo = ctk.CTkLabel(self.frameFormSCrearFichaAuthCirugia, text="Ingrese motivo en formato correcto (Solo letras)", text_font=Font_tuple, text_color="red")
+
             #Agregar buttons
             self.botonVolverSCrearFichaHosp = ctk.CTkButton(self.frameButtonsSCrearFichaHosp, width=200, height=120, text='Volver', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.show_frame(parent.screenFormularioCrearFicha))
             self.botonVolverSCrearFichaHosp.pack(padx= 10, pady = 40)
             
-            self.botonAgregarFichaHosp = ctk.CTkButton(self.frameButtonsSCrearFichaHosp, width=200, height=120, text='Agregar Ficha Hospitalización', text_font=Font_tuple10, hover_color="#142C3D", command=lambda: self.agregarFichaHosp(mascotaActual))
+            self.botonAgregarFichaHosp = ctk.CTkButton(self.frameButtonsSCrearFichaHosp, width=200, height=120, text='Agregar Ficha Hospitalización', text_font=Font_tuple10, hover_color="#142C3D", command=lambda: self.validarDatos(parent, mascotaActual))
             self.botonAgregarFichaHosp.pack(padx= 10, pady = 40)
+
+    def validarDatos(self, parent, mascotaActual):
+        
+        flag = True
+        motivo = self.entradaMotivoHospSCrearFichaHosp.get("1.0", END)
+
+        if(parent.filtroNoValidChar(motivo) is not True or (parent.filtroNum(motivo) is not False) or (len(motivo) < 6)):
+            flag = False
+            self.labelErrorMotivo.place(x="500", y="250")
+
+        if(flag is True):
+            self.agregarFichaHosp(mascotaActual)
+
 
     def agregarFichaHosp(self, mascotaActual):
         motivo = self.entradaMotivoHospSCrearFichaHosp.get("1.0", END)
@@ -1503,7 +1760,146 @@ class screenFormularioCrearFichaHospt(ctk.CTkFrame): #Hospitalización
         }
         terminalVet.agregarFichaHospitalizacion(mascotaActual.getId(), hospDicc)
         self.labelMensajeAgregadoSCrearFichaHosp.pack()
+
+
+class screenFormularioEditarFichaHospt(ctk.CTkFrame):
+    def __init__(self, parent, container):
+        super().__init__(container, fg_color="#C5DEDD")
+        Font_tuple = ("Helvetica", 12)
+        Font_tuple10 = ("Helvetica", 10)
+        mascotaActual:Mascota = parent.getMascotaApp()
+        if(mascotaActual is not None):
+
+            idFicha = mascotaActual.getidFichaActual()
+            self.frameFormSEditarFichaHosp = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
+            self.frameFormSEditarFichaHosp.grid(row=0, column=0, padx=20, pady=10)
+
+            self.frameButtonsSEditarFichaHosp = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
+            self.frameButtonsSEditarFichaHosp.grid(row=0, column=1, padx=20, pady=10)
+
+            self.frameText1 = ctk.CTkFrame(self.frameFormSEditarFichaHosp, corner_radius=0, fg_color="#4e5257")
+            self.frameText1.grid(row=6, column=1, padx=20, pady=10)
+
+            self.frameText2 = ctk.CTkFrame(self.frameFormSEditarFichaHosp, corner_radius=0, fg_color="#4e5257")
+            self.frameText2.grid(row=7, column=1, padx=20, pady=10)
+
+            #Agregar Labels
+            self.labelNombreMascotaSEditarFichaHosp = ctk.CTkLabel(self.frameFormSEditarFichaHosp, text="Nombre Mascota", text_font=Font_tuple, text_color="black")
+            self.labelNombreMascotaSEditarFichaHosp.grid(row=0, column=0, padx=20, pady=10)
+
+            self.labelPesoSEditarFichaHosp = ctk.CTkLabel(self.frameFormSEditarFichaHosp, text="Peso", text_font=Font_tuple, text_color="black")
+            self.labelPesoSEditarFichaHosp.grid(row=1, column=0, padx=20, pady=10)
+
+            self.labelEspecieSEditarFichaHosp = ctk.CTkLabel(self.frameFormSEditarFichaHosp, text="Especie ", text_font=Font_tuple, text_color="black")
+            self.labelEspecieSEditarFichaHosp.grid(row=2, column=0, padx=20, pady=10)
+
+            self.labelEdadSEditarFichaHosp = ctk.CTkLabel(self.frameFormSEditarFichaHosp, text="Edad", text_font=Font_tuple, text_color="black")
+            self.labelEdadSEditarFichaHosp.grid(row=3, column=0, padx=20, pady=10)
+
+            self.labelRazaSEditarFichaHosp = ctk.CTkLabel(self.frameFormSEditarFichaHosp, text="Raza", text_font=Font_tuple, text_color="black")
+            self.labelRazaSEditarFichaHosp.grid(row=4, column=0, padx=20, pady=10)
+
+            self.labelColorSEditarFichaHosp = ctk.CTkLabel(self.frameFormSEditarFichaHosp, text="Color", text_font=Font_tuple, text_color="black")
+            self.labelColorSEditarFichaHosp.grid(row=5, column=0, padx=20, pady=10)
+
+            self.labelMotivoHospSEditarFichaHosp = ctk.CTkLabel(self.frameFormSEditarFichaHosp, text="Motivo de Hospitalización", text_font=Font_tuple, text_color="black")
+            self.labelMotivoHospSEditarFichaHosp.grid(row=6, column=0, padx=20, pady=10)
+
+            self.labelDiagnosticoSEditarFichaHosp = ctk.CTkLabel(self.frameFormSEditarFichaHosp, text="Diagnóstico", text_font=Font_tuple, text_color="black")
+            self.labelDiagnosticoSEditarFichaHosp.grid(row=7, column=0, padx=20, pady=10)
+
+            self.labelAuthTutorSEditarFichaHosp = ctk.CTkLabel(self.frameFormSEditarFichaHosp, text="Autorización tutor", text_font=Font_tuple, text_color="black")
+            self.labelAuthTutorSEditarFichaHosp.grid(row=8, column=0, padx=20, pady=10)   
+
+            self.labelMensajeAgregarSEditarFichaHosp = ctk.CTkLabel(self.frameButtonsSEditarFichaHosp, text="Ficha Agregada", text_font=Font_tuple, text_color="green")
+
+
+            #Agregar Entrys
+            self.textVarNombrePaciente = tk.StringVar()
+            self.textVarPeso = tk.StringVar()
+            self.textVarEspecie = tk.StringVar()
+            self.textVarEdad = tk.StringVar()
+            self.textVarRaza = tk.StringVar()
+            self.textVarColor = tk.StringVar()
+
+            self.textVarNombrePaciente.set(mascotaActual.getNombreMascota())
+            self.entradaNombrePacienteSEditarFichaHosp = ctk.CTkEntry(self.frameFormSEditarFichaHosp, width = 400, text=self.textVarNombrePaciente, text_font=Font_tuple, text_color="grey", fg_color="#F0EFEB", state=DISABLED)
+            self.entradaNombrePacienteSEditarFichaHosp.grid(row=0, column=1, padx=20, pady=10)
+
+            self.textVarPeso.set(mascotaActual.getPeso(idFicha))
+            self.entradaPesoSEditarFichaHosp = ctk.CTkEntry(self.frameFormSEditarFichaHosp, width = 400, text=self.textVarPeso, text_font=Font_tuple, text_color="grey", fg_color="#F0EFEB", state=DISABLED)
+            self.entradaPesoSEditarFichaHosp.grid(row=1, column=1, padx=20, pady=10)
+
+            self.textVarEspecie.set(mascotaActual.getEspecie())
+            self.entradaEspecieSEditarFichaHosp = ctk.CTkEntry(self.frameFormSEditarFichaHosp, width = 400, text=self.textVarEspecie, text_font=Font_tuple, text_color="grey", fg_color="#F0EFEB", state=DISABLED)
+            self.entradaEspecieSEditarFichaHosp.grid(row=2, column=1, padx=20, pady=10)
+
+            self.textVarEdad.set(mascotaActual.getEdad(idFicha))
+            self.entradaEdadSEditarFichaHosp = ctk.CTkEntry(self.frameFormSEditarFichaHosp, width = 400, text=self.textVarEdad, text_font=Font_tuple, text_color="grey", fg_color="#F0EFEB", state=DISABLED)
+            self.entradaEdadSEditarFichaHosp.grid(row=3, column=1, padx=20, pady=10)
+
+
+            self.textVarRaza.set(mascotaActual.getRaza())
+            self.entradaRazaSEditarFichaHosp = ctk.CTkEntry(self.frameFormSEditarFichaHosp, width = 400, text=self.textVarRaza, text_font=Font_tuple, text_color="grey", fg_color="#F0EFEB", state=DISABLED)
+            self.entradaRazaSEditarFichaHosp.grid(row=4, column=1, padx=20, pady=10)
+
+
+            self.textVarColor.set(mascotaActual.getColorMascota())
+            self.entradaColorSEditarFichaHosp = ctk.CTkEntry(self.frameFormSEditarFichaHosp, width = 400, text=self.textVarColor, text_font=Font_tuple, text_color="grey", fg_color="#F0EFEB", state=DISABLED)
+            self.entradaColorSEditarFichaHosp.grid(row=5, column=1, padx=20, pady=10)
+
+            if(mascotaActual.getHospitalizacion(idFicha) == True):
+                motivoHosp = mascotaActual.getHospitalizacionFicha(idFicha)
+
+                self.entradaMotivoHospSEditarFichaHosp = tk.Text(self.frameText1, width = 40, height=6, font=("Helvetica", "12"), background="#F0EFEB")
+                self.entradaMotivoHospSEditarFichaHosp.delete(1.0, END)
+                self.entradaMotivoHospSEditarFichaHosp.grid(row=0, column=0, padx=2, pady=2)
+                self.entradaMotivoHospSEditarFichaHosp.insert(END, motivoHosp["motivo"])
+
+            if(mascotaActual.getOperacion(idFicha) == True):
+
+                operacion = mascotaActual.getOperacionFicha(idFicha)
+
+                self.entradaDiagnosticoSEditarFichaHosp = tk.Text(self.frameText2, width = 40, height=3, font=("Helvetica", "12"), background="#F0EFEB")
+                self.entradaDiagnosticoSEditarFichaHosp.delete(1.0, END)
+                self.entradaDiagnosticoSEditarFichaHosp.grid(row=0, column=0, padx=2, pady=2)
+                self.entradaDiagnosticoSEditarFichaHosp.insert(END, operacion['diagnostico'])
+                self.entradaDiagnosticoSEditarFichaHosp.configure(state="Disabled")
+                var = tk.IntVar()
+                var.set(1)
+                if(operacion['autTutor'] == True):
+                    self.entradaAuthTutorSEditarFichaHosp = ctk.CTkCheckBox(self.frameFormSEditarFichaHosp, text="", variable=var, onvalue=1, fg_color="#0D1D29", state=DISABLED, border_width=2, border_color="grey")
+                else:
+                    self.entradaAuthTutorSEditarFichaHosp = ctk.CTkCheckBox(self.frameFormSEditarFichaHosp, text="", variable=var, offvalue=0, fg_color="#0D1D29", state=DISABLED, border_width=2, border_color="grey")
+                self.entradaAuthTutorSEditarFichaHosp.grid(row=8, column=1, padx=20, pady=10)
+
+            #Agregar buttons
+            self.botonEditarSRditarFichaHosp = ctk.CTkButton(self.frameButtonsSEditarFichaHosp, width=200, height=120, text='Editar ficha', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.update_frame(parent.screenFormularioVerFicha, parent, container))
+            self.botonEditarSRditarFichaHosp.pack(padx= 10, pady = 40)
+            
+            self.botonVolverSEditarFichaHosp = ctk.CTkButton(self.frameButtonsSEditarFichaHosp, width=200, height=120, text='Volver', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.validarDatos(parent, mascotaActual))
+            self.botonVolverSEditarFichaHosp.pack(padx= 10, pady = 40)
+
+    def validarDatos(self, parent, mascotaActual):
         
+        flag = True
+        motivo = self.entradaMotivoHospSCrearFichaHosp.get("1.0", END)
+
+        if(parent.filtroNoValidChar(motivo) is not True or (parent.filtroNum(motivo) is not False) or (len(motivo) < 6)):
+            flag = False
+            self.labelErrorMotivo.place(x="500", y="250")
+
+        if(flag is True):
+            self.agregarFichaHosp(mascotaActual)
+
+
+    def editarFichaHosp(self, mascotaActual):
+        motivo = self.entradaMotivoHospSCrearFichaHosp.get("1.0", END)
+        
+        # terminalVet.editarFichaHospitalizacion(mascotaActual.getId(), hospDicc)
+        # self.labelMensajeAgregadoSCrearFichaHosp.pack()
+
+
 
 class screenFormularioFichaSedacion(ctk.CTkFrame): #Muestra datos cambiados
     def __init__(self, parent, container):
@@ -1697,6 +2093,7 @@ class screenFormularioCrearFichaSedacion(ctk.CTkFrame):
         terminalVet.agregarFichaSedacion(mascota.getId(), sedacionDicc)
         self.labelMensajeAgregarSCrearFichaSedacion.pack()
 
+
 class screenCalendarioVacunacion(ctk.CTkFrame):
     def __init__(self, parent, container):
         super().__init__(container, fg_color="#C5DEDD")
@@ -1871,6 +2268,7 @@ class screenAbstractMedico(ctk.CTkFrame):
         
         self.botonVolverSAbstract = ctk.CTkButton(self, width= 25, height= 3,text='Volver')
         self.botonVolverSAbstract.place(x='530', y='620')
+
 
 class screenAbstractMedico(ctk.CTkFrame):
     def __init__(self, parent, container):
