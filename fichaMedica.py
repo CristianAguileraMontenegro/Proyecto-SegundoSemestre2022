@@ -75,7 +75,7 @@ class FichaMedica:
         #return self.idTabla
     
     def getSucursalVeterinaria(self):
-        return self.idSucursalVeterinaria
+        return self.sucursalVeterinaria
 
     def getTemp(self):
         return self.temperatura
@@ -165,7 +165,7 @@ class FichaMedica:
         self.sedacion = sedacion
 
     def setTemp(self, temp):
-        self.temp = temp
+        self.temperatura = temp
 
     def setActual(self, actual):
         self.fichaActual = actual
