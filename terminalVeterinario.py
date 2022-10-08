@@ -16,8 +16,8 @@ from fichaMedica import FichaMedica
 from calendario import Calendario
 
 db = mysql.connector.connect(
-    user='piero',
-    password='pieron123',
+    user='root',
+    password='root',
     host='localhost',
     database='mydb',
     port='3306'
@@ -35,6 +35,7 @@ if __name__ != "__main__":
             self.idVeterinaria = None
             self.nombreVeterinaria = None
             self.mascotas:Mascota = []
+            self.mascotasExternas:Mascota = [] #masconas no pertenecientes a la veterinrias
             self.calendaio:Calendario
 
             self.validarTokenDeActivacion()
@@ -43,6 +44,7 @@ if __name__ != "__main__":
                 # De ser el caso que el token esta ya activado, se instancian aquí, debido a que actToken no se llamará
                 self.setIdVeterinaria()
                 self.setNombreVeterinaria()
+                print("46 terminalVterinario")
                 self.setMascotas()
                 self.setCalendario()
 
@@ -63,6 +65,23 @@ if __name__ != "__main__":
             mycursor.execute(sql, (str(self.idVeterinaria),))
             ids = mycursor.fetchall()
             for i in range(len(ids)):
+                print("67 terminal")
+                mascotalol= Mascota(str(ids[i][0]))
+                self.mascotas.append(mascotalol)
+        
+        def setMascotaOtraVeterinaria(self, idMascota):
+            mascotalol= Mascota(str(idMascota))
+            self.mascotasExternas.append(mascotalol)
+            self.setMascotaEspecifica(idMascota, mascotalol)
+
+
+        
+        def setMascotaOtraVeterinariaBeta(self, idMascota):
+            sql = 'SELECT idMascota FROM mascota WHERE idMascota = (%s)'
+            mycursor.execute(sql, (str(self.idVeterinaria),))
+            ids = mycursor.fetchall()
+            for i in range(len(ids)):
+                print("67 terminal")
                 mascotalol= Mascota(str(ids[i][0]))
                 self.mascotas.append(mascotalol)
         
@@ -141,7 +160,7 @@ if __name__ != "__main__":
             #                                resultadoMascota[7], resultadoMascota[8], tablaEntregar)
 
             mascota.setAlergias(alergiaFinal)
-            print(str(mascota.getAlergias()))
+            print("192 :"+str(mascota.getAlergias()))
             mascota.setRegistroDeVacunas(vacunasFinal)
             mascota.setRegistroDeOperaciones(registroOperacionesFinal)
             mascota.solicitarFichasParcialesEnBaseDeDatos(mycursor)
@@ -252,11 +271,71 @@ if __name__ != "__main__":
                     #mascota.setHospitalizacionFicha()
                     #mascota.setSedacionFicha()
                     break
+        
+        def editarFichaMedica(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, idMascota, tratamientos, causaVisita, medicamentos, vacunas, fechaModificacion):
+            
+            for mascota in self.mascotas:
+                if mascota.getId() == idMascota:
+
+                    #agregamos los demas datos
+                    tratamientosID = mascota.getTratamiento(idFicha)
+                    tratamientosA = tratamientos.split(';')
+                    tratClase = []
+                    tratDicc = {}
+                    i = 0
+                    for trat in tratamientosA:
+                        tratDicc = {
+                            'id' : tratamientosID[i]['id'],
+                            'nombreTratamiento': trat,
+                            'causaVisita' : causaVisita,
+                        }
+                        i = i+1
+                        tratClase.append(tratDicc)
+
+                    medicamentosID = mascota.getMedicamentosConsulta(idFicha)
+                    medicamentosA = medicamentos.split(';')
+                    medClase = []
+                    medDicc = {}
+                    i = 0
+                    for med in medicamentosA:
+                        medDicc = {
+                            'id' : medicamentosID[i]['id'],
+                            'nomMedicamento' : med,
+                        }
+                        i = i+1
+                        medClase.append(medDicc)
+        
+                    vacunasID = mascota.getVacunasSuministradasConsulta(idFicha)
+                    vacunasA = vacunas.split(';')
+                    vacClase = []
+                    vacDicc = {}
+                    i = 0
+                    for vac in vacunasA:
+                        vacDicc = {
+                            'id' : vacunasID[i]['id'],
+                            'nomVacuna' : vac,
+                        }    
+                        i = i+1
+                        vacClase.append(vacDicc)
+                    
+                    mascota.editarFichaMedicaConsulta(idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, mycursor, db, fechaModificacion, vacClase, medClase, tratClase) #modificamos los datos de la ficha primeramente
+                    break
 
         def completarFichaParcial(self, idMascota, idFicha):
             for mascota in self.mascotas:
+                print("307 terminalveterinario "+str(mascota.getId()))
+                if mascota.getId() == idMascota:
+                    
+                    mascota.completarFichaParcial(idFicha, mycursor)
+        
+        def completarFichaParcialMascotasExternas(self, idMascota, idFicha):
+            medicamentos = []
+            for mascota in self.mascotasExternas:
+                print("307 terminalveterinario "+str(mascota.getId()))
                 if mascota.getId() == idMascota:
                     mascota.completarFichaParcial(idFicha, mycursor)
+                    medicamentos.append(mascota.getMedicamentosConsulta(idFicha))
+            return medicamentos
 
 
         def agregarFichaOperacion(self, idMascota, opFicha):
@@ -271,6 +350,27 @@ if __name__ != "__main__":
 
                     mascota.setFichaDeOperacion(opFicha, mycursor, db)
         
+        def editarFichaOperacion(self, idMascota, idFicha, diagnostico, cirugia, fechaUltimaModificacion):
+
+            for mascota in self.mascotas:
+                if mascota.getId() == idMascota:
+                            
+                    idOperacion = mascota.getIdOperacion(idFicha)
+
+                    opFicha = { #al ser una ficha se guarda directamente en el tributo relerente al diccionario
+                        'id':idOperacion,
+                        'diagnostico':diagnostico,
+                        'cirugiaARealizar':cirugia,
+                        'autTutor': True
+                    }
+                    operacion = {
+                        'id': opFicha['id'],
+                        'operacion': opFicha['cirugiaARealizar'],
+                     }
+                    mascota.editarRegistroDeOperaciones(operacion, mycursor, db)
+
+                    mascota.editarFichaOperacion(idFicha, opFicha, fechaUltimaModificacion, mycursor, db)
+        
         def agregarFichaSedacion(self, idMascota, sedFicha):
             for mascota in self.mascotas:
                 if mascota.getId() == idMascota:
@@ -280,6 +380,20 @@ if __name__ != "__main__":
             for mascota in self.mascotas:
                 if mascota.getId() == idMascota:
                     mascota.setFichaDeHospitalizacion(hospFicha, mycursor, db)
+        
+        def editarFichaHospitalizacion(self, idMascota, idFicha, motivoHospitalización, fechaUltimaModificacion):
+
+            for mascota in self.mascotas:
+                if mascota.getId() == idMascota:
+                            
+                    idHospitalizacion = mascota.getIdHospitalizacion(idFicha)
+
+                    hospFicha = { #al ser una ficha se guarda directamente en el tributo relerente al diccionario
+                        'id':idHospitalizacion,
+                        'motivo':motivoHospitalización
+                    }
+
+                    mascota.editarFichaHospitalizacion(idFicha, hospFicha, fechaUltimaModificacion, mycursor, db)
 
 
         def buscarMascotaRemota(self, idMascotaBuscada):
@@ -566,4 +680,6 @@ if __name__ != "__main__":
             resultado = mycursor.fetchone()
             return resultado
 
+        def getMedicamentosConsulta(self, idFicha, mascota):
+            return mascota.getMedicamentosConsulta(idFicha)
                 

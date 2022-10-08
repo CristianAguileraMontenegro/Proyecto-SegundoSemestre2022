@@ -46,10 +46,23 @@ class Mascota:
         self.tablaMedica.solicitarFichasEnBaseDeDatos(myCursor)
     
     def solicitarFichasParcialesEnBaseDeDatos(self, myCursor):
+        print("49 mascota :")
         self.tablaMedica.solicitarFichasParcialesEnBaseDeDatos(myCursor)
     
     def completarFichaParcial(self, idFicha, myCursor):
         self.tablaMedica.completarFichaParcial(idFicha, myCursor)
+    
+    def editarFichaMedicaConsulta(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, myCursor, dB, fechaModificacion, vacunas, medicamentos, consulta):
+        self.tablaMedica.editarFichaMedicaConsulta(idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, myCursor, dB, fechaModificacion, vacunas, medicamentos, consulta)
+
+    def editarFichaOperacion(self, idFicha, operacion, fechaUltimaModificacion, myCursor, dB):
+        self.tablaMedica.editarFichaOperacion(idFicha, operacion, fechaUltimaModificacion, myCursor, dB)
+    
+    def editarRegistroDeOperaciones(self, operacion, myCursor, dB):
+        self.tablaMedica.editarRegistroDeOperacionesEnBaseDeDatos(operacion, myCursor, dB)
+    
+    def editarFichaHospitalizacion(self, idFicha, hospitalización, fechaUltimaModificacion, myCursor, dB):
+        self.tablaMedica.editarFichaHospitalizacion(idFicha, hospitalización, fechaUltimaModificacion, myCursor, dB)
 
     def getId(self):
         return self.id
@@ -250,6 +263,9 @@ class Mascota:
 
     def getOperacionFicha(self, idFicha):
         return self.tablaMedica.getOperacionFicha(idFicha)
+
+    def getIdOperacion(self, idFicha):
+        return self.tablaMedica.getIdOperacion(idFicha)
     
     def getVacunasSuministradasConsulta(self, idFicha):
         return self.tablaMedica.getVacunasSuministradasConsulta(idFicha)
@@ -271,6 +287,9 @@ class Mascota:
     
     def getHospitalizacionFicha(self, idFicha):
         return self.tablaMedica.getHospitalizacionFicha(idFicha)
+    
+    def getIdHospitalizacion(self, idFicha):
+        return self.tablaMedica.getIdHospitalizacion(idFicha)
     
     def getSedacion(self, idFicha):
         return self.tablaMedica.getSedacion(idFicha)
