@@ -32,7 +32,7 @@ class TablaMedica:
         myCursor.execute(sql, (str(self.id),))
         fichas = myCursor.fetchall()
         for ficha in fichas: #se recorren todas las ficha correspondientes a la tabla medica en particular 
-            
+            print("35 tabla medica")
             self.agregarFichaMedicaParcial(ficha[0],ficha[1])
             #self.fichas.append(fichaMedica)
 
@@ -64,14 +64,13 @@ class TablaMedica:
         self.fichas.append(fichaMedicaConsulta)
     
     def completarFichaParcial(self, idFicha, myCursor):
+        
         for ficha in self.fichas:
             if(ficha.getId() == idFicha):
-
+                print("70 tablaMedica llegue")
                 sql = 'SELECT * FROM fichaMedica WHERE idFichaMedica = (%s)'
                 myCursor.execute(sql, (str(idFicha),))
                 fichas = myCursor.fetchall()
-
-                print(str(fichas))
 
                 ficha.setSucursalVeterinaria(fichas[0][2])
                 ficha.setVeterinarioACargo(fichas[0][3])
@@ -84,11 +83,18 @@ class TablaMedica:
                 ficha.setSedacion(fichas[0][11])
                 ficha.setTemp(fichas[0][12])
 
-                ficha.solicitarFichaDeHospitalizacionEnBaseDeDatos(myCursor)
+                if(fichas[0][5] == 1):
+                    ficha.solicitarFichaDeOperacionEnBaseDeDatos(myCursor)
+                
+                if(fichas[0][10] == 1):
+                    ficha.solicitarFichaDeHospitalizacionEnBaseDeDatos(myCursor)
+                
+                if(fichas[0][11] == 1):
+                    ficha.solicitarFichaDeSedacionEnBaseDeDatos(myCursor)
+
+                print("94 tablaMedica llegue")
                 ficha.solicitarMedicamentosConsultaEnBaseDeDatos(myCursor)
                 ficha.solicitarVacunacionEnBaseDeDatos(myCursor)
-                ficha.solicitarFichaDeOperacionEnBaseDeDatos(myCursor)
-                ficha.solicitarFichaDeSedacionEnBaseDeDatos(myCursor)
                 ficha.solicitarTratamientosConsultaBaseDeDatos(myCursor)
 
                 break
@@ -96,8 +102,25 @@ class TablaMedica:
     def guardarFichaGeneralEnBaseDeDatos(self, fichaMedicaConsulta:FichaMedica, myCursor, dB):
         fichaMedicaConsulta.guardarFichaGeneralEnBaseDeDatos(self.getId(), myCursor, dB)
 
-    def editarFichaMedicaConsulta(self):
-        pass
+    def editarFichaMedicaConsulta(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, myCursor, dB, fechaModificacion, vacunas, medicamentos, tratamientos):
+        for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+                ficha.modificarFichaGeneralEnBaseDeDatos(sucursalVeterinaria, veterinarioACargo, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, myCursor, dB, fechaModificacion)
+                ficha.actualizarVacunasConsultaEnBaseDeDatos(vacunas ,myCursor, dB)
+                ficha.actualizarMedicamentosConsultaEnBaseDeDatos(medicamentos ,myCursor, dB)
+                ficha.actualizarTratamientosConsultaEnBaseDeDatos(tratamientos ,myCursor, dB)
+                self.editarRegistroVacunaEnBaseDeDatos(vacunas, myCursor, dB)
+                break
+    
+    def editarFichaOperacion(self, idFicha, operacion, fechaUltimaModificacion, myCursor, dB):
+        for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+                ficha.modificarOperacionEnBaseDeDatos(operacion, fechaUltimaModificacion, myCursor, dB)
+    
+    def editarFichaHospitalizacion(self, idFicha, hospitalizacion, fechaUltimaModificacion, myCursor, dB):
+        for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+                ficha.modificarHopitalizacionEnBaseDeDatos(hospitalizacion, fechaUltimaModificacion, myCursor, dB)
 
     def mostrarFichasMedicas(self):
         pass
@@ -165,6 +188,11 @@ class TablaMedica:
     
     def setRegistroDeOperaciones(self, operacion):
         self.registroDeOperaciones = operacion
+
+    def editarRegistroDeOperaciones(self, operacion):
+        for i in range(len(self.registroDeOperaciones)):
+            if(self.registroDeOperaciones[i]['id'] == operacion['id']):
+                self.registroDeOperaciones[i] = operacion
     
     def setRegistroDeOperacionesBas(self, operaciones, myCursor, dB): #local
         self.registroDeOperaciones = operaciones
@@ -181,6 +209,16 @@ class TablaMedica:
                 'operacion': operaciones[1],
             }
             self.agregarOperaciones.append(operacion)
+    
+    def editarRegistroDeOperacionesEnBaseDeDatos(self, operacion, myCursor, dB):
+        sql = 'UPDATE registroDeOperaciones SET operación = %s WHERE idRegistroDeOperaciones = %s'
+        myCursor.execute(sql, (str(operacion['operacion']),  str(operacion['id'])))
+        dB.commit()
+
+        for i in range(len(self.registroDeOperaciones)):
+            if(self.registroDeOperaciones[i]['id'] == operacion['id']):
+                self.registroDeOperaciones[i] = operacion
+                break
 
     def guardarOperacionesEnBaseDeDatos(self, myCursor, dB):
         for operacion in self.getRegistroDeOperaciones():
@@ -202,6 +240,13 @@ class TablaMedica:
         sql = 'INSERT INTO registrovacunassuministradas (idVacunasSuministradas, nombreVacuna, TablaMedica_idTablaMedica) VALUES (%s, %s, %s)'
         myCursor.execute(sql, (str(vacunas['id']), str(vacunas['nomVacuna']), str(self.getId())))
         dB.commit()
+
+    def editarRegistroVacunaEnBaseDeDatos(self, vacunas ,myCursor, dB):
+        for vacuna in vacunas:
+            sql = 'UPDATE registrovacunassuministradas SET nombreVacuna = %s WHERE idVacunasSuministradas = %s'
+            myCursor.execute(sql, (str(vacuna['nomVacuna']), str(vacuna['id'])))
+            dB.commit()
+        self.setRegistroDeVacunas(vacunas)
 
     def setRegistroDeVacunas(self, vacunas):
         self.vacunasSuministradas = vacunas 
@@ -325,6 +370,7 @@ class TablaMedica:
     def getMedicamentosConsulta(self, idFicha):
         for ficha in self.fichas:
             if(ficha.getId() == idFicha):
+                print("371 tablaMedica "+str(ficha.getMedicamentosConsulta()))
                 return ficha.getMedicamentosConsulta()
 
     def getOperacion(self, idFicha):
@@ -336,6 +382,11 @@ class TablaMedica:
         for ficha in self.fichas:
             if(ficha.getId() == idFicha):
                 return ficha.getOperacionFicha()
+    
+    def getIdOperacion(self, idFicha):
+        for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+                return ficha.getIdOperacion()
     
     def getVacunasSuministradasConsulta(self, idFicha):
         for ficha in self.fichas:
@@ -371,6 +422,11 @@ class TablaMedica:
         for ficha in self.fichas:
             if(ficha.getId() == idFicha):
                 return ficha.getHospitalizacionFicha()
+    
+    def getIdHospitalizacion(self, idFicha):
+        for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+                return ficha.getIdHospitalizacion()
     
     def getSedacion(self, idFicha):
         for ficha in self.fichas:
