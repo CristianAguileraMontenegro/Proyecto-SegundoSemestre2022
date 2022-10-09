@@ -367,6 +367,11 @@ class TablaMedica:
             if(ficha.getId() == idFicha):
                 return ficha.getFechaConsulta()
 
+    def getFechaModificacion(self, idFicha):
+        for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+                return ficha.getFechaModificacion()
+
     def getMedicamentosConsulta(self, idFicha):
         for ficha in self.fichas:
             if(ficha.getId() == idFicha):

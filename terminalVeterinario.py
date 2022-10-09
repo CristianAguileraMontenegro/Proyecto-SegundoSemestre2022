@@ -16,8 +16,8 @@ from fichaMedica import FichaMedica
 from calendario import Calendario
 
 db = mysql.connector.connect(
-    user='root',
-    password='root',
+    user='piero',
+    password='pieron123',
     host='localhost',
     database='mydb',
     port='3306'
@@ -329,13 +329,13 @@ if __name__ != "__main__":
                     mascota.completarFichaParcial(idFicha, mycursor)
         
         def completarFichaParcialMascotasExternas(self, idMascota, idFicha):
-            medicamentos = []
+            #medicamentos = []
             for mascota in self.mascotasExternas:
-                print("307 terminalveterinario "+str(mascota.getId()))
+
                 if mascota.getId() == idMascota:
+                    print("337 terminal")
                     mascota.completarFichaParcial(idFicha, mycursor)
-                    medicamentos.append(mascota.getMedicamentosConsulta(idFicha))
-            return medicamentos
+                    break
 
 
         def agregarFichaOperacion(self, idMascota, opFicha):
@@ -404,7 +404,7 @@ if __name__ != "__main__":
             
             if(resultadoMascota != None):
                 
-                for mascota in self.mascotas:
+                for mascota in self.mascotas: #indica que la mascota pertenece a la veterinraia actual
                     if(mascota.getId() == str(idMascotaBuscada)): #si se encuentra se cargan los datos restantes
                         print("Estoy en remoto "+ str(resultadoMascota))
                         sql = 'SELECT * FROM RegistroDeOperaciones WHERE TablaMedica_idTablaMedica = (%s)'
@@ -536,14 +536,8 @@ if __name__ != "__main__":
                         mascota.setRegistroDeVacunas(vacunasFinal)
                         mascota.setRegistroDeOperaciones(registroOperacionesFinal)
                         mascota.solicitarFichasParcialesEnBaseDeDatos(mycursor)
+                        self.mascotasExternas.append(mascota)
 
-                        listI = mascota.getIdsFichas()
-                        print(str(len(listI)))
-                        
-                        for i in listI:
-                            self.completarFichaParcial(idMascotaBuscada, i) #verificar que carge los medicamentos
-
-                        print("dentro de remoto lol")
                         return mascota
                 
 
@@ -680,6 +674,9 @@ if __name__ != "__main__":
             resultado = mycursor.fetchone()
             return resultado
 
-        def getMedicamentosConsulta(self, idFicha, mascota):
-            return mascota.getMedicamentosConsulta(idFicha)
+        def getMedicamentosConsulta(self, idFicha, idMascota):
+
+            for mascota in self.mascotasExternas:
+                if(mascota.getId() == str(idMascota)):
+                    return mascota.getMedicamentosConsulta(idFicha)
                 
