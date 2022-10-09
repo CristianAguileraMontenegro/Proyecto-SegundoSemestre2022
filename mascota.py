@@ -37,6 +37,13 @@ class Mascota:
         myCursor.execute(sql, (str(self.id), str(self.nombre), str(self.especie), str(self.color), str(self.raza), str(self.nombreTutor), str(self.rutTutor), str(self.numeroTelefono), str(self.direccion), str(self.tablaMedica.getId()), str(self.FechaNacimiento)))
         dB.commit()
     
+    def actulizarMascota(self, myCursor, dB):
+        sql = "UPDATE mascota SET nombreMascota = %s, especie = %s, color = %s, raza = %s, nombreTutor = %s, rutTutor = %s, numeroTelefono = %s, Dirección = %s,  FechaDeNacimiento = %s WHERE idMascota = %s"
+        myCursor.execute(sql, (str(self.nombre), str(self.especie), str(self.color), str(self.raza), str(self.nombreTutor), str(self.rutTutor), str(self.numeroTelefono), str(self.direccion), str(self.FechaNacimiento), str(self.id)))
+        dB.commit()
+    
+    def actualizarAlergias(self, myCursor, dB):
+        self.tablaMedica.editarRegistroDeAlergias(myCursor, dB)
     
     def agregarTablaMascota(self, idTerminal, myCursor, dB):
         sql = "INSERT INTO mascota_has_terminalveterinario values (%s, %s)"
@@ -165,6 +172,9 @@ class Mascota:
 
     def getAlergias(self):
         return self.tablaMedica.getAlergias()
+    
+    def getIdAlergias(self):
+        return self.tablaMedica.getIDAlergias()
     
     def getRegistroDeOperaciones(self):
         return self.tablaMedica.getRegistroDeOperaciones()

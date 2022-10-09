@@ -1,6 +1,6 @@
-import mysql.connector
 
 from fichaMedica import FichaMedica #importamos la clase 
+from datetime import datetime
 
 class TablaMedica:
 
@@ -24,7 +24,7 @@ class TablaMedica:
 
             #solicitamos todos los datos asociados en la base de datos
             
-            self.agregarFichaMedicaExistente(ficha[0],ficha[2],ficha[3],ficha[4],ficha[5],ficha[6],ficha[7],ficha[8],ficha[9],ficha[10],ficha[11], ficha[12], myCursor)
+            self.agregarFichaMedicaExistente(ficha[0],ficha[2],ficha[3],ficha[4],ficha[5],ficha[6],ficha[7],ficha[8],ficha[9],ficha[10],ficha[11], ficha[12], ficha[13], ficha[14], myCursor)
             #self.fichas.append(fichaMedica)
     
     def solicitarFichasParcialesEnBaseDeDatos(self, myCursor):
@@ -33,7 +33,8 @@ class TablaMedica:
         fichas = myCursor.fetchall()
         for ficha in fichas: #se recorren todas las ficha correspondientes a la tabla medica en particular 
             print("35 tabla medica")
-            self.agregarFichaMedicaParcial(ficha[0],ficha[1])
+            fecha = ficha[1].strftime("%Y-%m-%d %H:%M:%S")
+            self.agregarFichaMedicaParcial(ficha[0],fecha)
             #self.fichas.append(fichaMedica)
 
 
@@ -47,7 +48,8 @@ class TablaMedica:
         self.fichas.append(fichaMedicaConsulta)
         self.guardarFichaGeneralEnBaseDeDatos(fichaMedicaConsulta, myCursor, dB)
 
-    def agregarFichaMedicaExistente(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, myCursor):
+    def agregarFichaMedicaExistente(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, fechaMod, indentificadorMod, myCursor):
+        
         fichaMedicaConsulta = FichaMedica(idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp)
         #print(fichaMedicaConsulta.getId())
         fichaMedicaConsulta.solicitarFichaDeHospitalizacionEnBaseDeDatos(myCursor)
@@ -56,6 +58,12 @@ class TablaMedica:
         fichaMedicaConsulta.solicitarFichaDeOperacionEnBaseDeDatos(myCursor)
         fichaMedicaConsulta.solicitarFichaDeSedacionEnBaseDeDatos(myCursor)
         fichaMedicaConsulta.solicitarTratamientosConsultaBaseDeDatos(myCursor)
+
+        if(fechaMod is not None):
+            print("tablamedica 62")
+            fichaMedicaConsulta.setFechaModificacion(fechaMod)
+            fichaMedicaConsulta.setIndicadorModificacion(indentificadorMod)
+
         self.fichas.append(fichaMedicaConsulta)
     
     def agregarFichaMedicaParcial(self, idFicha, fechaConsulta):
@@ -82,6 +90,9 @@ class TablaMedica:
                 ficha.setHospitalizacion(fichas[0][10])
                 ficha.setSedacion(fichas[0][11])
                 ficha.setTemp(fichas[0][12])
+                ficha.setFechaModificacion(fichas[0][13])
+                ficha.setIndicadorModificacion(fichas[0][14])
+
 
                 if(fichas[0][5] == 1):
                     ficha.solicitarFichaDeOperacionEnBaseDeDatos(myCursor)
@@ -174,6 +185,19 @@ class TablaMedica:
 
     def getAlergias(self):
         return self.alergias
+    
+    def getIDAlergias(self):
+        ids = []
+        for alergia in self.getAlergias():
+            ids.append(alergia)
+
+        return ids
+    
+    def editarRegistroDeAlergias(self, myCursor, dB):
+        for i in range(len(self.alergias)):
+            sql = 'UPDATE alergias SET nombreAlergia = %s WHERE idAlergias = %s'
+            myCursor.execute(sql, (str(self.alergias[i]['nombre']),  str(self.alergias[i]['id'])))
+            dB.commit()
 
 #alergias
 
@@ -217,6 +241,7 @@ class TablaMedica:
 
         for i in range(len(self.registroDeOperaciones)):
             if(self.registroDeOperaciones[i]['id'] == operacion['id']):
+                print("222 tabla entro en enditar")
                 self.registroDeOperaciones[i] = operacion
                 break
 
@@ -246,7 +271,18 @@ class TablaMedica:
             sql = 'UPDATE registrovacunassuministradas SET nombreVacuna = %s WHERE idVacunasSuministradas = %s'
             myCursor.execute(sql, (str(vacuna['nomVacuna']), str(vacuna['id'])))
             dB.commit()
-        self.setRegistroDeVacunas(vacunas)
+        self.actualizarRegistroDeVacunas(vacunas)
+
+    def actualizarRegistroDeVacunas(self, vacunas):
+        i = 0
+        j = 0
+        for i in range(len(self.vacunasSuministradas)):
+            for j in range(len(vacunas)):
+                if(self.vacunasSuministradas[i]['id'] == vacunas[j]['id']):
+                    self.vacunasSuministradas[i]['nomVacuna'] = vacunas[j]['nomVacuna']
+                    break
+
+            
 
     def setRegistroDeVacunas(self, vacunas):
         self.vacunasSuministradas = vacunas 

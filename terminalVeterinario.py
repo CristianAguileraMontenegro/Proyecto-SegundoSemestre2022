@@ -16,8 +16,8 @@ from fichaMedica import FichaMedica
 from calendario import Calendario
 
 db = mysql.connector.connect(
-    user='piero',
-    password='pieron123',
+    user='root',
+    password='root',
     host='localhost',
     database='mydb',
     port='3306'
@@ -36,15 +36,17 @@ if __name__ != "__main__":
             self.nombreVeterinaria = None
             self.mascotas:Mascota = []
             self.mascotasExternas:Mascota = [] #masconas no pertenecientes a la veterinrias
-            self.calendaio:Calendario
+            self.calendaio = Calendario()
 
             self.validarTokenDeActivacion()
 
             if (self.tokenActivacion == True):
                 # De ser el caso que el token esta ya activado, se instancian aquí, debido a que actToken no se llamará
+                print("hola qtrtr")
+
                 self.setIdVeterinaria()
                 self.setNombreVeterinaria()
-                print("46 terminalVterinario")
+                
                 self.setMascotas()
                 self.setCalendario()
 
@@ -177,10 +179,42 @@ if __name__ != "__main__":
         def setCalendario(self):
             sql = 'SELECT idCalendario FROM calendario WHERE (Veterinaria_idVeterinaria, Veterinaria_nombreVeterinaria) = (%s, %s)'
             mycursor.execute(sql, (str(self.idVeterinaria), str(self.nombreVeterinaria)))
-            self.calendaio = Calendario(mycursor.fetchone())
+            Resultado = mycursor.fetchone()
+            print("181 termianl "+str(Resultado))
+            if(Resultado == None):
+                self.crearCalendario()
+            else:
+                self.calendaio.setId(Resultado[0])
+                self.solicitarDatosCalendarioBaseDeDatos()
+
+        def crearCalendario(self):
+            idCalendario = (uuid.uuid4())
+            sql = 'INSERT INTO calendario VALUES (%s, %s, %s)'
+            mycursor.execute(sql, (str(idCalendario), str(self.idVeterinaria), str(self.nombreVeterinaria)))
+            db.commit()
+
+            self.calendaio.setId(idCalendario)
+        
+        def solicitarDatosCalendarioBaseDeDatos(self):
+            self.calendaio.solicitarDatosCalendarioBaseDeDatos(mycursor)
         
         def getIdCalendario(self):
             return self.calendaio.getId()
+        
+        def getFechasCalendario(self):
+            return self.calendaio.getFechas()
+        
+        def getFechaCalendario(self, fechaSeleccionada):
+            return self.calendaio.getFecha(fechaSeleccionada)
+        
+        def verificarFechaCalendario(self, fecha):
+            return self.calendaio.verificarFecha(fecha)
+        
+        def agregarFechasCalendario(self, fechas):
+            self.calendaio.agregarFechas(fechas,mycursor, db)
+        
+        def agregarDatosAFechasCalendario(self, fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados):
+            self.calendaio.agregarDatosAFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados, mycursor, db)
         
         def agregarMascota(self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, alergias, tablaMedica, fechaNacimiento):
             mascotaNueva = Mascota(id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, tablaMedica,  fechaNacimiento)
@@ -206,6 +240,39 @@ if __name__ != "__main__":
 
             mascotaNueva.agregarTablaMascota(self.id, mycursor, db)
             
+        def editarMascota(self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, alergias, fechaNacimiento):
+
+            for mascota in self.mascotas:
+                if (mascota.getId == id):
+
+                    mascota.setNombreMascota(nombre)
+                    mascota.setColorMascota(especie)
+                    mascota.setEspecie(color)
+                    mascota.setRaza(raza)
+                    mascota.setNombreTutor(nombreTutor)
+                    mascota.setRutTutor(rutTutor)
+                    mascota.setNumeroTelefono(numeroTelefono)
+                    mascota.setDireccion(direccion)
+                    mascota.setFechaNacimiento(fechaNacimiento)
+
+                    alergiasActuales = mascota.getAlergias()
+
+                    alergiasArray = alergias.split(';')
+                    alergiaDicc = {}
+                    alergiasFinal = []
+                    i = 0
+                    for alergia in alergiasArray:
+                        alergiaDicc = {
+                            'id':alergiasActuales[i]['id'],
+                            'nombre':alergia
+                        }
+                        i = i+1
+                        alergiasFinal.append(alergiaDicc)
+                    
+                    mascota.setAlergias(alergiasFinal)
+
+                    mascota.actulizarMascota(mycursor, db)
+                    mascota.actualizarAlergias(mycursor, db)
 
         def agregarFichaMedica(self, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, idMascota, tratamientos, causaVisita, medicamentos, vacunas):
             idFicha = uuid.uuid4()
