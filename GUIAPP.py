@@ -10,6 +10,10 @@ import re
 import threading
 
 
+today = datetime.date.today()
+ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
+ctk.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"
+
 terminalVet = Terminal()
 today = datetime.date.today()
 ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
@@ -386,6 +390,7 @@ class screenDatosTotalMascota(ctk.CTkFrame): #HACERLA DPS
                 i += 1
 
             fechasString = []
+            print("393 :"+str(listaFechas))
             listaFechas.sort(reverse=True)
             i = 0
             while(i <= (len(listaFechas)-1)):
@@ -1711,7 +1716,7 @@ class screenFormularioCrearFichaAuthCirugia(ctk.CTkFrame):
             self.labelErrorCirugia.place_forget()
         
         if(flag is True):
-            self.agregarFichaCirugia(mascotaActual)
+            self.agregarFichaCirugia(mascotaActual, parent)
 
     def agregarFichaCirugia(self, mascotaActual, parent):
         idFichahOp = uuid.uuid4()
@@ -2265,8 +2270,7 @@ class screenFormularioCrearFichaSedacion(ctk.CTkFrame):
         parent.setFlagEditar(False)
         self.botonAgregarFichaSedacion.configure(state=DISABLED)
         self.labelMensajeAgregarSCrearFichaSedacion.pack()
-
-
+    
 class screenCalendarioVacunacion(ctk.CTkFrame):
     def __init__(self, parent, container):
         super().__init__(container, fg_color="#C5DEDD")
@@ -2274,84 +2278,90 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         Font_tuple14 = ("Helvetica", 16)
         Font_tuple12 = ("Helvetica", 12)
 
-        self.grid_columnconfigure(0, weight=1)
-        frame_0 = tk.Frame(self)
-        frame_0.grid_columnconfigure(0, weight=1)
-        frame_0.grid(row=0, column=0, sticky='nsew')
+        if(terminalVet.getIdCalendario() is not None):
 
-        self.grid_columnconfigure(1, weight=1)
-        frame_1 = tk.Frame(self)
-        frame_1.grid_columnconfigure(1, weight=1)
-        frame_1.grid(row=1, column=0, sticky='nsew')
+            self.frameBotonesCalendario = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
+            self.frameBotonesCalendario.grid(row=0, column=0, padx=20, pady=20)
 
-        self.labelTitle = ctk.CTkLabel(frame_0, text="Calendario de vacunación MyPetRecord", text_font=Font_tuple20, text_color='black')
-        self.labelTitle.grid(row=0, column=0, padx=10 , pady=10)
-        self.labelSubTitle = ctk.CTkLabel(frame_0, text="Nombre Veterinaria", text_font=Font_tuple14,text_color='black')
-        self.labelSubTitle.grid(row=1, column=0, padx=10 , pady=10)
+            self.frameIngresoDeDatos = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
+            self.frameIngresoDeDatos.grid(row=0, column=1, padx=20, pady=20)
 
-        self.calendario = Calendar(frame_0, selectmode='day',date_pattern='dd/mm/yyyy',  year=today.year, month=today.month, day=today.day)
-        self.calendario.grid(row=3, column=0, padx=10 , pady=10)
+            #self.grid_columnconfigure(0, weight=1)
+            #frame_0 = tk.Frame(self)
+            #frame_0.grid_columnconfigure(0, weight=1)
+            #frame_0.grid(row=0, column=0,padx=20, pady=20)
 
-        terminalVet.setCalendario()
-        self.calendarioVacunacion = Calendario(terminalVet.getIdCalendario()) #solo uno para pruebas, despues cambiar
-        self.calendarioVacunacion.solicitarDatosCalendarioBaseDeDatos()
-        self.indicarFechasEnCalendarioPostCargaBaseDeDatos(parent)
+            #self.grid_columnconfigure(0, weight=1)
+            #frame_1 = tk.Frame(self)
+            #frame_1.grid_columnconfigure(1, weight=1)
+            #frame_1.grid(row=0, column=1)
 
-         #calendario
-        #self.fechasCalendario:datetime.date = []
-        #elementos calendario
+            self.labelTitle = ctk.CTkLabel(self.frameBotonesCalendario, text="Calendario de vacunación MyPetRecord", text_font=Font_tuple20, text_color='black')
+            self.labelTitle.grid(row=0, column=0, padx=(50,50), pady=10)
 
-        self.ingresarCita = ctk.CTkButton(frame_0, width=10, text='Ingresar cita de vacunación', command=lambda: self.mostarElementos())
-        self.ingresarCita.grid(row=4, column=0, padx=10 , pady=10)
+            self.labelSubTitle = ctk.CTkLabel(self.frameIngresoDeDatos, text="Nombre Veterinaria", text_font=Font_tuple20, text_color='black')
+            self.labelSubTitle.grid(row=0, column=0, padx=(50,50), pady=10)
 
-        self.confirmarCita = ctk.CTkButton(frame_0, width=10, text='Confirmar cita de vacunación', command=lambda: self.clickConfirmarFecha(parent))
-        self.confirmarCita.grid(row=5, column=0, padx=10 , pady=10)
+            self.calendario = Calendar(self.frameBotonesCalendario, selectmode='day',date_pattern='dd/mm/yyyy',  year=today.year, month=today.month, day=today.day)
+            self.calendario.grid(row=3, column=0, padx=(50,50), pady=10)
+        
+            self.indicarFechasEnCalendarioPostCargaBaseDeDatos(parent)
 
-        self.verCitas= ctk.CTkButton(frame_0, width=10, text='Revisar de vacunación', command=lambda: self.mostarFechas(parent))
-        self.verCitas.grid(row=6, column=0, padx=10 , pady=10)
+            #calendario
+            #self.fechasCalendario:datetime.date = []
+            #elementos calendario
 
+            self.ingresarCita = ctk.CTkButton(self.frameBotonesCalendario, width=20, text='Ingresar cita de vacunación', command=lambda: self.mostarElementosDeLlenado())
+            self.ingresarCita.grid(row=4, column=0, padx=10 , pady=10)
+
+            self.confirmarCita = ctk.CTkButton(self.frameBotonesCalendario, width=20, text='Confirmar cita de vacunación', command=lambda: self.clickConfirmarFecha(parent))
+            self.confirmarCita.grid(row=5, column=0, padx=10 , pady=10)
+
+            self.verCitas= ctk.CTkButton(self.frameBotonesCalendario, width=20, text='Revisar de vacunación', command=lambda: self.mostarFechas(parent))
+            self.verCitas.grid(row=6, column=0, padx=10 , pady=10)
+
+
+            
+            #componentes botones
+            self.horaLabel = ctk.CTkLabel(self.frameIngresoDeDatos, text='Hora :', text_color="black", text_font=Font_tuple14)
+            self.horaLabel.grid(row=2, column=0, padx=10, pady=10)
+
+            self.hora = Spinbox(self.frameIngresoDeDatos, from_= 0, to = 24,width=5, state = 'readonly')  
+            self.hora.grid(row=2, column=1, padx=10 , pady=10)
+
+            self.minutosLabel = ctk.CTkLabel(self.frameIngresoDeDatos, text='Minutos :', text_color="black", text_font=Font_tuple14)
+            self.minutosLabel.grid(row=3, column=0, padx=10, pady=10)
+
+            self.minutos = Spinbox(self.frameIngresoDeDatos, from_= 0, to = 60,width=5, state = 'readonly')  
+            self.minutos.grid(row=3, column=1, padx=10 , pady=10)
+
+            self.rutLabel = ctk.CTkLabel(self.frameIngresoDeDatos, text='Rut :', text_color="black", text_font=Font_tuple14)
+            self.rutLabel.grid(row=4, column=0, padx=10 , pady=10)
+
+            self.entradaRut = ctk.CTkEntry(self.frameIngresoDeDatos, width = 140, text_font=Font_tuple14, fg_color="#F0EFEB", placeholder_text="Rut", placeholder_text_color="silver", justify = "center", text_color='black')
+            self.entradaRut.grid(row=4, column=1, padx=10 , pady=10)
+
+            self.numeroDeTelefonoLabel = ctk.CTkLabel(self.frameIngresoDeDatos, text='Telefono :', text_color="black", text_font=Font_tuple14)
+            self.numeroDeTelefonoLabel.grid(row=5, column=0, padx=10 , pady=10)
+
+            self.numeroDeTelefono = ctk.CTkEntry(self.frameIngresoDeDatos, width = 160, text_font=Font_tuple14, fg_color="#F0EFEB", placeholder_text="Telefono", placeholder_text_color="silver", justify = "center", text_color='black')
+            self.numeroDeTelefono.grid(row=5, column=1, padx=10 , pady=10)
+            
+            self.frameListaboxDatos = ctk.CTkFrame(self.frameIngresoDeDatos, corner_radius=10, fg_color="#99C1DE")
+            self.frameListaboxDatos.grid(row=6, column=0, padx=0 , pady=0)
+
+
+            self.ocularElementosParaLLenado()
 
         
-        #componentes botones
-        self.horaLabel = tk.Label(frame_0, text='Hora :' )
-        self.horaLabel.grid(row=4, column=1, padx=10, pady=10)
-
-        self.hora = Spinbox(frame_0, from_= 0, to = 24,width=5, state = 'readonly')  
-        self.hora.grid(row=4, column=2, padx=10 , pady=10)
-
-        self.minutosLabel = tk.Label(frame_0, text='Minutos :' )
-        self.minutosLabel.grid(row=4, column=3, padx=10, pady=10)
-
-        self.minutos = Spinbox(frame_0, from_= 0, to = 60,width=5, state = 'readonly')  
-        self.minutos.grid(row=4, column=4, padx=10 , pady=10)
-
-        self.rutLabel = tk.Label(frame_0, text='Rut :' )
-        self.rutLabel.grid(row=5, column=1, padx=10 , pady=10)
-
-        self.entradaRut = ctk.CTkEntry(frame_0, width = 140, text_font=Font_tuple14, fg_color="#F0EFEB", placeholder_text="Rut", placeholder_text_color="grey", justify = "center", text_color='black')
-        self.entradaRut.grid(row=5, column=2, padx=10 , pady=10)
-
-        self.numeroDeTelefonoLabel = tk.Label(frame_0, text='Telefono :' )
-        self.numeroDeTelefonoLabel.grid(row=5, column=3, padx=10 , pady=10)
-
-        self.numeroDeTelefono = ctk.CTkEntry(frame_0, width = 160, text_font=Font_tuple14, fg_color="#F0EFEB", placeholder_text="Telefono", placeholder_text_color="grey", justify = "center", text_color='black')
-        self.numeroDeTelefono.grid(row=5, column=4, padx=10 , pady=10)
-        
-        self.frameListaboxDatos = ctk.CTkFrame(frame_1, corner_radius=10, fg_color="#99C1DE")
-        self.frameListaboxDatos.grid(row=2, column=1, padx=20 , pady=20)
 
 
-        self.ocularElementos()
-
-       
-
-
-        #horas cita
-        
-        #self.IndicadorDeHora = ctk
-        #self.botonConf = ctk.CTkButton(self, width=10, text='Confirmar', command=lambda: self.clickConfirmar(parent))
-        #self.botonConf.pack(padx=10, pady=30)
-        #self.labelErrorIngreso = ctk.CTkLabel(self, text="Llave no existente", text_font=Font_tuple12, text_color='red')
+            #horas cita
+            
+            #self.IndicadorDeHora = ctk
+            #self.botonConf = ctk.CTkButton(self, width=10, text='Confirmar', command=lambda: self.clickConfirmar(parent))
+            #self.botonConf.pack(padx=10, pady=30)
+            #self.labelErrorIngreso = ctk.CTkLabel(self, text="Llave no existente", text_font=Font_tuple12, text_color='red')
         
     def clickConfirmarFecha(self, parent):
 
@@ -2364,17 +2374,21 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
 
         rutIngresado = self.entradaRut.get()
         numeroIngresado = self.numeroDeTelefono.get()
-
-        if self.calendarioVacunacion.verificarFecha(fechaSeleccionada) == False:
+        
+        if (terminalVet.verificarFechaCalendario(fechaSeleccionada) == False):
+            print("2375 giu")
             fechas = {'fecha': fechaSeleccionada, 'ruts':[], 'numeros':[], 'horas':[], 'minutos':[]}
             fechas["ruts"].append(rutIngresado)
             fechas["numeros"].append(numeroIngresado)
             fechas["horas"].append(horaSeleccionada)
             fechas["minutos"].append(minutosSeleccionados)
     
-            self.calendarioVacunacion.agregarFechas(fechas)
+            print(str(fechas["fecha"]))
+            terminalVet.agregarFechasCalendario(fechas)
         else:
-           self.calendarioVacunacion.agregarDatosAFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados)
+           terminalVet.agregarDatosAFechasCalendario(fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados)
+        
+        self.ocularElementosParaLLenado()
 
     def indicarFechasEnCalendario(self, parent, fechaSeleccionada):
 
@@ -2386,7 +2400,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
     
     def indicarFechasEnCalendarioPostCargaBaseDeDatos(self, parent):
 
-        fechas = self.calendarioVacunacion.getFechas()
+        fechas = terminalVet.getFechasCalendario()
         for i in range(len(fechas)):
             fechaSeleccionada = fechas[i]["fecha"].split('/') #la transformamos a string para poder ocuparla y marcar la casilla
 
@@ -2400,17 +2414,20 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
     def mostarFechas(self, parent):
         fechaSeleccionada = self.calendario.get_date() #obtenemos la fecha seleccionada
 
-        fechaObtenida = self.calendarioVacunacion.getFecha(fechaSeleccionada) #obtenemos los datos de la fecha seleccionada
+        fechaObtenida = terminalVet.getFechaCalendario(fechaSeleccionada) #obtenemos los datos de la fecha seleccionada
 
         self.lista = tk.Listbox(self.frameListaboxDatos, width=70, height=7, selectmode='browse', font=('Helvetica', '13')) #creanis la lista pra mostrar nuestros datos
         self.lista.grid(row=0, column=0, padx=10, pady=10)
 
         for i in range(len(fechaObtenida["ruts"])): #iteramos por el maximo largo
             datos = 'rut :'+str(fechaObtenida["ruts"][i])+' numero de telefono :'+str(fechaObtenida["numeros"][i])+' Hora de atención:'+str(fechaObtenida["horas"][i])+':'+str(fechaObtenida["minutos"][i])
+            print(str(len(fechaObtenida["ruts"])))
             self.lista.insert(END, datos)
+        
+        self.ocultarLlenadoParaMostar()
 
 
-    def mostarElementos(self):
+    def mostarElementosDeLlenado(self):
         self.hora.grid()
         self.horaLabel.grid()
         self.minutos.grid()
@@ -2419,9 +2436,20 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         self.rutLabel.grid()
         self.numeroDeTelefono.grid()
         self.numeroDeTelefonoLabel.grid()
-       
-
-    def ocularElementos(self):
+        self.frameListaboxDatos.grid_remove()
+        
+    def ocultarLlenadoParaMostar(self):
+        self.hora.grid_remove()
+        self.horaLabel.grid_remove()
+        self.minutos.grid_remove()
+        self.minutosLabel.grid_remove()
+        self.entradaRut.grid_remove()
+        self.rutLabel.grid_remove()
+        self.numeroDeTelefono.grid_remove()
+        self.numeroDeTelefonoLabel.grid_remove()
+        self.frameListaboxDatos.grid()
+    
+    def ocularElementosParaLLenado(self):
         self.hora.grid_remove()
         self.horaLabel.grid_remove()
         self.minutos.grid_remove()
