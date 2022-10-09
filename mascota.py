@@ -17,6 +17,7 @@ class Mascota:
             self.numeroTelefono = None
             self.direccion = None
             self.tablaMedica:TablaMedica = None
+            self.FechaNacimiento = None
         elif(len(args) == 11):
             print("hola llegue a entrar")
             self.nombre = args[1]
@@ -254,6 +255,9 @@ class Mascota:
 
     def getFechaConsulta(self, idFicha):
         return self.tablaMedica.getFechaConsulta(idFicha)
+
+    def getFechaModificacion(self, idFicha):
+        return self.tablaMedica.getFechaModificacion(idFicha)
 
     def getMedicamentosConsulta(self, idFicha):
         return self.tablaMedica.getMedicamentosConsulta(idFicha)
