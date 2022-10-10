@@ -33,8 +33,8 @@ class Mascota:
             self.FechaNacimiento = args[10]
     
     def agregarMascotaEnBaseDeDatos(self, myCursor, dB):
-        sql = "INSERT INTO mascota (idMascota, nombreMascota, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, Dirección, TablaMedica_idTablaMedica,  FechaDeNacimiento) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        myCursor.execute(sql, (str(self.id), str(self.nombre), str(self.especie), str(self.color), str(self.raza), str(self.nombreTutor), str(self.rutTutor), str(self.numeroTelefono), str(self.direccion), str(self.tablaMedica.getId()), str(self.FechaNacimiento)))
+        sql = "INSERT INTO mascota (idMascota, nombreMascota, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, Dirección, FechaDeNacimiento) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        myCursor.execute(sql, (str(self.id), str(self.nombre), str(self.especie), str(self.color), str(self.raza), str(self.nombreTutor), str(self.rutTutor), str(self.numeroTelefono), str(self.direccion), str(self.FechaNacimiento)))
         dB.commit()
     
     def actulizarMascota(self, myCursor, dB):
@@ -54,7 +54,6 @@ class Mascota:
         self.tablaMedica.solicitarFichasEnBaseDeDatos(myCursor)
     
     def solicitarFichasParcialesEnBaseDeDatos(self, myCursor):
-        print("49 mascota :")
         self.tablaMedica.solicitarFichasParcialesEnBaseDeDatos(myCursor)
     
     def completarFichaParcial(self, idFicha, myCursor):
@@ -139,8 +138,8 @@ class Mascota:
         self.tablaMedica = TablaMedica(id)
         #self.guardarTablaEnBaseDeDatos()
 
-    def guardarTablaEnBaseDeDatos(self, myCursor, dB):
-        self.tablaMedica.guardarTablaEnBaseDeDatos(myCursor, dB)
+    def guardarTablaEnBaseDeDatos(self, myCursor, dB, idVeterinaria, nombreVeterinaria, idMascota):
+        self.tablaMedica.guardarTablaEnBaseDeDatos(myCursor, dB, idVeterinaria, nombreVeterinaria, idMascota)
 
     def setAlergias(self, alergias):
         self.tablaMedica.setAlergias(alergias)
@@ -181,7 +180,6 @@ class Mascota:
 
     def getVacunasSuministradas(self):
         return self.tablaMedica.getVacunasSuministradas()
-
 
     #metodos de subida para tabla
 

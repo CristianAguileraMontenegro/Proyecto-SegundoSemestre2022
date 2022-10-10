@@ -38,9 +38,9 @@ class TablaMedica:
             #self.fichas.append(fichaMedica)
 
 
-    def guardarTablaEnBaseDeDatos(self, myCursor, dB):
-        sql = "INSERT INTO tablamedica values (%s)"
-        myCursor.execute(sql, (str(self.id),))
+    def guardarTablaEnBaseDeDatos(self, myCursor, dB, idVeterinaria, nombreVeterinaria, idMascota):
+        sql = "INSERT INTO tablamedica values (%s, %s, %s, %s)"
+        myCursor.execute(sql, (str(self.id), str(idMascota), str(idVeterinaria), str(nombreVeterinaria)))
         dB.commit()
 
     def agregarFichaMedicaConsultaATabla(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, myCursor, dB):
@@ -83,6 +83,7 @@ class TablaMedica:
                 ficha.setSucursalVeterinaria(fichas[0][2])
                 ficha.setVeterinarioACargo(fichas[0][3])
                 ficha.setOperacion(fichas[0][5])
+                print("86 : "+fichas[0][6])
                 ficha.setFrecRespiratoria(fichas[0][6])
                 ficha.setFrecCardiaca(fichas[0][7])
                 ficha.setPeso(fichas[0][8])
@@ -107,7 +108,6 @@ class TablaMedica:
                 ficha.solicitarMedicamentosConsultaEnBaseDeDatos(myCursor)
                 ficha.solicitarVacunacionEnBaseDeDatos(myCursor)
                 ficha.solicitarTratamientosConsultaBaseDeDatos(myCursor)
-
                 break
 
     def guardarFichaGeneralEnBaseDeDatos(self, fichaMedicaConsulta:FichaMedica, myCursor, dB):
@@ -411,7 +411,6 @@ class TablaMedica:
     def getMedicamentosConsulta(self, idFicha):
         for ficha in self.fichas:
             if(ficha.getId() == idFicha):
-                print("371 tablaMedica "+str(ficha.getMedicamentosConsulta()))
                 return ficha.getMedicamentosConsulta()
 
     def getOperacion(self, idFicha):

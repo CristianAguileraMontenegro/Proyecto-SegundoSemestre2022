@@ -49,7 +49,6 @@ class FichaMedica:
             self.temperatura = args[11]
 
             self.operacion = args[4] #indicar boolean
-            print(str(self.operacion)+"52 ficha")
             self.operacionFicha = None #diccionario
             self.hospitalizacion = args[9] #indicar boolean
             self.hospitalizacionFicha = None #diccionario
@@ -380,7 +379,6 @@ class FichaMedica:
             medicamentosArray.append(med)
         
         self.medicamentosConsulta = medicamentosArray
-        print("383 Fichamedica "+str(self.getMedicamentosConsulta()))
 
     def guardarMedicamentosConsultaEnBaseDeDatos(self, myCursor, dB): 
         for medicamento in self.getMedicamentosConsulta():
@@ -391,7 +389,7 @@ class FichaMedica:
     def actualizarMedicamentosConsultaEnBaseDeDatos(self, medicamentos, myCursor, dB): 
         for medicamento in medicamentos:
             sql = 'UPDATE MedicamentosConsulta SET nombreMedicamentos = %s WHERE idMedicamentosConsulta = %s' #(idMedicamentosConsulta, nombreMedicamentos, FichaMedica_idFichaMedica, FichaMedica_TablaMedica_idTablaMedica) 
-            myCursor.execute(sql, (str(medicamento['nomMedicamento']), str(self.getId())))
+            myCursor.execute(sql, (str(medicamento['nomMedicamento']), str(medicamento['id'])))
             dB.commit()
         
         self.medicamentosConsulta = medicamentos
@@ -429,8 +427,9 @@ class FichaMedica:
     
     def actualizarVacunasConsultaEnBaseDeDatos(self, vacunas, myCursor, dB): 
         for vacuna in vacunas:
+            print("430 :"+str(vacuna))
             sql = 'UPDATE vacunassuministradasconsulta SET nombreVacuna = %s WHERE idVacunasSuministradas = %s' #(idMedicamentosConsulta, nombreMedicamentos, FichaMedica_idFichaMedica, FichaMedica_TablaMedica_idTablaMedica) 
-            myCursor.execute(sql, (str(vacuna['nomVacuna']), str(self.getId())))
+            myCursor.execute(sql, (str(vacuna['nomVacuna']), str(vacuna['id'])))
             dB.commit()
         
         self.vacunasSuministradasConsulta = vacunas

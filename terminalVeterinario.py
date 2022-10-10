@@ -23,7 +23,7 @@ db = mysql.connector.connect(
     port='3306'
 )
 
-mycursor = db.cursor()
+mycursor = db.cursor(buffered=True)
 
 if __name__ != "__main__":
     class Terminal:
@@ -39,6 +39,7 @@ if __name__ != "__main__":
             self.calendaio = Calendario()
 
             self.validarTokenDeActivacion()
+            
 
             if (self.tokenActivacion == True):
                 # De ser el caso que el token esta ya activado, se instancian aquí, debido a que actToken no se llamará
@@ -46,23 +47,25 @@ if __name__ != "__main__":
 
                 self.setIdVeterinaria()
                 self.setNombreVeterinaria()
-                
                 self.setMascotas()
-                self.setCalendario()
+                self.setCalendario() #las veterinarias tendran calendario independiente de si tienen o no pacientes
 
         def setIdVeterinaria(self):
+            db.commit()
             sql = 'SELECT Veterinaria_idVeterinaria FROM TerminalVeterinario WHERE idTerminalVeterinario = (%s)'
             mycursor.execute(sql, (str(self.id),))
             idVet = mycursor.fetchone()
             self.idVeterinaria = idVet[0]
 
         def setNombreVeterinaria(self):
+            db.commit()
             sql = 'SELECT Veterinaria_nombreVeterinaria FROM TerminalVeterinario WHERE idTerminalVeterinario = (%s)'
             mycursor.execute(sql, (str(self.id),))
             nombreVet = mycursor.fetchone()
             self.nombreVeterinaria = nombreVet[0]
         
         def setMascotas(self):
+            db.commit()
             sql = 'SELECT Mascota_idMascota FROM Mascota_has_TerminalVeterinario as maste join terminalveterinario as termi on termi.IdTerminalVeterinario = maste.TerminalVeterinario_idTerminalVeterinario join veterinaria as veti on veti.idVeterinaria = termi.Veterinaria_idVeterinaria WHERE veti.idVeterinaria = (%s)'
             mycursor.execute(sql, (str(self.idVeterinaria),))
             ids = mycursor.fetchall()
@@ -76,9 +79,8 @@ if __name__ != "__main__":
             self.mascotasExternas.append(mascotalol)
             self.setMascotaEspecifica(idMascota, mascotalol)
 
-
-        
         def setMascotaOtraVeterinariaBeta(self, idMascota):
+            db.commit()
             sql = 'SELECT idMascota FROM mascota WHERE idMascota = (%s)'
             mycursor.execute(sql, (str(self.idVeterinaria),))
             ids = mycursor.fetchall()
@@ -93,19 +95,33 @@ if __name__ != "__main__":
             #mycursor.execute(sql, (str(ids[i][0]),))
             #resultado = mycursor.fetchone()
 
-            print(str(idMascota)+" el id del se5t")
+            db.commit()
 
             sql = 'SELECT * FROM Mascota WHERE idMascota = (%s)' #"obtenemos todoas los demas datos de la mascota"
             mycursor.execute(sql, (str(idMascota),))
             resultadoMascota = mycursor.fetchone()
 
-            print(str(resultadoMascota))
+            mascota.setNombreMascota(resultadoMascota[1])
+            mascota.setEspecie(resultadoMascota[2])
+            mascota.setColorMascota(resultadoMascota[3])
+            mascota.setRaza(resultadoMascota[4])
+            mascota.setNombreTutor(resultadoMascota[5])
+            mascota.setRutTutor(resultadoMascota[6])
+            mascota.setNumeroTelefono(resultadoMascota[7])
+            mascota.setDireccion(resultadoMascota[8])
+
+            sql = 'SELECT idTablaMedica FROM TablaMedica WHERE Veterinaria_idVeterinaria = %s AND Veterinaria_nombreVeterinaria = %s AND Mascota_idMascota = %s' #"obtenemos todoas los demas datos de la mascota"
+            mycursor.execute(sql, (str(self.idVeterinaria), str(self.nombreVeterinaria) ,str(idMascota)))
+            ResultadoTabla = mycursor.fetchone()
+
+            mascota.agregarTablaMedica(ResultadoTabla[0])
+
             sql = 'SELECT * FROM RegistroDeOperaciones WHERE TablaMedica_idTablaMedica = (%s)'
-            mycursor.execute(sql, (str(resultadoMascota[9]),)) #el numero 9 representa el campo 10 de la tabla de mascotas = id tabla medica 
+            mycursor.execute(sql, (str(ResultadoTabla[0]),)) #el numero 9 representa el campo 10 de la tabla de mascotas = id tabla medica 
             registroOp = mycursor.fetchall()
 
             sql = 'SELECT * FROM RegistroVacunasSuministradas WHERE TablaMedica_idTablaMedica = (%s)'
-            mycursor.execute(sql, (str(resultadoMascota[9]),))
+            mycursor.execute(sql, (str(ResultadoTabla[0]),))
             registroVac = mycursor.fetchall()
 
             vacunasFinal = []##arreglo donde se almacena el diccionario de vacunas
@@ -119,7 +135,7 @@ if __name__ != "__main__":
                 vacunasFinal.append(vacunaDicc)
 
             sql = 'SELECT * FROM Alergias WHERE TablaMedica_idTablaMedica = (%s)'
-            mycursor.execute(sql, (str(resultadoMascota[9]),))
+            mycursor.execute(sql, (str(ResultadoTabla[0]),))
             alergiasEntregar = mycursor.fetchall()
 
             alergiaFinal = []##arreglo donde se almacena el diccionario de alergias
@@ -142,41 +158,14 @@ if __name__ != "__main__":
                 }
                 registroOperacionesFinal.append(operacionesDicc)
             
-            
-                
-            #tablaEntregar = TablaMedica(resultadoMascota[9])
-
-            #self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, tablaMedica
-            
-            mascota.setNombreMascota(resultadoMascota[1])
-            mascota.setEspecie(resultadoMascota[2])
-            mascota.setColorMascota(resultadoMascota[3])
-            mascota.setRaza(resultadoMascota[4])
-            mascota.setNombreTutor(resultadoMascota[5])
-            mascota.setRutTutor(resultadoMascota[6])
-            mascota.setNumeroTelefono(resultadoMascota[7])
-            mascota.setDireccion(resultadoMascota[8])
-            mascota.agregarTablaMedica(resultadoMascota[9])
-            
-            #mascotaEncontrada= Mascota(resultadoMascota[0], resultadoMascota[1], resultadoMascota[2], resultadoMascota[3], resultadoMascota[4], resultadoMascota[5], resultadoMascota[6],
-            #                                resultadoMascota[7], resultadoMascota[8], tablaEntregar)
-
             mascota.setAlergias(alergiaFinal)
-            print("192 :"+str(mascota.getAlergias()))
             mascota.setRegistroDeVacunas(vacunasFinal)
             mascota.setRegistroDeOperaciones(registroOperacionesFinal)
             mascota.solicitarFichasParcialesEnBaseDeDatos(mycursor)
             
-            #tablaEntregar.setAlergias(alergiaFinal)
-            #tablaEntregar.setRegistroDeVacunas(vacunasFinal)
-            #tablaEntregar.setRegistroDeOperaciones(registroOperacionesFinal)
-                
-            #tablaEntregar.solicitarFichasEnBaseDeDatos()#solicitamos las fichas correspondientes a la tabla, si embargo solo se solicitan los datos necesarios como fecha e id para realizar consultas mas rapidamente
-                #print(str(tablaEntregar.getIdsFichas()))
-
-            
         
         def setCalendario(self):
+            db.commit()
             sql = 'SELECT idCalendario FROM calendario WHERE (Veterinaria_idVeterinaria, Veterinaria_nombreVeterinaria) = (%s, %s)'
             mycursor.execute(sql, (str(self.idVeterinaria), str(self.nombreVeterinaria)))
             Resultado = mycursor.fetchone()
@@ -216,6 +205,12 @@ if __name__ != "__main__":
         def agregarDatosAFechasCalendario(self, fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados):
             self.calendaio.agregarDatosAFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados, mycursor, db)
         
+        def editarDatosDeFecha(self, fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados, cita):
+            self.calendaio.editarDatosDeFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados, cita, mycursor, db)
+        
+        def getDatosAEditar(self, fechaSeleccionada, cita):
+            return self.calendaio.getDatosAEditar(fechaSeleccionada, cita)
+        
         def agregarMascota(self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, alergias, tablaMedica, fechaNacimiento):
             mascotaNueva = Mascota(id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, tablaMedica,  fechaNacimiento)
 
@@ -232,16 +227,36 @@ if __name__ != "__main__":
                 }
                 alergiasFinal.append(alergiaDicc)
 
-            mascotaNueva.guardarTablaEnBaseDeDatos(mycursor, db)
+            mascotaNueva.agregarMascotaEnBaseDeDatos(mycursor, db)    
+
+            mascotaNueva.guardarTablaEnBaseDeDatos(mycursor, db, self.idVeterinaria, self.nombreVeterinaria, id)
             
             mascotaNueva.setAlergiasBas(alergiasFinal, mycursor, db)
 
-            mascotaNueva.agregarMascotaEnBaseDeDatos(mycursor, db) 
-
             mascotaNueva.agregarTablaMascota(self.id, mycursor, db)
+        
+        def agregarMascotaDesdeAbstract(self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, alergias, tablaMedica, fechaNacimiento):
+            mascotaNueva = Mascota(id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, tablaMedica,  fechaNacimiento)
+
+            self.mascotas.append(mascotaNueva)
+
+            alergiasArray = alergias.split(';')
+            alergiaDicc = {}
+            alergiasFinal = []
+            for alergia in alergiasArray:
+                idAlergia = str(uuid.uuid4())
+                alergiaDicc = {
+                    'id':idAlergia,
+                    'nombre':alergia
+                }
+                alergiasFinal.append(alergiaDicc)
+
+        
+            mascotaNueva.guardarTablaEnBaseDeDatos(mycursor, db, self.idVeterinaria, self.nombreVeterinaria, id)
+            mascotaNueva.setAlergias(alergiasFinal)
             
         def editarMascota(self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, alergias, fechaNacimiento):
-
+            db.commit()
             for mascota in self.mascotas:
                 if (mascota.getId == id):
 
@@ -340,7 +355,6 @@ if __name__ != "__main__":
                     break
         
         def editarFichaMedica(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, idMascota, tratamientos, causaVisita, medicamentos, vacunas, fechaModificacion):
-            
             for mascota in self.mascotas:
                 if mascota.getId() == idMascota:
 
@@ -389,14 +403,13 @@ if __name__ != "__main__":
                     break
 
         def completarFichaParcial(self, idMascota, idFicha):
+            db.commit()
             for mascota in self.mascotas:
-                print("307 terminalveterinario "+str(mascota.getId()))
                 if mascota.getId() == idMascota:
-                    
                     mascota.completarFichaParcial(idFicha, mycursor)
         
         def completarFichaParcialMascotasExternas(self, idMascota, idFicha):
-            #medicamentos = []
+            db.commit()
             for mascota in self.mascotasExternas:
 
                 if mascota.getId() == idMascota:
@@ -464,22 +477,29 @@ if __name__ != "__main__":
 
 
         def buscarMascotaRemota(self, idMascotaBuscada):
+            db.commit()
             sql = 'SELECT * FROM mascota WHERE idMascota = (%s)' #muestra informacion bascia buscar 
             mycursor.execute(sql, (idMascotaBuscada,))
             resultadoMascota = mycursor.fetchone()
-
+            flagMascota = False
             
             if(resultadoMascota != None):
                 
                 for mascota in self.mascotas: #indica que la mascota pertenece a la veterinraia actual
                     if(mascota.getId() == str(idMascotaBuscada)): #si se encuentra se cargan los datos restantes
-                        print("Estoy en remoto "+ str(resultadoMascota))
+                        flagMascota = True
+                        sql = 'SELECT idTablaMedica FROM TablaMedica WHERE Veterinaria_idVeterinaria = %s AND Veterinaria_nombreVeterinaria = %s AND Mascota_idMascota = %s' #"obtenemos todoas los demas datos de la mascota"
+                        mycursor.execute(sql, (str(self.idVeterinaria), str(self.nombreVeterinaria) ,str(idMascotaBuscada)))
+                        ResultadoTabla = mycursor.fetchone()
+
+                        mascota.agregarTablaMedica(ResultadoTabla[0])
+
                         sql = 'SELECT * FROM RegistroDeOperaciones WHERE TablaMedica_idTablaMedica = (%s)'
-                        mycursor.execute(sql, (str(resultadoMascota[9]),)) #el numero 9 representa el campo 10 de la tabla de mascotas = id tabla medica 
+                        mycursor.execute(sql, (str(ResultadoTabla[0]),)) #el numero 9 representa el campo 10 de la tabla de mascotas = id tabla medica 
                         registroOp = mycursor.fetchall()
 
                         sql = 'SELECT * FROM RegistroVacunasSuministradas WHERE TablaMedica_idTablaMedica = (%s)'
-                        mycursor.execute(sql, (str(resultadoMascota[9]),))
+                        mycursor.execute(sql, (str(ResultadoTabla[0]),))
                         registroVac = mycursor.fetchall()
 
                         vacunasFinal = []##arreglo donde se almacena el diccionario de vacunas
@@ -493,7 +513,7 @@ if __name__ != "__main__":
                             vacunasFinal.append(vacunaDicc)
 
                         sql = 'SELECT * FROM Alergias WHERE TablaMedica_idTablaMedica = (%s)'
-                        mycursor.execute(sql, (str(resultadoMascota[9]),))
+                        mycursor.execute(sql, (str(ResultadoTabla[0]),))
                         alergiasEntregar = mycursor.fetchall()
 
                         alergiaFinal = []##arreglo donde se almacena el diccionario de alergias
@@ -505,6 +525,7 @@ if __name__ != "__main__":
                                 'nombre':alergia[1]
                             }
                             alergiaFinal.append(alergiaDicc)
+                        
 
                         registroOperacionesFinal = []##arreglo donde se almacena el diccionario de registro de Operaciones
                         operacionesDicc = {}
@@ -526,7 +547,7 @@ if __name__ != "__main__":
                         mascota.setRutTutor(resultadoMascota[6])
                         mascota.setNumeroTelefono(resultadoMascota[7])
                         mascota.setDireccion(resultadoMascota[8])
-                        mascota.agregarTablaMedica(resultadoMascota[9])
+                        mascota.setFechaNacimiento(resultadoMascota[9])
                         
                         #mascotaEncontrada= Mascota(resultadoMascota[0], resultadoMascota[1], resultadoMascota[2], resultadoMascota[3], resultadoMascota[4], resultadoMascota[5], resultadoMascota[6],
                         #                                resultadoMascota[7], resultadoMascota[8], tablaEntregar)
@@ -539,15 +560,22 @@ if __name__ != "__main__":
                         print("dentro de remoto lol")
                         return mascota
                 
-                if(len(self.mascotas) == 0):
+                if((len(self.mascotas) == 0) or flagMascota == False):
+                        print("563 "+str(resultadoMascota))
                         mascota = Mascota(idMascotaBuscada)
 
+                        sql = 'SELECT idTablaMedica FROM TablaMedica WHERE Mascota_idMascota = %s' #"obtenemos todoas los demas datos de la mascota"
+                        mycursor.execute(sql, (str(idMascotaBuscada),))
+                        ResultadoTabla = mycursor.fetchone()
+
+                        mascota.agregarTablaMedica(ResultadoTabla[0])
+
                         sql = 'SELECT * FROM RegistroDeOperaciones WHERE TablaMedica_idTablaMedica = (%s)'
-                        mycursor.execute(sql, (str(resultadoMascota[9]),)) #el numero 9 representa el campo 10 de la tabla de mascotas = id tabla medica 
+                        mycursor.execute(sql, (str(ResultadoTabla[0]),)) #el numero 9 representa el campo 10 de la tabla de mascotas = id tabla medica 
                         registroOp = mycursor.fetchall()
 
                         sql = 'SELECT * FROM RegistroVacunasSuministradas WHERE TablaMedica_idTablaMedica = (%s)'
-                        mycursor.execute(sql, (str(resultadoMascota[9]),))
+                        mycursor.execute(sql, (str(ResultadoTabla[0]),))
                         registroVac = mycursor.fetchall()
 
                         vacunasFinal = []##arreglo donde se almacena el diccionario de vacunas
@@ -561,7 +589,7 @@ if __name__ != "__main__":
                             vacunasFinal.append(vacunaDicc)
 
                         sql = 'SELECT * FROM Alergias WHERE TablaMedica_idTablaMedica = (%s)'
-                        mycursor.execute(sql, (str(resultadoMascota[9]),))
+                        mycursor.execute(sql, (str(ResultadoTabla[0]),))
                         alergiasEntregar = mycursor.fetchall()
 
                         alergiaFinal = []##arreglo donde se almacena el diccionario de alergias
@@ -573,6 +601,7 @@ if __name__ != "__main__":
                                 'nombre':alergia[1]
                             }
                             alergiaFinal.append(alergiaDicc)
+                        
 
                         registroOperacionesFinal = []##arreglo donde se almacena el diccionario de registro de Operaciones
                         operacionesDicc = {}
@@ -594,7 +623,7 @@ if __name__ != "__main__":
                         mascota.setRutTutor(resultadoMascota[6])
                         mascota.setNumeroTelefono(resultadoMascota[7])
                         mascota.setDireccion(resultadoMascota[8])
-                        mascota.agregarTablaMedica(resultadoMascota[9])
+                        mascota.setFechaNacimiento(resultadoMascota[9])
                         
                         #mascotaEncontrada= Mascota(resultadoMascota[0], resultadoMascota[1], resultadoMascota[2], resultadoMascota[3], resultadoMascota[4], resultadoMascota[5], resultadoMascota[6],
                         #                                resultadoMascota[7], resultadoMascota[8], tablaEntregar)
@@ -635,7 +664,7 @@ if __name__ != "__main__":
                 for mascota in self.mascotas:
                     if(mascota.getId() == str(idMascotaBuscada)):
                         flagMascotaEnc = True
-                
+                print("codigo dentro de terminal 665 :"+ str(flagMascotaEnc))
                 if(flagMascotaEnc):
                     mascotaBuscada = self.buscarMascotaLocal(idMascotaBuscada)
                     print(str(mascotaBuscada.getId()))
@@ -646,10 +675,12 @@ if __name__ != "__main__":
                     mascotaBuscada = self.buscarMascotaRemota(idMascotaBuscada)
                     print(str(mascotaBuscada))
                     if(mascotaBuscada != None):
+
                         listRetorno.append(mascotaRemote)
                         listRetorno.append(idMascotaBuscada)
                         return listRetorno
                 
+                db.commit()
                 sql = 'SELECT idMascota FROM mascota WHERE idMascota = (%s)'
                 mycursor.execute(sql, (idMascotaBuscada,))
                 resultado = mycursor.fetchone()
@@ -674,7 +705,7 @@ if __name__ != "__main__":
         def validarLlaveConServidor(self, llaveEntrada):
 
             #uic.loadUi("Proyecto-PetRecord/Complementos/AbstracMedico.ui", self)
-
+            db.commit()
             if(llaveEntrada == ''):
                  return False
 
@@ -706,6 +737,7 @@ if __name__ != "__main__":
             self.setIdVeterinaria()
             self.setNombreVeterinaria()
             self.setMascotas()
+            self.setCalendario()
         
         def validarTokenDeActivacion(self):
             
@@ -736,6 +768,7 @@ if __name__ != "__main__":
                     return str(idRand)
 
         def getDatosBasicosMascota(self, idMascota):
+            db.commit()
             sql = 'SELECT * FROM mascota WHERE idMascota = (%s)' #muestra informacion bascia buscar 
             mycursor.execute(sql, (idMascota,))
             resultado = mycursor.fetchone()
