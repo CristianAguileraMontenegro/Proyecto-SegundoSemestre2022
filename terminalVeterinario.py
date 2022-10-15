@@ -70,24 +70,13 @@ if __name__ != "__main__":
             mycursor.execute(sql, (str(self.idVeterinaria),))
             ids = mycursor.fetchall()
             for i in range(len(ids)):
-                print("67 terminal")
+                print("67 terminal :"+str(ids[i][0]))
                 mascotalol= Mascota(str(ids[i][0]))
                 self.mascotas.append(mascotalol)
         
         def setMascotaOtraVeterinaria(self, idMascota):
             mascotalol= Mascota(str(idMascota))
-            self.mascotasExternas.append(mascotalol)
-            self.setMascotaEspecifica(idMascota, mascotalol)
-
-        def setMascotaOtraVeterinariaBeta(self, idMascota):
-            db.commit()
-            sql = 'SELECT idMascota FROM mascota WHERE idMascota = (%s)'
-            mycursor.execute(sql, (str(self.idVeterinaria),))
-            ids = mycursor.fetchall()
-            for i in range(len(ids)):
-                print("67 terminal")
-                mascotalol= Mascota(str(ids[i][0]))
-                self.mascotas.append(mascotalol)
+            self.mascotas.append(mascotalol)
         
         def setMascotaEspecifica(self, idMascota, mascota:Mascota):
 
@@ -109,6 +98,7 @@ if __name__ != "__main__":
             mascota.setRutTutor(resultadoMascota[6])
             mascota.setNumeroTelefono(resultadoMascota[7])
             mascota.setDireccion(resultadoMascota[8])
+            mascota.setFechaNacimiento(resultadoMascota[9])
 
             sql = 'SELECT idTablaMedica FROM TablaMedica WHERE Veterinaria_idVeterinaria = %s AND Veterinaria_nombreVeterinaria = %s AND Mascota_idMascota = %s' #"obtenemos todoas los demas datos de la mascota"
             mycursor.execute(sql, (str(self.idVeterinaria), str(self.nombreVeterinaria) ,str(idMascota)))
@@ -162,55 +152,18 @@ if __name__ != "__main__":
             mascota.setRegistroDeVacunas(vacunasFinal)
             mascota.setRegistroDeOperaciones(registroOperacionesFinal)
             mascota.solicitarFichasParcialesEnBaseDeDatos(mycursor)
-            
         
-        def setCalendario(self):
-            db.commit()
-            sql = 'SELECT idCalendario FROM calendario WHERE (Veterinaria_idVeterinaria, Veterinaria_nombreVeterinaria) = (%s, %s)'
-            mycursor.execute(sql, (str(self.idVeterinaria), str(self.nombreVeterinaria)))
-            Resultado = mycursor.fetchone()
-            print("181 termianl "+str(Resultado))
-            if(Resultado == None):
-                self.crearCalendario()
-            else:
-                self.calendaio.setId(Resultado[0])
-                self.solicitarDatosCalendarioBaseDeDatos()
 
-        def crearCalendario(self):
-            idCalendario = (uuid.uuid4())
-            sql = 'INSERT INTO calendario VALUES (%s, %s, %s)'
-            mycursor.execute(sql, (str(idCalendario), str(self.idVeterinaria), str(self.nombreVeterinaria)))
-            db.commit()
-
-            self.calendaio.setId(idCalendario)
+        def getMascota(self, idMascota):
+            for mascota in self.mascotas:
+                if((mascota.getId() == str(idMascota))): 
+                    return mascota
         
-        def solicitarDatosCalendarioBaseDeDatos(self):
-            self.calendaio.solicitarDatosCalendarioBaseDeDatos(mycursor)
-        
-        def getIdCalendario(self):
-            return self.calendaio.getId()
-        
-        def getFechasCalendario(self):
-            return self.calendaio.getFechas()
-        
-        def getFechaCalendario(self, fechaSeleccionada):
-            return self.calendaio.getFecha(fechaSeleccionada)
-        
-        def verificarFechaCalendario(self, fecha):
-            return self.calendaio.verificarFecha(fecha)
-        
-        def agregarFechasCalendario(self, fechas):
-            self.calendaio.agregarFechas(fechas,mycursor, db)
-        
-        def agregarDatosAFechasCalendario(self, fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados):
-            self.calendaio.agregarDatosAFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados, mycursor, db)
-        
-        def editarDatosDeFecha(self, fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados, cita):
-            self.calendaio.editarDatosDeFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados, cita, mycursor, db)
-        
-        def getDatosAEditar(self, fechaSeleccionada, cita):
-            return self.calendaio.getDatosAEditar(fechaSeleccionada, cita)
-        
+        def getMascotaExterna(self, idMascota):
+            for mascota in self.mascotasExternas:
+                if((mascota.getId() == str(idMascota))): 
+                    return mascota
+                                                    
         def agregarMascota(self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, alergias, tablaMedica, fechaNacimiento):
             mascotaNueva = Mascota(id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, tablaMedica,  fechaNacimiento)
 
@@ -235,25 +188,46 @@ if __name__ != "__main__":
 
             mascotaNueva.agregarTablaMascota(self.id, mycursor, db)
         
-        def agregarMascotaDesdeAbstract(self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, alergias, tablaMedica, fechaNacimiento):
-            mascotaNueva = Mascota(id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, tablaMedica,  fechaNacimiento)
+        def verificarPresenciaDeTablaDeMascota(self, idMascota):
 
-            self.mascotas.append(mascotaNueva)
+            sql = 'SELECT idTablaMedica FROM TablaMedica WHERE Veterinaria_idVeterinaria = %s AND Veterinaria_nombreVeterinaria = %s AND Mascota_idMascota = %s' #"obtenermos el id de la tablaMedica para verificar si la macota ya posee una en la veterinaira actual"
+            mycursor.execute(sql, (str(self.idVeterinaria), str(self.nombreVeterinaria) ,str(idMascota)))
+            ResultadoTabla = mycursor.fetchone()
 
-            alergiasArray = alergias.split(';')
-            alergiaDicc = {}
-            alergiasFinal = []
-            for alergia in alergiasArray:
-                idAlergia = str(uuid.uuid4())
-                alergiaDicc = {
-                    'id':idAlergia,
-                    'nombre':alergia
-                }
-                alergiasFinal.append(alergiaDicc)
-
+            return ResultadoTabla
         
-            mascotaNueva.guardarTablaEnBaseDeDatos(mycursor, db, self.idVeterinaria, self.nombreVeterinaria, id)
-            mascotaNueva.setAlergias(alergiasFinal)
+        def agregarMascotaDesdeAbstractPrimeraVez(self, idMascota, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, alergias, tablaMedicaId, fechaNacimiento):
+
+            for mascota in self.mascotas:
+                if((mascota.getId() == str(idMascota))):
+                    
+                    mascota.setNombreMascota(nombre)
+                    mascota.setEspecie(especie)
+                    mascota.setColorMascota(color)
+                    mascota.setRaza(raza)
+                    mascota.setNombreTutor(nombreTutor)
+                    mascota.setRutTutor(rutTutor)
+                    mascota.setNumeroTelefono(numeroTelefono)
+                    mascota.setDireccion(direccion)
+                    mascota.setFechaNacimiento(fechaNacimiento)
+
+                    alergiasArray = alergias.split(';')
+                    alergiaDicc = {}
+                    alergiasFinal = []
+                    for alergia in alergiasArray:
+                        idAlergia = str(uuid.uuid4())
+                        alergiaDicc = {
+                            'id':idAlergia,
+                            'nombre':alergia
+                        }
+                        alergiasFinal.append(alergiaDicc)
+
+                   
+                    mascota.agregarTablaMedica(tablaMedicaId) 
+                    mascota.guardarTablaEnBaseDeDatos(mycursor, db, self.idVeterinaria, self.nombreVeterinaria, idMascota)
+                    mascota.setAlergias(alergiasFinal)
+                    break
+            
             
         def editarMascota(self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, alergias, fechaNacimiento):
             db.commit()
@@ -485,85 +459,26 @@ if __name__ != "__main__":
             
             if(resultadoMascota != None):
                 
-                for mascota in self.mascotas: #indica que la mascota pertenece a la veterinraia actual
-                    if(mascota.getId() == str(idMascotaBuscada)): #si se encuentra se cargan los datos restantes
-                        flagMascota = True
-                        sql = 'SELECT idTablaMedica FROM TablaMedica WHERE Veterinaria_idVeterinaria = %s AND Veterinaria_nombreVeterinaria = %s AND Mascota_idMascota = %s' #"obtenemos todoas los demas datos de la mascota"
-                        mycursor.execute(sql, (str(self.idVeterinaria), str(self.nombreVeterinaria) ,str(idMascotaBuscada)))
-                        ResultadoTabla = mycursor.fetchone()
+                return True
+            else:
+                return False
 
-                        mascota.agregarTablaMedica(ResultadoTabla[0])
-
-                        sql = 'SELECT * FROM RegistroDeOperaciones WHERE TablaMedica_idTablaMedica = (%s)'
-                        mycursor.execute(sql, (str(ResultadoTabla[0]),)) #el numero 9 representa el campo 10 de la tabla de mascotas = id tabla medica 
-                        registroOp = mycursor.fetchall()
-
-                        sql = 'SELECT * FROM RegistroVacunasSuministradas WHERE TablaMedica_idTablaMedica = (%s)'
-                        mycursor.execute(sql, (str(ResultadoTabla[0]),))
-                        registroVac = mycursor.fetchall()
-
-                        vacunasFinal = []##arreglo donde se almacena el diccionario de vacunas
-                        vacunaDicc = {}
-                            
-                        for vacuna in registroVac:
-                            vacunaDicc = {
-                                'id':vacuna[0],
-                                'nomVacuna':vacuna[1]
-                            }
-                            vacunasFinal.append(vacunaDicc)
-
-                        sql = 'SELECT * FROM Alergias WHERE TablaMedica_idTablaMedica = (%s)'
-                        mycursor.execute(sql, (str(ResultadoTabla[0]),))
-                        alergiasEntregar = mycursor.fetchall()
-
-                        alergiaFinal = []##arreglo donde se almacena el diccionario de alergias
-                        alergiaDicc = {}
-                            
-                        for alergia in alergiasEntregar:
-                            alergiaDicc = {
-                                'id':alergia[0],
-                                'nombre':alergia[1]
-                            }
-                            alergiaFinal.append(alergiaDicc)
-                        
-
-                        registroOperacionesFinal = []##arreglo donde se almacena el diccionario de registro de Operaciones
-                        operacionesDicc = {}
-                        for operacion in registroOp:
-                            operacionesDicc = {
-                                'id':operacion[0],
-                                'operacion':operacion[1]
-                            }
-                            registroOperacionesFinal.append(operacionesDicc)
-                            
-                        #tablaEntregar = TablaMedica(resultadoMascota[9])
-
-                        #self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, tablaMedica
-                        mascota.setNombreMascota(resultadoMascota[1])
-                        mascota.setEspecie(resultadoMascota[2])
-                        mascota.setColorMascota(resultadoMascota[3])
-                        mascota.setRaza(resultadoMascota[4])
-                        mascota.setNombreTutor(resultadoMascota[5])
-                        mascota.setRutTutor(resultadoMascota[6])
-                        mascota.setNumeroTelefono(resultadoMascota[7])
-                        mascota.setDireccion(resultadoMascota[8])
-                        mascota.setFechaNacimiento(resultadoMascota[9])
-                        
-                        #mascotaEncontrada= Mascota(resultadoMascota[0], resultadoMascota[1], resultadoMascota[2], resultadoMascota[3], resultadoMascota[4], resultadoMascota[5], resultadoMascota[6],
-                        #                                resultadoMascota[7], resultadoMascota[8], tablaEntregar)
-
-                        mascota.setAlergias(alergiaFinal)
-                        mascota.setRegistroDeVacunas(vacunasFinal)
-                        mascota.setRegistroDeOperaciones(registroOperacionesFinal)
-                        mascota.solicitarFichasParcialesEnBaseDeDatos(mycursor)
-
-                        print("dentro de remoto lol")
-                        return mascota
-                
-                if((len(self.mascotas) == 0) or flagMascota == False):
-                        print("563 "+str(resultadoMascota))
-                        mascota = Mascota(idMascotaBuscada)
-
+        def agregarMascotaRemota(self, idMascotaBuscada):
+            mascota = Mascota(idMascotaBuscada)
+            self.mascotasExternas.append(mascota)
+            return mascota
+            
+        
+        def buscarMascotaRemota2(self, idMascotaBuscada):
+            db.commit()
+            sql = 'SELECT * FROM mascota WHERE idMascota = (%s)' #muestra informacion bascia buscar 
+            mycursor.execute(sql, (idMascotaBuscada,))
+            resultadoMascota = mycursor.fetchone()
+            flagMascota = False
+            
+            if(resultadoMascota != None):
+                for mascota in self.mascotasExternas:
+                    
                         sql = 'SELECT idTablaMedica FROM TablaMedica WHERE Mascota_idMascota = %s' #"obtenemos todoas los demas datos de la mascota"
                         mycursor.execute(sql, (str(idMascotaBuscada),))
                         ResultadoTabla = mycursor.fetchone()
@@ -592,6 +507,8 @@ if __name__ != "__main__":
                         mycursor.execute(sql, (str(ResultadoTabla[0]),))
                         alergiasEntregar = mycursor.fetchall()
 
+                        print("726 terminal"+str(alergiasEntregar)+":"+str(ResultadoTabla[0]))
+
                         alergiaFinal = []##arreglo donde se almacena el diccionario de alergias
                         alergiaDicc = {}
                             
@@ -632,10 +549,7 @@ if __name__ != "__main__":
                         mascota.setRegistroDeVacunas(vacunasFinal)
                         mascota.setRegistroDeOperaciones(registroOperacionesFinal)
                         mascota.solicitarFichasParcialesEnBaseDeDatos(mycursor)
-                        self.mascotasExternas.append(mascota)
 
-                        return mascota
-                
 
         def buscarMascotaLocal(self, idMascota):
             mascotaEncontrada:Mascota = None
@@ -644,12 +558,16 @@ if __name__ != "__main__":
             for mascota in self.mascotas:
                 
                 if((mascota.getId() == str(idMascota))): #si se encuentra se cargan los datos restantes
-                    self.setMascotaEspecifica(idMascota, mascota)
-                    mascotaEncontrada = mascota
+                    return True
 
-            return mascotaEncontrada
-
+            return False
         
+        def buscarMascotaLocal2(self, idMascota):
+            for mascota in self.mascotas:
+                if((mascota.getId() == str(idMascota))): #si se encuentra se cargan los datos restantes
+                    self.setMascotaEspecifica(idMascota, mascota)
+
+                
         def verificarMascotaEnSistema(self, codigoMascotaGUI): #debe ser adaptado y modificado para las nuevas screens
             malCodigo = "MalCodigo"
             mascotaLocal = "MascotaLocal"
@@ -667,14 +585,15 @@ if __name__ != "__main__":
                 print("codigo dentro de terminal 665 :"+ str(flagMascotaEnc))
                 if(flagMascotaEnc):
                     mascotaBuscada = self.buscarMascotaLocal(idMascotaBuscada)
-                    print(str(mascotaBuscada.getId()))
-                    listRetorno.append(mascotaLocal)
-                    listRetorno.append(idMascotaBuscada)
-                    return listRetorno
+
+                    if(mascotaBuscada is True):
+                        listRetorno.append(mascotaLocal)
+                        listRetorno.append(idMascotaBuscada)
+                        return listRetorno
+
                 elif(flagMascotaEnc == False):
                     mascotaBuscada = self.buscarMascotaRemota(idMascotaBuscada)
-                    print(str(mascotaBuscada))
-                    if(mascotaBuscada != None):
+                    if(mascotaBuscada is True):
 
                         listRetorno.append(mascotaRemote)
                         listRetorno.append(idMascotaBuscada)
@@ -779,4 +698,54 @@ if __name__ != "__main__":
             for mascota in self.mascotasExternas:
                 if(mascota.getId() == str(idMascota)):
                     return mascota.getMedicamentosConsulta(idFicha)
-                
+        
+        #calendario
+        #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------         
+        def setCalendario(self):
+            db.commit()
+            sql = 'SELECT idCalendario FROM calendario WHERE (Veterinaria_idVeterinaria, Veterinaria_nombreVeterinaria) = (%s, %s)'
+            mycursor.execute(sql, (str(self.idVeterinaria), str(self.nombreVeterinaria)))
+            Resultado = mycursor.fetchone()
+            print("181 termianl "+str(Resultado))
+            if(Resultado == None):
+                self.crearCalendario()
+            else:
+                self.calendaio.setId(Resultado[0])
+                self.solicitarDatosCalendarioBaseDeDatos()
+
+        def crearCalendario(self):
+            idCalendario = (uuid.uuid4())
+            sql = 'INSERT INTO calendario VALUES (%s, %s, %s)'
+            mycursor.execute(sql, (str(idCalendario), str(self.idVeterinaria), str(self.nombreVeterinaria)))
+            db.commit()
+
+            self.calendaio.setId(idCalendario)
+        
+        def solicitarDatosCalendarioBaseDeDatos(self):
+            self.calendaio.solicitarDatosCalendarioBaseDeDatos(mycursor)
+        
+        def getIdCalendario(self):
+            return self.calendaio.getId()
+        
+        def getFechasCalendario(self):
+            return self.calendaio.getFechas()
+        
+        def getFechaCalendario(self, fechaSeleccionada):
+            return self.calendaio.getFecha(fechaSeleccionada)
+        
+        def verificarFechaCalendario(self, fecha):
+            return self.calendaio.verificarFecha(fecha)
+        
+        def agregarFechasCalendario(self, fechas):
+            self.calendaio.agregarFechas(fechas,mycursor, db)
+        
+        def agregarDatosAFechasCalendario(self, fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados):
+            self.calendaio.agregarDatosAFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados, mycursor, db)
+        
+        def editarDatosDeFecha(self, fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados, cita):
+            self.calendaio.editarDatosDeFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados, cita, mycursor, db)
+        
+        def getDatosAEditar(self, fechaSeleccionada, cita):
+            return self.calendaio.getDatosAEditar(fechaSeleccionada, cita)
+
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ 
