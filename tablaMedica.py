@@ -39,6 +39,7 @@ class TablaMedica:
 
 
     def guardarTablaEnBaseDeDatos(self, myCursor, dB, idVeterinaria, nombreVeterinaria, idMascota):
+        print("42 tablaMedica"+str(self.id))
         sql = "INSERT INTO tablamedica values (%s, %s, %s, %s)"
         myCursor.execute(sql, (str(self.id), str(idMascota), str(idVeterinaria), str(nombreVeterinaria)))
         dB.commit()
@@ -68,7 +69,7 @@ class TablaMedica:
     
     def agregarFichaMedicaParcial(self, idFicha, fechaConsulta):
         fichaMedicaConsulta = FichaMedica(idFicha, fechaConsulta)
-        #print(fichaMedicaConsulta.getId())
+        print("71 :"+fichaMedicaConsulta.getId())
         self.fichas.append(fichaMedicaConsulta)
     
     def completarFichaParcial(self, idFicha, myCursor):

@@ -223,9 +223,10 @@ class screenBuscarMascota(ctk.CTkFrame):
         elif(resultado[0]=="MascotaLocal"):
 
             idMascota = resultado[1]
-            datosMascota = terminalVet.getDatosBasicosMascota(idMascota)
+            #datosMascota = terminalVet.getDatosBasicosMascota(idMascota)
 
-            mascotaLol = terminalVet.buscarMascotaLocal(idMascota)
+            mascotaLol = terminalVet.getMascota(idMascota)
+            terminalVet.buscarMascotaLocal2(idMascota)
 
             parent.setMascotaApp(mascotaLol)
             
@@ -245,7 +246,9 @@ class screenBuscarMascota(ctk.CTkFrame):
             idMascota = resultado[1]
             datosMascota = terminalVet.getDatosBasicosMascota(idMascota)
 
-            mascotaLol = terminalVet.buscarMascotaRemota(idMascota)
+            mascotaLol = terminalVet.agregarMascotaRemota(idMascota)
+
+            terminalVet.buscarMascotaRemota2(idMascota)
 
             parent.setMascotaApp(mascotaLol)
             
@@ -2727,20 +2730,34 @@ class screenAbstractMedico(ctk.CTkFrame):
     
     def insetarMascotaEnVeterinariaActual(self, parent, mascotaActual, container):
         
-        tablaMedica = TablaMedica(uuid.uuid4())
+        
         #self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, alergias, tablaMedica, fechaNacimiento
-        alergias = ""
-        for alegia in  mascotaActual.getAlergias():
-            alergias += alergias+str(alegia['nombre'])+';'
+        
 
-        print("2722 gui"+str(mascotaActual.getFechaDeNacimiento()))
-        terminalVet.agregarMascotaDesdeAbstract(mascotaActual.getId(), mascotaActual.getNombreMascota(), mascotaActual.getEspecie(), mascotaActual.getColorMascota(), mascotaActual.getRaza(), mascotaActual.getNombreTutor(), mascotaActual.getRutTutor(),
-        mascotaActual.getNumeroTelefono(), mascotaActual.getDireccion(), alergias, tablaMedica, mascotaActual.getFechaDeNacimiento())
+        if(terminalVet.verificarPresenciaDeTablaDeMascota(mascotaActual.getId()) != None):
+            
+            terminalVet.setMascotaOtraVeterinaria(mascotaActual.getId())
+            mascotalol = terminalVet.getMascota(mascotaActual.getId())
+            terminalVet.buscarMascotaLocal2(mascotalol.getId())
+            mascotalol.setAlergias(mascotaActual.getAlergias())
 
-        mascotalol = terminalVet.buscarMascotaLocal(mascotaActual.getId())
+            parent.setMascotaApp(mascotalol)
+            parent.update_frame(parent.screenDatosTotalMascota, parent, container)
+        else:
+            alergias = ""
+            for alegia in  mascotaActual.getAlergias():
+                alergias += alergias+str(alegia['nombre'])+';'
 
-        parent.setMascotaApp(mascotalol)
-        parent.update_frame(parent.screenDatosTotalMascota, parent, container)
+            terminalVet.setMascotaOtraVeterinaria(mascotaActual.getId())
+            mascotalol = terminalVet.getMascota(mascotaActual.getId())
+            tablaMedica = TablaMedica(uuid.uuid4())
+            
+            terminalVet.agregarMascotaDesdeAbstractPrimeraVez(mascotaActual.getId(), mascotaActual.getNombreMascota(), mascotaActual.getEspecie(), mascotaActual.getColorMascota(), mascotaActual.getRaza(), mascotaActual.getNombreTutor(), mascotaActual.getRutTutor(),
+            mascotaActual.getNumeroTelefono(), mascotaActual.getDireccion(), alergias, tablaMedica.getId(), mascotaActual.getFechaDeNacimiento())
+            parent.setMascotaApp(mascotalol)
+            parent.update_frame(parent.screenDatosTotalMascota, parent, container)
+
+           
         #*quitar tablaMedica de mascota en insert into
         #*agregar terminal a tabla en insert into
 
