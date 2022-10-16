@@ -74,8 +74,8 @@ if __name__ != "__main__":
                 mascotalol= Mascota(str(ids[i][0]))
                 self.mascotas.append(mascotalol)
         
-        def setMascotaOtraVeterinaria(self, idMascota):
-            mascotalol= Mascota(str(idMascota))
+        def setMascotaOtraVeterinaria(self, idMascota): #seteamos la mascota de otra veterinaria para esta vaterinaria
+            mascotalol= Mascota(str(idMascota)) #en los otros metodos como busquedaLocal2 obtendremos solo los datos asociados a esta veterinaria
             self.mascotas.append(mascotalol)
         
         def setMascotaEspecifica(self, idMascota, mascota:Mascota):
@@ -106,52 +106,13 @@ if __name__ != "__main__":
 
             mascota.agregarTablaMedica(ResultadoTabla[0])
 
-            sql = 'SELECT * FROM RegistroDeOperaciones WHERE TablaMedica_idTablaMedica = (%s)'
-            mycursor.execute(sql, (str(ResultadoTabla[0]),)) #el numero 9 representa el campo 10 de la tabla de mascotas = id tabla medica 
-            registroOp = mycursor.fetchall()
+            mascota.solicitarRegistroDeOperacionesEnBaseDeDatos(mycursor)
 
-            sql = 'SELECT * FROM RegistroVacunasSuministradas WHERE TablaMedica_idTablaMedica = (%s)'
-            mycursor.execute(sql, (str(ResultadoTabla[0]),))
-            registroVac = mycursor.fetchall()
+            mascota.solicitarVacunasEnBaseDeDatos(mycursor)
 
-            vacunasFinal = []##arreglo donde se almacena el diccionario de vacunas
-            vacunaDicc = {}
-                
-            for vacuna in registroVac:
-                vacunaDicc = {
-                    'id':vacuna[0],
-                    'nomVacuna':vacuna[1]
-                }
-                vacunasFinal.append(vacunaDicc)
-
-            sql = 'SELECT * FROM Alergias WHERE TablaMedica_idTablaMedica = (%s)'
-            mycursor.execute(sql, (str(ResultadoTabla[0]),))
-            alergiasEntregar = mycursor.fetchall()
-
-            alergiaFinal = []##arreglo donde se almacena el diccionario de alergias
-            alergiaDicc = {}
-                
-            for alergia in alergiasEntregar:
-                alergiaDicc = {
-                    'id':alergia[0],
-                    'nombre':alergia[1]
-                }
-                alergiaFinal.append(alergiaDicc)
-            
-
-            registroOperacionesFinal = []##arreglo donde se almacena el diccionario de registro de Operaciones
-            operacionesDicc = {}
-            for operacion in registroOp:
-                operacionesDicc = {
-                    'id':operacion[0],
-                    'operacion':operacion[1]
-                }
-                registroOperacionesFinal.append(operacionesDicc)
-            
-            mascota.setAlergias(alergiaFinal)
-            mascota.setRegistroDeVacunas(vacunasFinal)
-            mascota.setRegistroDeOperaciones(registroOperacionesFinal)
-            mascota.solicitarFichasParcialesEnBaseDeDatos(mycursor)
+            mascota.solicitarAlergiasEnBaseDeDatos(mycursor) 
+    
+            mascota.solicitarFichasParcialesEnBaseDeDatos(mycursor, ResultadoTabla[0])
         
 
         def getMascota(self, idMascota):
@@ -187,6 +148,40 @@ if __name__ != "__main__":
             mascotaNueva.setAlergiasBas(alergiasFinal, mycursor, db)
 
             mascotaNueva.agregarTablaMascota(self.id, mycursor, db)
+        
+        def editarMascota(self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, alergias, fechaNacimiento):
+            db.commit()
+            for mascota in self.mascotas:
+                if (mascota.getId == id):
+
+                    mascota.setNombreMascota(nombre)
+                    mascota.setColorMascota(especie)
+                    mascota.setEspecie(color)
+                    mascota.setRaza(raza)
+                    mascota.setNombreTutor(nombreTutor)
+                    mascota.setRutTutor(rutTutor)
+                    mascota.setNumeroTelefono(numeroTelefono)
+                    mascota.setDireccion(direccion)
+                    mascota.setFechaNacimiento(fechaNacimiento)
+
+                    alergiasActuales = mascota.getAlergias()
+
+                    alergiasArray = alergias.split(';')
+                    alergiaDicc = {}
+                    alergiasFinal = []
+                    i = 0
+                    for alergia in alergiasArray:
+                        alergiaDicc = {
+                            'id':alergiasActuales[i]['id'],
+                            'nombre':alergia
+                        }
+                        i = i+1
+                        alergiasFinal.append(alergiaDicc)
+                    
+                    mascota.setAlergias(alergiasFinal)
+
+                    mascota.actulizarMascota(mycursor, db)
+                    mascota.actualizarAlergias(mycursor, db)
         
         def verificarPresenciaDeTablaDeMascota(self, idMascota):
 
@@ -226,42 +221,8 @@ if __name__ != "__main__":
                     mascota.agregarTablaMedica(tablaMedicaId) 
                     mascota.guardarTablaEnBaseDeDatos(mycursor, db, self.idVeterinaria, self.nombreVeterinaria, idMascota)
                     mascota.setAlergias(alergiasFinal)
+                    mascota.agregarTablaMascota(self.id, mycursor, db)
                     break
-            
-            
-        def editarMascota(self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, alergias, fechaNacimiento):
-            db.commit()
-            for mascota in self.mascotas:
-                if (mascota.getId == id):
-
-                    mascota.setNombreMascota(nombre)
-                    mascota.setColorMascota(especie)
-                    mascota.setEspecie(color)
-                    mascota.setRaza(raza)
-                    mascota.setNombreTutor(nombreTutor)
-                    mascota.setRutTutor(rutTutor)
-                    mascota.setNumeroTelefono(numeroTelefono)
-                    mascota.setDireccion(direccion)
-                    mascota.setFechaNacimiento(fechaNacimiento)
-
-                    alergiasActuales = mascota.getAlergias()
-
-                    alergiasArray = alergias.split(';')
-                    alergiaDicc = {}
-                    alergiasFinal = []
-                    i = 0
-                    for alergia in alergiasArray:
-                        alergiaDicc = {
-                            'id':alergiasActuales[i]['id'],
-                            'nombre':alergia
-                        }
-                        i = i+1
-                        alergiasFinal.append(alergiaDicc)
-                    
-                    mascota.setAlergias(alergiasFinal)
-
-                    mascota.actulizarMascota(mycursor, db)
-                    mascota.actualizarAlergias(mycursor, db)
 
         def agregarFichaMedica(self, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, idMascota, tratamientos, causaVisita, medicamentos, vacunas):
             idFicha = uuid.uuid4()
@@ -385,7 +346,6 @@ if __name__ != "__main__":
         def completarFichaParcialMascotasExternas(self, idMascota, idFicha):
             db.commit()
             for mascota in self.mascotasExternas:
-
                 if mascota.getId() == idMascota:
                     print("337 terminal")
                     mascota.completarFichaParcial(idFicha, mycursor)
@@ -478,60 +438,11 @@ if __name__ != "__main__":
             
             if(resultadoMascota != None):
                 for mascota in self.mascotasExternas:
-                    
+                    if(mascota.getId() == idMascotaBuscada):
                         sql = 'SELECT idTablaMedica FROM TablaMedica WHERE Mascota_idMascota = %s' #"obtenemos todoas los demas datos de la mascota"
                         mycursor.execute(sql, (str(idMascotaBuscada),))
-                        ResultadoTabla = mycursor.fetchone()
+                        ResultadoTablaX = mycursor.fetchall()
 
-                        mascota.agregarTablaMedica(ResultadoTabla[0])
-
-                        sql = 'SELECT * FROM RegistroDeOperaciones WHERE TablaMedica_idTablaMedica = (%s)'
-                        mycursor.execute(sql, (str(ResultadoTabla[0]),)) #el numero 9 representa el campo 10 de la tabla de mascotas = id tabla medica 
-                        registroOp = mycursor.fetchall()
-
-                        sql = 'SELECT * FROM RegistroVacunasSuministradas WHERE TablaMedica_idTablaMedica = (%s)'
-                        mycursor.execute(sql, (str(ResultadoTabla[0]),))
-                        registroVac = mycursor.fetchall()
-
-                        vacunasFinal = []##arreglo donde se almacena el diccionario de vacunas
-                        vacunaDicc = {}
-                            
-                        for vacuna in registroVac:
-                            vacunaDicc = {
-                                'id':vacuna[0],
-                                'nomVacuna':vacuna[1]
-                            }
-                            vacunasFinal.append(vacunaDicc)
-
-                        sql = 'SELECT * FROM Alergias WHERE TablaMedica_idTablaMedica = (%s)'
-                        mycursor.execute(sql, (str(ResultadoTabla[0]),))
-                        alergiasEntregar = mycursor.fetchall()
-
-                        print("726 terminal"+str(alergiasEntregar)+":"+str(ResultadoTabla[0]))
-
-                        alergiaFinal = []##arreglo donde se almacena el diccionario de alergias
-                        alergiaDicc = {}
-                            
-                        for alergia in alergiasEntregar:
-                            alergiaDicc = {
-                                'id':alergia[0],
-                                'nombre':alergia[1]
-                            }
-                            alergiaFinal.append(alergiaDicc)
-                        
-
-                        registroOperacionesFinal = []##arreglo donde se almacena el diccionario de registro de Operaciones
-                        operacionesDicc = {}
-                        for operacion in registroOp:
-                            operacionesDicc = {
-                                'id':operacion[0],
-                                'operacion':operacion[1]
-                            }
-                            registroOperacionesFinal.append(operacionesDicc)
-                            
-                        #tablaEntregar = TablaMedica(resultadoMascota[9])
-
-                        #self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, tablaMedica
                         mascota.setNombreMascota(resultadoMascota[1])
                         mascota.setEspecie(resultadoMascota[2])
                         mascota.setColorMascota(resultadoMascota[3])
@@ -541,14 +452,83 @@ if __name__ != "__main__":
                         mascota.setNumeroTelefono(resultadoMascota[7])
                         mascota.setDireccion(resultadoMascota[8])
                         mascota.setFechaNacimiento(resultadoMascota[9])
+                        mascota.solicitarAlergiasEnBaseDeDatos(mycursor)
+
+                        idTabla = str(uuid.uuid4())
+                        mascota.agregarTablaMedica(idTabla)
+                        
+                        for ResultadoTabla in ResultadoTablaX:
+                            
+                            if(flagMascota is False):
+                                sql = 'SELECT * FROM RegistroDeOperaciones WHERE TablaMedica_idTablaMedica = (%s)'
+                                mycursor.execute(sql, (str(ResultadoTabla[0]),)) #el numero 9 representa el campo 10 de la tabla de mascotas = id tabla medica 
+                                registroOp = mycursor.fetchall()
+
+                                sql = 'SELECT * FROM RegistroVacunasSuministradas WHERE TablaMedica_idTablaMedica = (%s)'
+                                mycursor.execute(sql, (str(ResultadoTabla[0]),))
+                                registroVac = mycursor.fetchall()
+
+                                vacunasFinal = []##arreglo donde se almacena el diccionario de vacunas
+                                vacunaDicc = {}
+                                    
+                                for vacuna in registroVac:
+                                    vacunaDicc = {
+                                        'id':vacuna[0],
+                                        'nomVacuna':vacuna[1]
+                                    }
+                                    vacunasFinal.append(vacunaDicc)
+
+                                registroOperacionesFinal = []##arreglo donde se almacena el diccionario de registro de Operaciones
+                                operacionesDicc = {}
+                                for operacion in registroOp:
+                                    operacionesDicc = {
+                                        'id':operacion[0],
+                                        'operacion':operacion[1]
+                                    }
+                                    registroOperacionesFinal.append(operacionesDicc)
+
+                                mascota.setRegistroDeVacunas(vacunasFinal)
+                                mascota.setRegistroDeOperaciones(registroOperacionesFinal)
+                                flagMascota = True
+                            else:
+                                sql = 'SELECT * FROM RegistroDeOperaciones WHERE TablaMedica_idTablaMedica = (%s)'
+                                mycursor.execute(sql, (str(ResultadoTabla[0]),)) #el numero 9 representa el campo 10 de la tabla de mascotas = id tabla medica 
+                                registroOp = mycursor.fetchall()
+
+                                sql = 'SELECT * FROM RegistroVacunasSuministradas WHERE TablaMedica_idTablaMedica = (%s)'
+                                mycursor.execute(sql, (str(ResultadoTabla[0]),))
+                                registroVac = mycursor.fetchall()
+
+                                vacunasFinal = []##arreglo donde se almacena el diccionario de vacunas
+                                vacunaDicc = {}
+                                    
+                                for vacuna in registroVac:
+                                    vacunaDicc = {
+                                        'id':vacuna[0],
+                                        'nomVacuna':vacuna[1]
+                                    }
+                                    mascota.agregarVacunasSinBd(vacunaDicc)
+                                
+                                registroOperacionesFinal = []##arreglo donde se almacena el diccionario de registro de Operaciones
+                                operacionesDicc = {}
+                                for operacion in registroOp:
+                                    operacionesDicc = {
+                                        'id':operacion[0],
+                                        'operacion':operacion[1]
+                                    }
+                                    mascota.agregarOperacionesSinBd(operacionesDicc)
+
+                            mascota.solicitarFichasParcialesEnBaseDeDatos(mycursor, ResultadoTabla[0])
+                                
+                            #tablaEntregar = TablaMedica(resultadoMascota[9])
+
+                        #self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, tablaMedica
+                        
                         
                         #mascotaEncontrada= Mascota(resultadoMascota[0], resultadoMascota[1], resultadoMascota[2], resultadoMascota[3], resultadoMascota[4], resultadoMascota[5], resultadoMascota[6],
                         #                                resultadoMascota[7], resultadoMascota[8], tablaEntregar)
 
-                        mascota.setAlergias(alergiaFinal)
-                        mascota.setRegistroDeVacunas(vacunasFinal)
-                        mascota.setRegistroDeOperaciones(registroOperacionesFinal)
-                        mascota.solicitarFichasParcialesEnBaseDeDatos(mycursor)
+                        
 
 
         def buscarMascotaLocal(self, idMascota):

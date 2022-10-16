@@ -18,6 +18,7 @@ class Mascota:
             self.direccion = None
             self.tablaMedica:TablaMedica = None
             self.FechaNacimiento = None
+            self.alergias = [] #diccionario
         elif(len(args) == 11):
             print("hola llegue a entrar")
             self.nombre = args[1]
@@ -31,6 +32,7 @@ class Mascota:
             self.direccion = args[8]
             self.tablaMedica:TablaMedica = args[9]
             self.FechaNacimiento = args[10]
+            self.alergias = [] #diccionario
     
     def agregarMascotaEnBaseDeDatos(self, myCursor, dB):
         sql = "INSERT INTO mascota (idMascota, nombreMascota, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, Dirección, FechaDeNacimiento) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
@@ -42,9 +44,6 @@ class Mascota:
         myCursor.execute(sql, (str(self.nombre), str(self.especie), str(self.color), str(self.raza), str(self.nombreTutor), str(self.rutTutor), str(self.numeroTelefono), str(self.direccion), str(self.FechaNacimiento), str(self.id)))
         dB.commit()
     
-    def actualizarAlergias(self, myCursor, dB):
-        self.tablaMedica.editarRegistroDeAlergias(myCursor, dB)
-    
     def agregarTablaMascota(self, idTerminal, myCursor, dB):
         sql = "INSERT INTO mascota_has_terminalveterinario values (%s, %s)"
         myCursor.execute(sql, (str(self.id), str(idTerminal)))
@@ -53,8 +52,9 @@ class Mascota:
     def solicitarFichasEnBaseDeDatos(self, myCursor):
         self.tablaMedica.solicitarFichasEnBaseDeDatos(myCursor)
     
-    def solicitarFichasParcialesEnBaseDeDatos(self, myCursor):
-        self.tablaMedica.solicitarFichasParcialesEnBaseDeDatos(myCursor)
+    def solicitarFichasParcialesEnBaseDeDatos(self, myCursor, idTabla):
+        print("57 mascota -------------------")
+        self.tablaMedica.solicitarFichasParcialesEnBaseDeDatos(myCursor, idTabla)
     
     def completarFichaParcial(self, idFicha, myCursor):
         self.tablaMedica.completarFichaParcial(idFicha, myCursor)
@@ -65,8 +65,14 @@ class Mascota:
     def editarFichaOperacion(self, idFicha, operacion, fechaUltimaModificacion, myCursor, dB):
         self.tablaMedica.editarFichaOperacion(idFicha, operacion, fechaUltimaModificacion, myCursor, dB)
     
+    def solicitarVacunasEnBaseDeDatos(self, myCursor):
+        self.tablaMedica.solicitarVacunasEnBaseDeDatos(myCursor)
+    
     def editarRegistroDeOperaciones(self, operacion, myCursor, dB):
         self.tablaMedica.editarRegistroDeOperacionesEnBaseDeDatos(operacion, myCursor, dB)
+    
+    def solicitarRegistroDeOperacionesEnBaseDeDatos(self, myCursor):
+        self.tablaMedica.solicitarRegistroDeOperacionesEnBaseDeDatos(myCursor)
     
     def editarFichaHospitalizacion(self, idFicha, hospitalización, fechaUltimaModificacion, myCursor, dB):
         self.tablaMedica.editarFichaHospitalizacion(idFicha, hospitalización, fechaUltimaModificacion, myCursor, dB)
@@ -130,6 +136,56 @@ class Mascota:
     
     def setFechaNacimiento(self, fechaNacimiento):
         self.FechaNacimiento = fechaNacimiento
+    
+     #alergias
+    def agregarAlergias(self, alergia):
+        self.alergias.append(alergia)
+    
+    def setAlergias(self, alergias):
+        self.alergias = alergias
+        #self.guardarAlergiasEnBaseDeDatos()
+    
+    def setAlergiasBas(self, alergias, myCursor, dB):
+        self.alergias = alergias
+        self.guardarAlergiasEnBaseDeDatos(myCursor, dB)
+
+    def solicitarAlergiasEnBaseDeDatos(self, myCursor):
+        sql = 'SELECT * FROM Alergias WHERE Mascota_idMascota = (%s)'
+        myCursor.execute(sql, (str(self.getId()),))
+        alergiasMascota = myCursor.fetchall()
+        alergia = {}
+        alergiasFinal = []
+        for alergiaMascota in alergiasMascota:
+            alergia = {
+                'id': alergiaMascota[0],
+                'nombre': alergiaMascota[1]
+            }
+            alergiasFinal.append(alergia)
+        self.alergias = alergiasFinal
+
+    def guardarAlergiasEnBaseDeDatos(self, myCursor, dB):
+        for alergia in self.getAlergias():
+            sql = "INSERT INTO alergias values (%s, %s, %s)"
+            myCursor.execute(sql, (str(alergia['id']), str(alergia['nombre']), str(self.getId())))
+            dB.commit()
+
+    def getAlergias(self):
+        return self.alergias
+    
+    def getIDAlergias(self):
+        ids = []
+        for alergia in self.getAlergias():
+            ids.append(alergia)
+
+        return ids
+    
+    def editarRegistroDeAlergias(self, myCursor, dB):
+        for i in range(len(self.alergias)):
+            sql = 'UPDATE alergias SET nombreAlergia = %s WHERE idAlergias = %s'
+            myCursor.execute(sql, (str(self.alergias[i]['nombre']),  str(self.alergias[i]['id'])))
+            dB.commit()
+
+#alergias
 
     #metodos de bajada para la tabla
     
@@ -140,15 +196,6 @@ class Mascota:
 
     def guardarTablaEnBaseDeDatos(self, myCursor, dB, idVeterinaria, nombreVeterinaria, idMascota):
         self.tablaMedica.guardarTablaEnBaseDeDatos(myCursor, dB, idVeterinaria, nombreVeterinaria, idMascota)
-
-    def setAlergias(self, alergias):
-        self.tablaMedica.setAlergias(alergias)
-
-    def setAlergiasBas(self, alergias, myCursor, dB):
-        self.tablaMedica.setAlergiasBas(alergias, myCursor, dB)
-    
-    def agregarAlergias(self, alergia):
-        self.tablaMedica.agregarAlergias(alergia)
     
     def setRegistroDeOperaciones(self, operaciones):
         self.tablaMedica.setRegistroDeOperaciones(operaciones)
@@ -158,6 +205,9 @@ class Mascota:
     
     def agregarOperaciones(self, operacion, myCursor, dB):
         self.tablaMedica.agregarOperaciones(operacion, myCursor, dB)
+    
+    def agregarOperacionesSinBd(self, operacion):
+        self.tablaMedica.agregarOperacionesSinBd(operacion)
 
     def setRegistroDeVacunas(self, vacunas):
         self.tablaMedica.setRegistroDeVacunas(vacunas)
@@ -165,15 +215,12 @@ class Mascota:
     def agregarVacunas(self, vacuna, myCursor, dB):
         self.tablaMedica.agregarVacunas(vacuna, myCursor, dB)
 
+    def agregarVacunasSinBd(self, vacuna):
+        self.tablaMedica.agregarVacunasSinBd(vacuna)
+
     #metodos de bajada para la tabla
 
     #metodos de subida para tabla
-
-    def getAlergias(self):
-        return self.tablaMedica.getAlergias()
-    
-    def getIdAlergias(self):
-        return self.tablaMedica.getIDAlergias()
     
     def getRegistroDeOperaciones(self):
         return self.tablaMedica.getRegistroDeOperaciones()

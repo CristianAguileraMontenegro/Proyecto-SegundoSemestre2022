@@ -2568,7 +2568,7 @@ class screenAbstractMedico(ctk.CTkFrame):
             medicamentos = []
             i = 0
             while(i <= (len(idsFichas)-1)):
-
+                print("tukiiiiiiiiiiiiiii")
                 terminalVet.completarFichaParcialMascotasExternas(mascotaActual.getId(), idsFichas[i]) #completamos cada ficha parcial para extraer los datos para el resumen veterinario 
                 i += 1
 
@@ -2748,7 +2748,7 @@ class screenAbstractMedico(ctk.CTkFrame):
             for alegia in  mascotaActual.getAlergias():
                 alergias += alergias+str(alegia['nombre'])+';'
 
-            terminalVet.setMascotaOtraVeterinaria(mascotaActual.getId())
+            terminalVet.setMascotaOtraVeterinaria(mascotaActual.getId()) #agrega la nueva mascota al arreglo de mascotas locales para su manejo
             mascotalol = terminalVet.getMascota(mascotaActual.getId())
             tablaMedica = TablaMedica(uuid.uuid4())
             
