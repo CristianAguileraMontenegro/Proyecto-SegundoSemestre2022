@@ -9,7 +9,6 @@ class TablaMedica:
     def __init__(self, id):
         self.id = id
         self.fichas:FichaMedica = [] #arreglo 
-        self.alergias = [] #diccionario
         self.registroDeOperaciones = [] #diccionario
         self.vacunasSuministradas = [] #diccionario
     
@@ -27,10 +26,11 @@ class TablaMedica:
             self.agregarFichaMedicaExistente(ficha[0],ficha[2],ficha[3],ficha[4],ficha[5],ficha[6],ficha[7],ficha[8],ficha[9],ficha[10],ficha[11], ficha[12], ficha[13], ficha[14], myCursor)
             #self.fichas.append(fichaMedica)
     
-    def solicitarFichasParcialesEnBaseDeDatos(self, myCursor):
+    def solicitarFichasParcialesEnBaseDeDatos(self, myCursor, idTabla):
         sql = 'SELECT idFichaMedica, fechaConsulta FROM fichaMedica WHERE Tablamedica_idTablamedica = (%s)' #seleccionamos solo el id y la fecha de creacion
-        myCursor.execute(sql, (str(self.id),))
+        myCursor.execute(sql, (str(idTabla),))
         fichas = myCursor.fetchall()
+        print("34 tablaMedica ")
         for ficha in fichas: #se recorren todas las ficha correspondientes a la tabla medica en particular 
             print("35 tabla medica")
             fecha = ficha[1].strftime("%Y-%m-%d %H:%M:%S")
@@ -149,59 +149,6 @@ class TablaMedica:
     def solicitudConexionServMostrar(self):
         pass
 
-    
-        
-
-#alergias
-    def agregarAlergias(self, alergia):
-        self.alergias.append(alergia)
-    
-    def setAlergias(self, alergias):
-        self.alergias = alergias
-        #self.guardarAlergiasEnBaseDeDatos()
-    
-    def setAlergiasBas(self, alergias, myCursor, dB):
-        self.alergias = alergias
-        self.guardarAlergiasEnBaseDeDatos(myCursor, dB)
-
-    def solicitarAlergiasEnBaseDeDatos(self, myCursor):
-        sql = 'SELECT * FROM Alergias WHERE TablaMedica_idTablaMedica = (%s)'
-        myCursor.execute(sql, (str(self.getId()),))
-        alergiasMascota = myCursor.fetchall()
-        alergia = {}
-        alergiasFinal = []
-        for alergiaMascota in alergiasMascota:
-            alergia = {
-                'id': alergiaMascota[0],
-                'nombre': alergiaMascota[1]
-            }
-            alergiasFinal.append(alergia)
-        self.alergias = alergiasFinal
-
-    def guardarAlergiasEnBaseDeDatos(self, myCursor, dB):
-        for alergia in self.getAlergias():
-            sql = "INSERT INTO alergias values (%s, %s, %s)"
-            myCursor.execute(sql, (str(alergia['id']), str(alergia['nombre']), str(self.getId())))
-            dB.commit()
-
-    def getAlergias(self):
-        return self.alergias
-    
-    def getIDAlergias(self):
-        ids = []
-        for alergia in self.getAlergias():
-            ids.append(alergia)
-
-        return ids
-    
-    def editarRegistroDeAlergias(self, myCursor, dB):
-        for i in range(len(self.alergias)):
-            sql = 'UPDATE alergias SET nombreAlergia = %s WHERE idAlergias = %s'
-            myCursor.execute(sql, (str(self.alergias[i]['nombre']),  str(self.alergias[i]['id'])))
-            dB.commit()
-
-#alergias
-
 #Registro de operaciones 
 
     def agregarOperaciones(self, operacion, myCursor, dB):
@@ -210,6 +157,9 @@ class TablaMedica:
         sql = 'Insert INTO registroDeOperaciones VALUES (%s, %s,%s)'
         myCursor.execute(sql, (str(operacion['id']), str(operacion['operacion']),  str(self.getId())))
         dB.commit()
+    
+    def agregarOperacionesSinBd(self, operacion):
+        self.registroDeOperaciones.append(operacion)
     
     def setRegistroDeOperaciones(self, operacion):
         self.registroDeOperaciones = operacion
@@ -227,13 +177,15 @@ class TablaMedica:
         sql = 'SELECT * FROM RegistroDeOperaciones WHERE TablaMedica_idTablaMedica = (%s)'
         myCursor.execute(sql, (str(self.getId()),))
         registroOperaciones = myCursor.fetchall()
-
+        operacion = {}
+        operacionFinal = []
         for operaciones in registroOperaciones:
             operacion = {
                 'id': operaciones[0],
                 'operacion': operaciones[1],
             }
-            self.agregarOperaciones.append(operacion)
+            operacionFinal.append(operacion)
+        self.registroDeOperaciones = operacionFinal
     
     def editarRegistroDeOperacionesEnBaseDeDatos(self, operacion, myCursor, dB):
         sql = 'UPDATE registroDeOperaciones SET operación = %s WHERE idRegistroDeOperaciones = %s'
@@ -266,6 +218,10 @@ class TablaMedica:
         sql = 'INSERT INTO registrovacunassuministradas (idVacunasSuministradas, nombreVacuna, TablaMedica_idTablaMedica) VALUES (%s, %s, %s)'
         myCursor.execute(sql, (str(vacunas['id']), str(vacunas['nomVacuna']), str(self.getId())))
         dB.commit()
+    
+    def agregarVacunasSinBd(self, vacunas):
+
+        self.vacunasSuministradas.append(vacunas) #agregamos tanto las vacunas a la tabla como a la base de datos
 
     def editarRegistroVacunaEnBaseDeDatos(self, vacunas ,myCursor, dB):
         for vacuna in vacunas:
@@ -282,8 +238,6 @@ class TablaMedica:
                 if(self.vacunasSuministradas[i]['id'] == vacunas[j]['id']):
                     self.vacunasSuministradas[i]['nomVacuna'] = vacunas[j]['nomVacuna']
                     break
-
-            
 
     def setRegistroDeVacunas(self, vacunas):
         self.vacunasSuministradas = vacunas 

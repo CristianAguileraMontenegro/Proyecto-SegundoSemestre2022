@@ -377,7 +377,7 @@ class FichaMedica:
             'nomMedicamento' : medicamento[1],
             }
             medicamentosArray.append(med)
-        
+            print("380 fichaMedica :"+str(med))
         self.medicamentosConsulta = medicamentosArray
 
     def guardarMedicamentosConsultaEnBaseDeDatos(self, myCursor, dB): 
