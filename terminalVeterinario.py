@@ -695,11 +695,8 @@ if __name__ != "__main__":
 
         def crearCalendario(self):
             idCalendario = (uuid.uuid4())
-            sql = 'INSERT INTO calendario VALUES (%s, %s, %s)'
-            mycursor.execute(sql, (str(idCalendario), str(self.idVeterinaria), str(self.nombreVeterinaria)))
-            db.commit()
-
             self.calendaio.setId(idCalendario)
+            self.calendaio.agregarCalendarioBaseDeDatos(self.idVeterinaria, self.nombreVeterinaria, mycursor, db)
         
         def solicitarDatosCalendarioBaseDeDatos(self):
             self.calendaio.solicitarDatosCalendarioBaseDeDatos(mycursor)
@@ -719,13 +716,35 @@ if __name__ != "__main__":
         def agregarFechasCalendario(self, fechas):
             self.calendaio.agregarFechas(fechas,mycursor, db)
         
-        def agregarDatosAFechasCalendario(self, fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados):
-            self.calendaio.agregarDatosAFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados, mycursor, db)
+        def agregarDatosAFechasCalendario(self, fechaSeleccionada, rutIngresado, numeroIngresado, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada):
+            self.calendaio.agregarDatosAFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada, mycursor, db)
         
-        def editarDatosDeFecha(self, fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados, cita):
-            self.calendaio.editarDatosDeFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados, cita, mycursor, db)
+        def editarDatosDeFecha(self, fechaSeleccionada, rutIngresado, numeroIngresado, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada, cita):
+            self.calendaio.editarDatosDeFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada, cita, mycursor, db)
         
-        def getDatosAEditar(self, fechaSeleccionada, cita):
-            return self.calendaio.getDatosAEditar(fechaSeleccionada, cita)
+        def eliminarDatosDeFecha(self, fechaSeleccionada, cita):
+            self.calendaio.eliminarDatosDeFecha(fechaSeleccionada, cita, mycursor, db)
+        
+        def getRutsMascota(self):
+            ruts = []
+            for mascota in self.mascotas:
+                sql = 'SELECT rutTutor FROM mascota WHERE idMascota = (%s)'
+                mycursor.execute(sql, (str(mascota.getId()),))
+                rutsB = mycursor.fetchone()
+
+                ruts.append(str(rutsB[0]))
+            
+            print("735 : "+str(ruts))
+            return ruts
+        
+        def getNumeroTelefonoMascota(self):
+            numeros = []
+            for mascota in self.mascotas:
+                sql = 'SELECT numeroTelefono FROM mascota WHERE idMascota = (%s)'
+                mycursor.execute(sql, (str(mascota.getId()),))
+                numero = mycursor.fetchone()
+
+                numeros.append(str(numero[0]))
+            return numeros
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ 

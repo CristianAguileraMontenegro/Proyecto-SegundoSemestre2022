@@ -1,4 +1,5 @@
 import tkinter as tk
+from ttkwidgets.autocomplete import AutocompleteCombobox # pip3 install ttkwidgets
 import customtkinter as ctk
 from terminalVeterinario import *
 import datetime #para sacar la fecha actual
@@ -2356,13 +2357,16 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
             self.calendario = Calendar(self.frameBotonesCalendario, selectmode='day',date_pattern='dd/mm/yyyy',  year=today.year, month=today.month, day=today.day)
             self.calendario.grid(row=3, column=0, padx=(50,50), pady=10)
         
-            #self.indicarFechasEnCalendarioPostCargaBaseDeDatos(parent)
+            self.indicarFechasEnCalendarioPostCargaBaseDeDatos(parent)
 
-            self.ingresarCita = ctk.CTkButton(self.frameIngresoDeDatos, width=20, text='Ingresar cita de vacunación', command=lambda: self.mostarElementosDeLlenado())
+            self.ingresarCita = ctk.CTkButton(self.frameIngresoDeDatos, width=20, text='Ingresar cita de vacunación', command=lambda: self.ingresarCitaFuncion())
             self.ingresarCita.grid(row=4, column=0, padx=10 , pady=10)
 
             self.botonEditar = ctk.CTkButton(self.frameIngresoDeDatos, width= 20, text='Editar horario', command=lambda: self.editarHorario(parent), hover_color="#142C3D")
             self.botonEditar.grid(row=10, column=0, padx=10 , pady=10)
+
+            self.botonEliminar = ctk.CTkButton(self.frameIngresoDeDatos, width= 20, text='Eliminar horario', command=lambda: self.eliminarCita(parent), hover_color="#142C3D")
+            self.botonEliminar.grid(row=11, column=0, padx=10 , pady=10)
 
             self.botonConfirmarEditar = ctk.CTkButton(self.frameIngresoDeDatos, width= 20, text='Confirmar edicion de horario', command=lambda: self.clickConfirmarEdicion(parent), hover_color="#142C3D")
             self.botonConfirmarEditar.grid(row=8, column=0, padx=10 , pady=10)
@@ -2410,13 +2414,18 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
             self.rutLabel = ctk.CTkLabel(self.frameIngresoDeDatos, text='Rut :', text_color="black", text_font=Font_tuple14)
             self.rutLabel.grid(row=6, column=0, padx=10 , pady=10)
 
-            self.entradaRut = ctk.CTkEntry(self.frameIngresoDeDatos, width = 140, text_font=Font_tuple14, fg_color="#F0EFEB", placeholder_text="Rut", placeholder_text_color="silver", justify = "center", text_color='black')
+            self.listaRuts = terminalVet.getRutsMascota()
+            self.listaNumeros = terminalVet.getNumeroTelefonoMascota()
+
+            print(self.listaRuts)
+
+            self.entradaRut = AutocompleteCombobox(self.frameIngresoDeDatos, completevalues = self.listaRuts)
             self.entradaRut.grid(row=6, column=1, padx=10 , pady=10)
 
             self.numeroDeTelefonoLabel = ctk.CTkLabel(self.frameIngresoDeDatos, text='Telefono :', text_color="black", text_font=Font_tuple14)
             self.numeroDeTelefonoLabel.grid(row=7, column=0, padx=10 , pady=10)
 
-            self.numeroDeTelefono = ctk.CTkEntry(self.frameIngresoDeDatos, width = 160, text_font=Font_tuple14, fg_color="#F0EFEB", placeholder_text="Telefono", placeholder_text_color="silver", justify = "center", text_color='black')
+            self.numeroDeTelefono = AutocompleteCombobox(self.frameIngresoDeDatos, completevalues = self.listaNumeros)
             self.numeroDeTelefono.grid(row=7, column=1, padx=10 , pady=10)
 
             self.confirmarCita = ctk.CTkButton(self.frameIngresoDeDatos, width=20, text='Confirmar cita de vacunación', command=lambda: self.clickConfirmarFecha(parent))
@@ -2459,6 +2468,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         self.confirmarCita.grid_remove()
         self.botonEditar.grid_remove()
         self.botonConfirmarEditar.grid_remove()
+        self.botonEliminar.grid_remove()
     
     def mostarElementosDeLlenado(self):
         self.horaInicial.grid()
@@ -2483,31 +2493,44 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         pass
     
     def mostarElementosDeEditar(self):
-        #self.hora.grid()
-        #self.horaLabel.grid()
-        #self.minutos.grid()
-        #self.minutosLabel.grid()
-        #self.entradaRut.grid()
-        #self.rutLabel.grid()
-        #self.numeroDeTelefono.grid()
-        #self.numeroDeTelefonoLabel.grid()
-        #self.botonEditar.grid_remove()
-        #self.botonConfirmarEditar.grid()
-        #self.lista.grid_remove()
-        pass
+        self.horaInicial.grid()
+        self.horaInicialLabel.grid()
+        self.minutosInicial.grid()
+        self.minutosInicialLabel.grid()
+        self.hora.grid()
+        self.horaLabel.grid()
+        self.minutos.grid()
+        self.minutosLabel.grid()
+        self.entradaRut.grid()
+        self.rutLabel.grid()
+        self.numeroDeTelefono.grid()
+        self.numeroDeTelefonoLabel.grid()
+        self.confirmarCita.grid()
+       
+        self.lista.grid_remove()
+        self.botonEditar.grid_remove()
+        self.ingresarCita.grid_remove()
+        self.confirmarCita.grid_remove()
+        self.botonConfirmarEditar.grid()
     
     def ocultarElementosDeEditar(self):
-        pass
         self.hora.grid_remove()
         self.horaLabel.grid_remove()
+        self.horaInicial.grid_remove()
+        self.horaInicialLabel.grid_remove()
         self.minutos.grid_remove()
         self.minutosLabel.grid_remove()
+        self.minutosInicial.grid_remove()
+        self.minutosInicialLabel.grid_remove()
         self.entradaRut.grid_remove()
         self.rutLabel.grid_remove()
         self.numeroDeTelefono.grid_remove()
         self.numeroDeTelefonoLabel.grid_remove()
-        self.botonConfirmarEditar.grid_remove()
         self.lista.grid_remove()
+        self.ingresarCita.grid_remove()
+        self.confirmarCita.grid_remove()
+        self.botonEditar.grid_remove()
+        self.botonConfirmarEditar.grid_remove()
         
     def ocultarLlenadoParaMostarListaDeFechas(self):
         self.hora.grid_remove()
@@ -2528,19 +2551,17 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         self.lista.grid()
         self.botonEditar.grid()
         self.ingresarCita.grid()
+        self.botonEliminar.grid()
     
     def ingresarCitaFuncion(self):
         indicadorDeCitas = []
         self.mostarElementosDeLlenado()
-        indicadorDeCitas = self.obtenerSeccionHorariaSeleccionada()
+        indicadorDeCitas = self.obtenerSeccionHorariaSeleccionada() #otenemos los datos de las listas
 
-        self.horaInicialValor.set(indicadorDeCitas[0])
+        self.horaInicialValor.set(indicadorDeCitas[0]) #seteamos los valores en los campos 
         self.minutosInicialValor.set(indicadorDeCitas[1])
         self.horaValor.set(indicadorDeCitas[2])
         self.minutosValor.set(indicadorDeCitas[3])
-
-
-
         
     def obtenerSeccionHorariaSeleccionada(self):
         indicadoresDeCitas = []
@@ -2552,7 +2573,6 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
             indicadoresDeCitas.append(self.minutoFinalArray[i])
             break
         return  indicadoresDeCitas
-    
         
     def clickConfirmarFecha(self, parent):
 
@@ -2631,19 +2651,20 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
                 self.minutoFinalArray.append(minuto2)
                 datos = 'Hora de atención : '+str(hora)+':'+str(minuto)+'-'+str(hora)+':'+str(minuto2)
 
-            
             self.lista.insert(END, datos)
 
         #verificar si ya se tienen horas reservadas 
+        if (fechaObtenida is not False):
+            cantidadDeElementos = len(fechaObtenida["ruts"])
+
+            for j in range(cantidadDeElementos):
+                for i in range(len(self.horaInicialArray)): #iteramos por el maximo largo
+                        if(fechaObtenida["horasInicio"][j] == str(self.horaInicialArray[i])): #identificamos la hora de 
+                            datos = 'Hora de atención : '+str(self.horaInicialArray[i])+':'+str(self.minutoInicialArray[i])+'-'+str(self.horaFinalArray[i])+':'+str(self.minutoFinalArray[i])+" Rut : "+str(fechaObtenida["ruts"][j])+" numero : "+str(fechaObtenida["numeros"][j])
+                            self.lista.delete(i) #en al linea anterior lar horas permaneceran igual, sin embargo datos como rut y numeros son sacados de la clase calendario
+                            self.lista.insert(i, datos)
+                            break
     
-
-        #for i in range(len(fechaObtenida["ruts"])): #iteramos por el maximo largo
-         #   datos = 'rut :'+str(fechaObtenida["ruts"][i])+' numero de telefono: '+str(fechaObtenida["numeros"][i])+' Hora de atención: '+str(fechaObtenida["horas"][i])+':'+str(fechaObtenida["minutos"][i]+"hrs")
-            
-          #  self.lista.insert(END, datos)
-
-
-        
         self.ocultarLlenadoParaMostarListaDeFechas()
 
         #self.lista.delete(0,'end')
@@ -2653,43 +2674,93 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
           #  self.lista.insert(END, datos)
         
         #self.ocultarLlenadoParaMostar()
-
-
     
 
     def editarHorario(self, parent):
-        for i in self.lista.curselection():
-            self.elementoAEditar = self.lista.get(i)
+        for a in self.lista.curselection():
+            self.elementoAEditar = self.lista.get(a)
 
             if(self.elementoAEditar != None): #verificamos que haya seleccionado un fecha
                 self.mostarElementosDeEditar()
-
                 fechaSeleccionada = self.calendario.get_date()
+                datosFecha = terminalVet.getFechaCalendario(fechaSeleccionada)
 
-                datosFecha = terminalVet.getDatosAEditar(fechaSeleccionada, i)
+                cantidadDeElementos = len(datosFecha["ruts"])
+                print("2696")
+                for j in range(cantidadDeElementos):
+                    if(datosFecha["horasInicio"][j] == str(self.horaInicialArray[a])): #identificamos la hora de 
+
+                        self.horaInicialValor.set(datosFecha["horasInicio"][j])
+                        self.minutosInicialValor.set(datosFecha["minutosInicio"][j])
+
+                        self.horaValor.set(datosFecha["horasFin"][j])
+                        self.minutosValor.set(datosFecha["minutosFin"][j])
+
+                        self.entradaRut.delete(0, 'end')
+                        self.entradaRut.insert(0, str(datosFecha["ruts"][j]))
+                        self.numeroDeTelefono.delete(0, 'end')
+                        self.numeroDeTelefono.insert(0, str(datosFecha["numeros"][j]))
+
+                        self.elementoAEditar = datosFecha
+                        break
 
                 #cargamos los datos a editar en los entry
-                self.horaValor.set(datosFecha["horas"][i])
-                self.minutosValor.set(datosFecha["minutos"][i])
-                self.entradaRut.delete(0, 'end')
-                self.entradaRut.insert(0, str(datosFecha["ruts"][i]))
-                self.numeroDeTelefono.delete(0, 'end')
-                self.numeroDeTelefono.insert(0, str(datosFecha["numeros"][i]))
+
+                
     
     def clickConfirmarEdicion(self, parent):
-        for i in range(self.lista.size()):
-            if(self.lista.get(i) == self.elementoAEditar):
+        
+        datosFecha = self.elementoAEditar
+        for j in range(len(datosFecha["ruts"])):
+            if(datosFecha["horasInicio"][j] == str(self.horaInicial.get())): #identificamos la hora de 
+
                 self.ocultarElementosDeEditar()
                 fechaSeleccionada = self.calendario.get_date()
-                
-                #obtenermos la hora y minutos
-                horaSeleccionada = self.hora.get()
-                minutosSeleccionados = self.minutos.get()
+                            
+                    #obtenermos la hora y minutos
+                horaInicialSeleccionada = self.horaInicial.get()
+                minutosInicialSeleccionados = self.minutosInicial.get()
+
+                horaFinalSeleccionada = self.hora.get()
+                minutosFinalSeleccionada = self.minutos.get()
 
                 rutIngresado = self.entradaRut.get()
                 numeroIngresado = self.numeroDeTelefono.get()
 
-                terminalVet.editarDatosDeFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaSeleccionada, minutosSeleccionados, i)
+                terminalVet.editarDatosDeFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada, j)
+
+    def eliminarCita(self, parent):
+
+        for i in self.lista.curselection():
+            self.elementoAEditar = self.lista.get(i)
+
+            if(self.elementoAEditar != None): #verificamos que haya seleccionado un fecha
+                fechaSeleccionada = self.calendario.get_date()
+                datosFecha = terminalVet.getFechaCalendario(fechaSeleccionada)
+
+                cantidadDeElementos = len(datosFecha["ruts"])
+                for j in range(cantidadDeElementos):
+                    if(datosFecha["horasInicio"][j] == str(self.horaInicialArray[i])): #identificamos la hora seleccionada para de esta manera eliminar los datos
+                        datos = 'Hora de atención : '+str(self.horaInicialArray[i])+':'+str(self.minutoInicialArray[i])+'-'+str(self.horaFinalArray[i])+':'+str(self.minutoFinalArray[i])
+                        self.lista.delete(i) #en al linea anterior lar horas permaneceran igual, sin embargo datos como rut y numeros son sacados de la clase calendario
+                        self.lista.insert(i, datos)
+
+                        terminalVet.eliminarDatosDeFecha(fechaSeleccionada, j)
+                        break
+
+       
+            
+            #indicadoresDeCitas.append(self.horaInicialArray[i])
+            #indicadoresDeCitas.append(self.minutoInicialArray[i])
+            #indicadoresDeCitas.append(self.horaFinalArray[i])
+            #indicadoresDeCitas.append(self.minutoFinalArray[i])
+
+            break
+        return  #indicadoresDeCitas
+              
+                   
+    
+        
 
 
 #----------------------------------------------------------------------------           ------------------------------              ------------------------------                  
