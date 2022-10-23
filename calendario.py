@@ -21,6 +21,11 @@ class Calendario:
     def setId(self, idCalendario):
         self.idCalendario = idCalendario
     
+    def agregarCalendarioBaseDeDatos(self, idVeterinaria, nombreVeterinaria, mycursor, db):
+        sql = 'INSERT INTO calendario VALUES (%s, %s, %s)'
+        mycursor.execute(sql, (str(self.idCalendario), str(idVeterinaria), str(nombreVeterinaria)))
+        db.commit()
+    
     def getFecha(self, fecha):
         for i in range(len(self.fechasAsignadas)): #recorremos las fechas y obetemos la elegida
             if (self.fechasAsignadas[i]["fecha"] == fecha):
@@ -54,26 +59,26 @@ class Calendario:
         for i in range(len(self.fechasAsignadas)):
             if (self.fechasAsignadas[i]["fecha"] == fecha):
                 id  = str(uuid.uuid4())
-                self.fechasAsignadas["ruts"].append(rut)
-                self.fechasAsignadas["numeros"].append(telefono)
-                self.fechasAsignadas["horasInicio"].append(horasInicio)
-                self.fechasAsignadas["minutosInicio"].append(minutosInicio)
-                self.fechasAsignadas["horasFin"].append(horasFinal)
-                self.fechasAsignadas["minutosFin"].append(minutosFinal)
-                self.fechasAsignadas["id"].append(id)
+                self.fechasAsignadas[i]["ruts"].append(rut)
+                self.fechasAsignadas[i]["numeros"].append(telefono)
+                self.fechasAsignadas[i]["horasInicio"].append(horasInicio)
+                self.fechasAsignadas[i]["minutosInicio"].append(minutosInicio)
+                self.fechasAsignadas[i]["horasFin"].append(horasFinal)
+                self.fechasAsignadas[i]["minutosFin"].append(minutosFinal)
+                self.fechasAsignadas[i]["id"].append(id)
                 self.guardarDatosDeCalendarioEnBaseDeDatos(i, mycursor, db)
                 break
        
     def agregarDatosAFechaSinGuardadoEnBaseDeDatos(self, fecha, rut, telefono, horasInicio, minutosInicio, horasFinal, minutosFinal, id): #agregamos datos a una fecha ya existente 
         for i in range(len(self.fechasAsignadas)):
             if (self.fechasAsignadas[i]["fecha"] == fecha):
-                self.fechasAsignadas["ruts"].append(rut)
-                self.fechasAsignadas["numeros"].append(telefono)
-                self.fechasAsignadas["horasInicio"].append(horasInicio)
-                self.fechasAsignadas["minutosInicio"].append(minutosInicio)
-                self.fechasAsignadas["horasFin"].append(horasFinal)
-                self.fechasAsignadas["minutosFin"].append(minutosFinal)
-                self.fechasAsignadas["id"].append(id)
+                self.fechasAsignadas[i]["ruts"].append(rut)
+                self.fechasAsignadas[i]["numeros"].append(telefono)
+                self.fechasAsignadas[i]["horasInicio"].append(horasInicio)
+                self.fechasAsignadas[i]["minutosInicio"].append(minutosInicio)
+                self.fechasAsignadas[i]["horasFin"].append(horasFinal)
+                self.fechasAsignadas[i]["minutosFin"].append(minutosFinal)
+                self.fechasAsignadas[i]["id"].append(id)
                 break
     
     #def guardarCalendariosEnBaseDeDatos(self, idVeterinaria, nombreVeterinaria):
@@ -85,13 +90,14 @@ class Calendario:
 
         ulitmo =  len(self.fechasAsignadas[idFecha]["numeros"])-1 #ocupamos ultimo para identificar la ultimo hora, minuot, rut y numero gingresda y que sera guardado en la base de datos
         fecha = self.fechasAsignadas[idFecha]["fecha"].split('/')
-        fechaCompleta = str(fecha[2])+"-"+str(fecha[1])+"-"+str(fecha[0])+" "+str(self.fechasAsignadas[idFecha]["horas"][ulitmo])+":"+str(self.fechasAsignadas[idFecha]["minutos"][ulitmo])+":00"
+        fechaCompletaInicial = str(fecha[2])+"-"+str(fecha[1])+"-"+str(fecha[0])+" "+str(self.fechasAsignadas[idFecha]["horasInicio"][ulitmo])+":"+str(self.fechasAsignadas[idFecha]["minutosInicio"][ulitmo])+":00"
+        fechaCompletaFinal = str(fecha[2])+"-"+str(fecha[1])+"-"+str(fecha[0])+" "+str(self.fechasAsignadas[idFecha]["horasFin"][ulitmo])+":"+str(self.fechasAsignadas[idFecha]["minutosFin"][ulitmo])+":00"
 
         print("82 "+str(str(self.fechasAsignadas[idFecha]["id"][ulitmo])))
         print("83 "+str(str(self.fechasAsignadas[idFecha])))
 
-        sql = 'INSERT INTO fechassolicitadas (idFechasSolicitadas, FechasSolicitadascol, Rut, NumeroDeContacto, Calendario_idCalendario) VALUES (%s, %s, %s, %s, %s)'
-        mycursor.execute(sql, (str(self.fechasAsignadas[idFecha]["id"][ulitmo]), str(fechaCompleta), str(self.fechasAsignadas[idFecha]["ruts"][ulitmo]), str(self.fechasAsignadas[idFecha]["numeros"][ulitmo]), str(self.idCalendario))) #cambiar al terminal en el que nos encontramos
+        sql = 'INSERT INTO fechassolicitadas (idFechasSolicitadas, FechaInicial, FechaFinal, Rut, NumeroDeContacto, Calendario_idCalendario) VALUES (%s, %s, %s, %s, %s, %s)'
+        mycursor.execute(sql, (str(self.fechasAsignadas[idFecha]["id"][ulitmo]), str(fechaCompletaInicial), str(fechaCompletaFinal), str(self.fechasAsignadas[idFecha]["ruts"][ulitmo]), str(self.fechasAsignadas[idFecha]["numeros"][ulitmo]), str(self.idCalendario))) #cambiar al terminal en el que nos encontramos
         db.commit()
 
     def solicitarDatosCalendarioBaseDeDatos(self, mycursor):
@@ -118,32 +124,57 @@ class Calendario:
             diccionarioDeFecha = {'fecha': fecha, 'ruts':[], 'numeros':[], 'horasInicio':[], 'minutosInicio':[], 'horasFin':[], 'minutosFin':[] , 'id': []}
 
             self.agregarFechasSinGuardadoEnBaseDeDatos(fecha, diccionarioDeFecha)
+            
             self.agregarDatosAFechaSinGuardadoEnBaseDeDatos(fecha, rut, numero, horaInicial, minutosInicial, horaFinal, minutosFinal ,str(datosCalendario[i][0]))
     
-    def editarDatosDeFecha(self, fecha, rut, telefono, horas, minutos, cita, mysql, db): #agregamos datos a una fecha ya existente 
+    def editarDatosDeFecha(self, fecha, rut, telefono, horasInicio, minutosInicio, horasFinal, minutosFinal, cita, mysql, db): #agregamos datos a una fecha ya existente 
         for i in range(len(self.fechasAsignadas)):
             if (self.fechasAsignadas[i]["fecha"] == fecha):
+
                 self.fechasAsignadas[i]["ruts"][cita] = rut
-                self.fechasAsignadas[i]["minutos"][cita] = minutos
-                self.fechasAsignadas[i]["horas"][cita] = horas
-                self.fechasAsignadas[i]["numeros"][cita] = telefono
+                self.fechasAsignadas[i]["numeros"][cita]= telefono
+                self.fechasAsignadas[i]["horasInicio"][cita] = horasInicio
+                self.fechasAsignadas[i]["minutosInicio"][cita] = minutosInicio
+                self.fechasAsignadas[i]["horasFin"][cita] = horasFinal
+                self.fechasAsignadas[i]["minutosFin"][cita] = minutosFinal
+   
                 self.editarDatosDeFechaEnBaseDeDatos(i, cita, mysql, db)
                 break
     
     def editarDatosDeFechaEnBaseDeDatos(self, idFecha, idicadorDeDatosAAgregar, mycursor, db):
 
-        fecha = self.fechasAsignadas[idFecha]["fecha"].split('/')
-        fechaCompleta = str(fecha[2])+"-"+str(fecha[1])+"-"+str(fecha[0])+" "+str(self.fechasAsignadas[idFecha]["horas"][idicadorDeDatosAAgregar])+":"+str(self.fechasAsignadas[idFecha]["minutos"][idicadorDeDatosAAgregar])+":00"
+        fecha = self.fechasAsignadas[idFecha]["fecha"].split('/') #dividimos la fecha en componentes
+        fechaCompletaInicial = str(fecha[2])+"-"+str(fecha[1])+"-"+str(fecha[0])+" "+str(self.fechasAsignadas[idFecha]["horasInicio"][idicadorDeDatosAAgregar])+":"+str(self.fechasAsignadas[idFecha]["minutosInicio"][idicadorDeDatosAAgregar])+":00"
+        fechaCompletaFinal = str(fecha[2])+"-"+str(fecha[1])+"-"+str(fecha[0])+" "+str(self.fechasAsignadas[idFecha]["horasFin"][idicadorDeDatosAAgregar])+":"+str(self.fechasAsignadas[idFecha]["minutosFin"][idicadorDeDatosAAgregar])+":00"
 
-        sql = 'UPDATE fechassolicitadas SET Rut =%s, NumeroDeContacto = %s, FechasSolicitadascol = %s WHERE idFechasSolicitadas = %s'
-        mycursor.execute(sql, (str(self.fechasAsignadas[idFecha]["ruts"][idicadorDeDatosAAgregar]), str(self.fechasAsignadas[idFecha]["numeros"][idicadorDeDatosAAgregar]), str(fechaCompleta), str(self.fechasAsignadas[idFecha]["id"][idicadorDeDatosAAgregar]))) #cambiar al terminal en el que nos encontramos
-        db.commit()
+        print("145 calendario : "+str(self.fechasAsignadas[idFecha]["id"][idicadorDeDatosAAgregar]))
     
-    def getDatosAEditar(self, fecha, cita): #agregamos datos a una fecha ya existente 
+        sql = 'UPDATE fechassolicitadas SET Rut =%s, NumeroDeContacto = %s, FechaInicial = %s, FechaFinal = %s WHERE idFechasSolicitadas = %s'
+        mycursor.execute(sql, (str(self.fechasAsignadas[idFecha]["ruts"][idicadorDeDatosAAgregar]), str(self.fechasAsignadas[idFecha]["numeros"][idicadorDeDatosAAgregar]), str(fechaCompletaInicial), str(fechaCompletaFinal),  str(self.fechasAsignadas[idFecha]["id"][idicadorDeDatosAAgregar]))) #cambiar al terminal en el que nos encontramos
+        db.commit()
+
+        print("149")
+    
+    def eliminarDatosDeFecha(self, fecha, cita, mysql, db): #agregamos datos a una fecha ya existente 
         for i in range(len(self.fechasAsignadas)):
             if (self.fechasAsignadas[i]["fecha"] == fecha):
-                return self.fechasAsignadas[i]    
-        return None
+
+                self.fechasAsignadas[i]["ruts"].pop(cita)
+                self.fechasAsignadas[i]["numeros"].pop(cita)
+                self.fechasAsignadas[i]["horasInicio"].pop(cita)
+                self.fechasAsignadas[i]["minutosInicio"].pop(cita)
+                self.fechasAsignadas[i]["horasFin"].pop(cita)
+                self.fechasAsignadas[i]["minutosFin"].pop(cita)
+   
+                self.eliminarDatosDeFechaBaseDeDatos(i, cita, mysql, db)
+                break
+    
+    def eliminarDatosDeFechaBaseDeDatos(self, idFecha, idicadorDeDatosAAgregar, mycursor, db):
+
+        sql = 'DELETE FROM fechassolicitadas WHERE idFechasSolicitadas = %s'
+        mycursor.execute(sql, (str(self.fechasAsignadas[idFecha]["id"][idicadorDeDatosAAgregar]),)) #cambiar al terminal en el que nos encontramos
+        db.commit()
+
     
     def actualizarCitaEnBaseDeDatos(self, idFecha, mycursor, db):
         pass
