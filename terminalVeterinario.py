@@ -713,6 +713,9 @@ if __name__ != "__main__":
         def verificarFechaCalendario(self, fecha):
             return self.calendaio.verificarFecha(fecha)
         
+        def verificarFechaEnHorario(self, fecha, horaInicial, horaFinal):
+            return self.calendaio.verificarFechaHorario(fecha, horaInicial, horaFinal) 
+        
         def agregarFechasCalendario(self, fechas):
             self.calendaio.agregarFechas(fechas,mycursor, db)
         

@@ -180,7 +180,7 @@ class screenPantallaInicial(ctk.CTkFrame):
         self.botonBuscarMascota.pack(padx=20, pady=50)
         self.botonIngresarMascota = ctk.CTkButton(self.frameBotonesPrincipal, width=300, height=120, text="Ingresar mascota al sistema", text_font=Font_tuple, fg_color="#28587A", hover_color="#142C3D", command= lambda: parent.update_frame(parent.screenFormularioAgregarMascota, parent, container))
         self.botonIngresarMascota.pack(padx=20, pady=50)
-        self.botonCalendario = ctk.CTkButton(self.frameBotonesPrincipal, width=300, height=120, text="Ver calendario de vacunación", text_font=Font_tuple, fg_color="#28587A", hover_color="#142C3D", command= lambda: parent.update_frame(parent.screenCalendarioVacunacion, parent, container))
+        self.botonCalendario = ctk.CTkButton(self.frameBotonesPrincipal, width=300, height=120, text="Ver calendario", text_font=Font_tuple, fg_color="#28587A", hover_color="#142C3D", command= lambda: parent.update_frame(parent.screenCalendarioVacunacion, parent, container))
         self.botonCalendario.pack(padx=20, pady=50)
         #futuro boton que liste a las mascotas
         #Boton que permita manejar los insumos
@@ -859,7 +859,7 @@ class screenFormularioEditarFicha(ctk.CTkFrame):
         
         hoy = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         terminalVet.editarFichaMedica(idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, idMascota, tratamientos, causaVisita, medicamentos, vacunas, hoy)
-        self.botonEditarFichaGeneralSCrearFicha.configure(state=DISABLED)
+        #self.botonEditarFichaGeneralSCrearFicha.configure(state=DISABLED)
         self.labelMensajeEditadoGeneral.grid(row=1, column=2, pady=15)
         mascotaActual.setActualFichaMedicaConsulta(str(fechaConsulta), True)
         
@@ -1596,7 +1596,7 @@ class screenFormularioEditarFichaAuthCirugia(ctk.CTkFrame): #Ta weno ya
 
         terminalVet.editarFichaOperacion(mascotaActual.getId(), idFicha, diagnostico, cirugia, hoy)
         self.labelMensajeEditadoFichaAuthCirugia.grid(row=0, column=0, padx=10, pady=10)
-        self.botonEditarSFichaAuthCirugia.configure(state=DISABLED)
+        #self.botonEditarSFichaAuthCirugia.configure(state=DISABLED)
 
 
 class screenFormularioCrearFichaAuthCirugia(ctk.CTkFrame): 
@@ -2118,7 +2118,7 @@ class screenFormularioEditarFichaHospt(ctk.CTkFrame):
         motivo = self.entradaMotivoHospSEditarFichaHosp.get("1.0", END)
         hoy = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.labelMensajeAgregarSEditarFichaHosp.pack()
-        self.botonEditarSRditarFichaHosp.configure(state=DISABLED)
+        #self.botonEditarSRditarFichaHosp.configure(state=DISABLED)
         terminalVet.editarFichaHospitalizacion(mascotaActual.getId(), idFicha, motivo, hoy)
 
         # terminalVet.editarFichaHospitalizacion(mascotaActual.getId(), hospDicc)
@@ -2359,21 +2359,22 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         
             self.indicarFechasEnCalendarioPostCargaBaseDeDatos(parent)
 
-            self.ingresarCita = ctk.CTkButton(self.frameIngresoDeDatos, width=20, text='Ingresar cita de vacunación', command=lambda: self.ingresarCitaFuncion())
+            self.ingresarCita = ctk.CTkButton(self.frameIngresoDeDatos, width=20, text='Ingresar cita', command=lambda: self.ingresarCitaFuncion())
             self.ingresarCita.grid(row=4, column=0, padx=10 , pady=10)
 
-            self.botonEditar = ctk.CTkButton(self.frameIngresoDeDatos, width= 20, text='Editar horario', command=lambda: self.editarHorario(parent), hover_color="#142C3D")
-            self.botonEditar.grid(row=10, column=0, padx=10 , pady=10)
+            self.botonEditar = ctk.CTkButton(self.frameIngresoDeDatos, width= 20, text='Editar cita', command=lambda: self.editarHorario(parent), hover_color="#142C3D")
+            self.botonEditar.grid(row=5, column=0, padx=10 , pady=10)
 
-            self.botonEliminar = ctk.CTkButton(self.frameIngresoDeDatos, width= 20, text='Eliminar horario', command=lambda: self.eliminarCita(parent), hover_color="#142C3D")
-            self.botonEliminar.grid(row=11, column=0, padx=10 , pady=10)
+            self.botonEliminar = ctk.CTkButton(self.frameIngresoDeDatos, width= 20, text='Eliminar cita', command=lambda: self.eliminarCita(parent), hover_color="#142C3D")
+            self.botonEliminar.grid(row=6, column=0, padx=10 , pady=10)
 
-            self.botonConfirmarEditar = ctk.CTkButton(self.frameIngresoDeDatos, width= 20, text='Confirmar edicion de horario', command=lambda: self.clickConfirmarEdicion(parent), hover_color="#142C3D")
-            self.botonConfirmarEditar.grid(row=8, column=0, padx=10 , pady=10)
+            self.botonConfirmarEditar = ctk.CTkButton(self.frameIngresoDeDatos, width= 20, text='Confirmar edicion de cita', command=lambda: self.clickConfirmarEdicion(parent), hover_color="#142C3D")
+            self.botonConfirmarEditar.grid(row=10, column=0, padx=10 , pady=10)
 
             self.elementoAEditar = None
+            self.datosAntesDeEdicion = None
 
-            self.verCitas= ctk.CTkButton(self.frameBotonesCalendario, width=20, text='Revisar Horarios De Vacunación', command=lambda: self.mostarFechas(parent))
+            self.verCitas= ctk.CTkButton(self.frameBotonesCalendario, width=20, text='Revisar Horarios Reservados', command=lambda: self.mostarFechas(parent))
             self.verCitas.grid(row=6, column=0, padx=10 , pady=10)
 
             self.botonVolverBuscar = ctk.CTkButton(self.frameBotonesCalendario, width= 20, text='Volver', command=lambda: parent.update_frame(parent.screenBuscarMascota, parent, container), hover_color="#142C3D")
@@ -2423,13 +2424,13 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
             self.entradaRut.grid(row=6, column=1, padx=10 , pady=10)
 
             self.numeroDeTelefonoLabel = ctk.CTkLabel(self.frameIngresoDeDatos, text='Telefono :', text_color="black", text_font=Font_tuple14)
-            self.numeroDeTelefonoLabel.grid(row=7, column=0, padx=10 , pady=10)
+            self.numeroDeTelefonoLabel.grid(row=8, column=0, padx=10 , pady=10)
 
             self.numeroDeTelefono = AutocompleteCombobox(self.frameIngresoDeDatos, completevalues = self.listaNumeros)
-            self.numeroDeTelefono.grid(row=7, column=1, padx=10 , pady=10)
+            self.numeroDeTelefono.grid(row=8, column=1, padx=10 , pady=10)
 
-            self.confirmarCita = ctk.CTkButton(self.frameIngresoDeDatos, width=20, text='Confirmar cita de vacunación', command=lambda: self.clickConfirmarFecha(parent))
-            self.confirmarCita.grid(row=8, column=0, padx=10 , pady=10)
+            self.confirmarCita = ctk.CTkButton(self.frameIngresoDeDatos, width=20, text='Confirmar cita', command=lambda: self.clickConfirmarFecha(parent))
+            self.confirmarCita.grid(row=10, column=0, padx=10 , pady=10)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
 
             self.lista = tk.Listbox(self.frameIngresoDeDatos, width=70, height=7, selectmode='browse', font=('Helvetica', '13')) #creanis la lista pra mostrar nuestros datos
@@ -2449,7 +2450,15 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
             #self.botonConf = ctk.CTkButton(self, width=10, text='Confirmar', command=lambda: self.clickConfirmar(parent))
             #self.botonConf.pack(padx=10, pady=30)
             #self.labelErrorIngreso = ctk.CTkLabel(self, text="Llave no existente", text_font=Font_tuple12, text_color='red')
-            
+
+#mensajes de error 
+            self.labelErrorRutTutor = ctk.CTkLabel(self.frameIngresoDeDatos, text="Ingrese rut válido", text_font=Font_tuple12, text_color="#c1121f")
+            self.labelErrorNumeroTelefono = ctk.CTkLabel(self.frameIngresoDeDatos, text="Ingrese número válido (Solo números)", text_font=Font_tuple12, text_color="#c1121f")
+            self.labelErrorSeleccion = ctk.CTkLabel(self.frameIngresoDeDatos, text="Seleccione un horario válido", text_font=Font_tuple12, text_color="#c1121f")
+            self.labelErrorHorario = ctk.CTkLabel(self.frameIngresoDeDatos, text="Seleccione una horas y minutos validos, margen de 30 minutos", text_font=Font_tuple12, text_color="#c1121f")
+            self.labelErrorSeleccionEdicion = ctk.CTkLabel(self.frameIngresoDeDatos, text="Seleccione un horario previamente reservado para edición", text_font=Font_tuple12, text_color="#c1121f")
+            self.labelErrorSeleccionEliminacion = ctk.CTkLabel(self.frameIngresoDeDatos, text="Seleccione un horario previamente reservado para eliminación", text_font=Font_tuple12, text_color="#c1121f")
+                
     def ocularElementosDeLLenado(self):
         self.hora.grid_remove()
         self.horaLabel.grid_remove()
@@ -2490,6 +2499,13 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         self.botonEditar.grid_remove()
         self.botonConfirmarEditar.grid_remove()
         self.ingresarCita.grid_remove()
+
+        self.labelErrorSeleccionEliminacion.grid_remove()
+        self.labelErrorSeleccionEdicion.grid_remove()
+
+               #ocultamos mensajes de error
+        self.labelErrorNumeroTelefono.grid_remove()
+        self.labelErrorRutTutor.grid_remove()
         pass
     
     def mostarElementosDeEditar(self):
@@ -2511,6 +2527,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         self.botonEditar.grid_remove()
         self.ingresarCita.grid_remove()
         self.confirmarCita.grid_remove()
+        self.botonEliminar.grid_remove()
         self.botonConfirmarEditar.grid()
     
     def ocultarElementosDeEditar(self):
@@ -2553,15 +2570,58 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         self.ingresarCita.grid()
         self.botonEliminar.grid()
     
-    def ingresarCitaFuncion(self):
-        indicadorDeCitas = []
-        self.mostarElementosDeLlenado()
-        indicadorDeCitas = self.obtenerSeccionHorariaSeleccionada() #otenemos los datos de las listas
+    def quitarMensajesDeErrorBotones(self):
+        self.labelErrorSeleccionEliminacion.grid_remove()
+        self.labelErrorSeleccionEdicion.grid_remove()
+        self.labelErrorSeleccion.grid_remove()
+    
+    def validarDatos(self, parent, rutTutor, numTel):
+        
+        flag = True
 
-        self.horaInicialValor.set(indicadorDeCitas[0]) #seteamos los valores en los campos 
-        self.minutosInicialValor.set(indicadorDeCitas[1])
-        self.horaValor.set(indicadorDeCitas[2])
-        self.minutosValor.set(indicadorDeCitas[3])
+        if(parent.validarRut(rutTutor) is not True):
+            flag = False
+            self.labelErrorRutTutor.grid(row=7, column=1, padx=10 , pady=10)
+        else:
+            print("Valid")
+            self.labelErrorRutTutor.grid_forget()
+
+        if((parent.filtroNum(numTel) is not True) or (parent.filtroNoValidChar(numTel) is not True) or (len(numTel) < 9)):
+            flag = False
+            self.labelErrorNumeroTelefono.grid(row=9, column=1, padx=10 , pady=10)
+        else: 
+            self.labelErrorNumeroTelefono.grid_forget()
+
+        
+        return flag
+        
+    
+    def ingresarCitaFuncion(self):
+        for a in self.lista.curselection():
+            self.elementoAEditar = self.lista.get(a)
+            break
+
+        if(self.elementoAEditar is None):
+            self.labelErrorSeleccion.grid(row=7, column=0, padx=10 , pady=10)
+        else:
+            #
+            print("2593 :"+ str(self.horaFinalArray[a]))
+            fechaSeleccionada = self.calendario.get_date()
+
+            if(terminalVet.verificarFechaEnHorario(fechaSeleccionada, self.horaInicialArray[a] ,self.horaFinalArray[a]) == False):
+
+                self.quitarMensajesDeErrorBotones()
+
+                indicadorDeCitas = []
+                self.mostarElementosDeLlenado()
+                indicadorDeCitas = self.obtenerSeccionHorariaSeleccionada() #otenemos los datos de las listas
+
+                self.horaInicialValor.set(indicadorDeCitas[0]) #seteamos los valores en los campos 
+                self.minutosInicialValor.set(indicadorDeCitas[1])
+                self.horaValor.set(indicadorDeCitas[2])
+                self.minutosValor.set(indicadorDeCitas[3])
+            else:
+                self.labelErrorSeleccion.grid(row=7, column=0, padx=10 , pady=10)
         
     def obtenerSeccionHorariaSeleccionada(self):
         indicadoresDeCitas = []
@@ -2577,7 +2637,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
     def clickConfirmarFecha(self, parent):
 
         fechaSeleccionada = self.calendario.get_date()
-        self.indicarFechasEnCalendario(parent, fechaSeleccionada)
+        
 
         #obtenermos la hora y minutos
         horaInicialSeleccionada = self.horaInicial.get()
@@ -2588,22 +2648,24 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
 
         rutIngresado = self.entradaRut.get()
         numeroIngresado = self.numeroDeTelefono.get()
+
+        if(self.validarDatos(parent, rutIngresado, numeroIngresado) == True):
+            self.indicarFechasEnCalendario(parent, fechaSeleccionada) #marcamod en color verde la fecha seleccionada
+            if (terminalVet.verificarFechaCalendario(fechaSeleccionada) == False):
+                id  = str(uuid.uuid4())
+                fechas = {'fecha': fechaSeleccionada, 'ruts':[], 'numeros':[], 'horasInicio':[], 'minutosInicio':[], 'horasFin':[], 'minutosFin':[] , 'id': []}
+                fechas["ruts"].append(rutIngresado)
+                fechas["numeros"].append(numeroIngresado)
+                fechas["horasInicio"].append(horaInicialSeleccionada)
+                fechas["minutosInicio"].append(minutosInicialSeleccionados)
+                fechas["horasFin"].append(horaFinalSeleccionada)
+                fechas["minutosFin"].append(minutosFinalSeleccionada)
+                fechas["id"].append(id)
+                terminalVet.agregarFechasCalendario(fechas)
+            else:
+                terminalVet.agregarDatosAFechasCalendario(fechaSeleccionada, rutIngresado, numeroIngresado, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada)
         
-        if (terminalVet.verificarFechaCalendario(fechaSeleccionada) == False):
-            id  = str(uuid.uuid4())
-            fechas = {'fecha': fechaSeleccionada, 'ruts':[], 'numeros':[], 'horasInicio':[], 'minutosInicio':[], 'horasFin':[], 'minutosFin':[] , 'id': []}
-            fechas["ruts"].append(rutIngresado)
-            fechas["numeros"].append(numeroIngresado)
-            fechas["horasInicio"].append(horaInicialSeleccionada)
-            fechas["minutosInicio"].append(minutosInicialSeleccionados)
-            fechas["horasFin"].append(horaFinalSeleccionada)
-            fechas["minutosFin"].append(minutosFinalSeleccionada)
-            fechas["id"].append(id)
-            terminalVet.agregarFechasCalendario(fechas)
-        else:
-           terminalVet.agregarDatosAFechasCalendario(fechaSeleccionada, rutIngresado, numeroIngresado, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada)
-        
-        self.ocularElementosDeLLenado()
+            self.ocularElementosDeLLenado()
 
     def indicarFechasEnCalendario(self, parent, fechaSeleccionada):
 
@@ -2659,7 +2721,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
 
             for j in range(cantidadDeElementos):
                 for i in range(len(self.horaInicialArray)): #iteramos por el maximo largo
-                        if(fechaObtenida["horasInicio"][j] == str(self.horaInicialArray[i])): #identificamos la hora de 
+                        if(fechaObtenida["horasInicio"][j] == str(self.horaInicialArray[i]) and fechaObtenida["minutosInicio"][j] == str(self.minutoInicialArray[i])): #identificamos la hora de 
                             datos = 'Hora de atención : '+str(self.horaInicialArray[i])+':'+str(self.minutoInicialArray[i])+'-'+str(self.horaFinalArray[i])+':'+str(self.minutoFinalArray[i])+" Rut : "+str(fechaObtenida["ruts"][j])+" numero : "+str(fechaObtenida["numeros"][j])
                             self.lista.delete(i) #en al linea anterior lar horas permaneceran igual, sin embargo datos como rut y numeros son sacados de la clase calendario
                             self.lista.insert(i, datos)
@@ -2677,77 +2739,135 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
     
 
     def editarHorario(self, parent):
+        self.labelErrorSeleccionEliminacion.grid_remove()
+        self.labelErrorSeleccionEdicion.grid_remove()
+        indicadorDeSeleccion = False
         for a in self.lista.curselection():
             self.elementoAEditar = self.lista.get(a)
 
             if(self.elementoAEditar != None): #verificamos que haya seleccionado un fecha
-                self.mostarElementosDeEditar()
                 fechaSeleccionada = self.calendario.get_date()
                 datosFecha = terminalVet.getFechaCalendario(fechaSeleccionada)
 
-                cantidadDeElementos = len(datosFecha["ruts"])
-                print("2696")
-                for j in range(cantidadDeElementos):
-                    if(datosFecha["horasInicio"][j] == str(self.horaInicialArray[a])): #identificamos la hora de 
+                if(datosFecha != False):#verificamos que haya una cita en el horario seleccionado
+                    self.quitarMensajesDeErrorBotones()
+                    cantidadDeElementos = len(datosFecha["ruts"])
+                    
+                    for j in range(cantidadDeElementos):
+                        if((datosFecha["horasInicio"][j] == str(self.horaInicialArray[a])) and (datosFecha["minutosInicio"][j] == str(self.minutoInicialArray[a])) and datosFecha["ruts"][j] is not None): #identificamos la hora de 
 
-                        self.horaInicialValor.set(datosFecha["horasInicio"][j])
-                        self.minutosInicialValor.set(datosFecha["minutosInicio"][j])
+                            print("2724 : "+str(datosFecha["horasInicio"][j])+"-"+str(self.minutoInicialArray[a]))
 
-                        self.horaValor.set(datosFecha["horasFin"][j])
-                        self.minutosValor.set(datosFecha["minutosFin"][j])
+                            self.horaInicialValor.set(datosFecha["horasInicio"][j])
+                            self.minutosInicialValor.set(datosFecha["minutosInicio"][j])
 
-                        self.entradaRut.delete(0, 'end')
-                        self.entradaRut.insert(0, str(datosFecha["ruts"][j]))
-                        self.numeroDeTelefono.delete(0, 'end')
-                        self.numeroDeTelefono.insert(0, str(datosFecha["numeros"][j]))
+                            self.horaValor.set(datosFecha["horasFin"][j])
+                            self.minutosValor.set(datosFecha["minutosFin"][j])
 
-                        self.elementoAEditar = datosFecha
-                        break
+                            horasInciales = [datosFecha["horasInicio"][j], datosFecha["minutosInicio"][j], datosFecha["horasFin"][j], datosFecha["minutosFin"][j]]
 
-                #cargamos los datos a editar en los entry
-
-                
-    
-    def clickConfirmarEdicion(self, parent):
+                            if(str(datosFecha["ruts"][j]) is not None):
+                                self.entradaRut.delete(0, 'end')
+                                self.entradaRut.insert(0, str(datosFecha["ruts"][j]))
+                                self.numeroDeTelefono.delete(0, 'end')
+                                self.numeroDeTelefono.insert(0, str(datosFecha["numeros"][j]))
+                                self.mostarElementosDeEditar()
+                                self.elementoAEditar = datosFecha
+                                self.datosAntesDeEdicion = horasInciales
+                                indicadorDeSeleccion = True
+                            
+                            break
+                else:
+                    self.labelErrorSeleccionEdicion.grid(row=7, column=0, padx=10 , pady=10)
+                    break
         
-        datosFecha = self.elementoAEditar
-        for j in range(len(datosFecha["ruts"])):
-            if(datosFecha["horasInicio"][j] == str(self.horaInicial.get())): #identificamos la hora de 
+        if(indicadorDeSeleccion == False): #verificamos que haya seleccionado una cita valida para edicion
+            self.labelErrorSeleccion.grid(row=7, column=0, padx=10 , pady=10)
+        else:
+            self.labelErrorSeleccion.grid_remove()
+                #cargamos los datos a editar en los entry
+    
+    def validarHoraSeleccionadaValida(self, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada):
 
-                self.ocultarElementosDeEditar()
-                fechaSeleccionada = self.calendario.get_date()
+        horaInicial = int(horaInicialSeleccionada)*100
+        minutosInicial = int(minutosInicialSeleccionados)
+        horaFinal = int(horaFinalSeleccionada)*100
+        minutosFinal = int(minutosFinalSeleccionada)
+
+        print(horaInicial)
+        print(minutosInicial)
+        print(horaFinal)
+        print(minutosFinal)
+
+        horarioInicial = horaInicial+minutosInicial
+        horarioFinal = horaFinal+minutosFinal
+        print(horarioInicial)
+        print(horarioFinal)
+
+        if(horarioFinal-horarioInicial == 30):
+            return True
+        
+        return False
+
+
+    def clickConfirmarEdicion(self, parent):
+
+        fechaSeleccionada = self.calendario.get_date()
                             
                     #obtenermos la hora y minutos
-                horaInicialSeleccionada = self.horaInicial.get()
-                minutosInicialSeleccionados = self.minutosInicial.get()
+        horaInicialSeleccionada = self.horaInicial.get()
+        minutosInicialSeleccionados = self.minutosInicial.get()
 
-                horaFinalSeleccionada = self.hora.get()
-                minutosFinalSeleccionada = self.minutos.get()
+        horaFinalSeleccionada = self.hora.get()
+        minutosFinalSeleccionada = self.minutos.get()
 
-                rutIngresado = self.entradaRut.get()
-                numeroIngresado = self.numeroDeTelefono.get()
+        rutIngresado = self.entradaRut.get()
+        numeroIngresado = self.numeroDeTelefono.get()
 
-                terminalVet.editarDatosDeFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada, j)
+        if(self.validarDatos(parent, rutIngresado, numeroIngresado) == True and self.validarHoraSeleccionadaValida(horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada) == True):
+        
+            datosFecha = self.elementoAEditar
+            for j in range(len(datosFecha["ruts"])):
+                if(datosFecha["horasInicio"][j] == str(self.datosAntesDeEdicion[0])): #identificamos la hora dentro del diccionario
+
+                    self.ocultarElementosDeEditar()
+                    self.labelErrorHorario.grid_remove()
+                    terminalVet.editarDatosDeFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada, j)
+        else:
+            self.labelErrorHorario.grid(row=12, column=0, padx=10 , pady=10)
 
     def eliminarCita(self, parent):
-
+        self.labelErrorSeleccionEliminacion.grid_remove()
+        self.labelErrorSeleccionEdicion.grid_remove()
+        indicadorDeSeleccion = False
         for i in self.lista.curselection():
             self.elementoAEditar = self.lista.get(i)
 
             if(self.elementoAEditar != None): #verificamos que haya seleccionado un fecha
                 fechaSeleccionada = self.calendario.get_date()
                 datosFecha = terminalVet.getFechaCalendario(fechaSeleccionada)
+                
+                if(datosFecha != False):#verificamos que haya una cita en el horario seleccionado
+                    self.quitarMensajesDeErrorBotones()
+                    cantidadDeElementos = len(datosFecha["ruts"])
+                    for j in range(cantidadDeElementos):
+                        if(datosFecha["horasInicio"][j] == str(self.horaInicialArray[i])): #identificamos la hora seleccionada para de esta manera eliminar los datos
+                            datos = 'Hora de atención : '+str(self.horaInicialArray[i])+':'+str(self.minutoInicialArray[i])+'-'+str(self.horaFinalArray[i])+':'+str(self.minutoFinalArray[i])
+                            self.lista.delete(i) #en al linea anterior lar horas permaneceran igual, sin embargo datos como rut y numeros son sacados de la clase calendario
+                            self.lista.insert(i, datos)
+                            indicadorDeSeleccion = True
+                            terminalVet.eliminarDatosDeFecha(fechaSeleccionada, j)
+                            break
+                else:
+                    self.labelErrorSeleccionEliminacion.grid(row=7, column=0, padx=10 , pady=10)
+                    break
 
-                cantidadDeElementos = len(datosFecha["ruts"])
-                for j in range(cantidadDeElementos):
-                    if(datosFecha["horasInicio"][j] == str(self.horaInicialArray[i])): #identificamos la hora seleccionada para de esta manera eliminar los datos
-                        datos = 'Hora de atención : '+str(self.horaInicialArray[i])+':'+str(self.minutoInicialArray[i])+'-'+str(self.horaFinalArray[i])+':'+str(self.minutoFinalArray[i])
-                        self.lista.delete(i) #en al linea anterior lar horas permaneceran igual, sin embargo datos como rut y numeros son sacados de la clase calendario
-                        self.lista.insert(i, datos)
+            break
 
-                        terminalVet.eliminarDatosDeFecha(fechaSeleccionada, j)
-                        break
-
+        if(indicadorDeSeleccion == False): #verificamos que haya seleccionado una cita valida para edicion
+            self.labelErrorSeleccion.grid(row=7, column=0, padx=10 , pady=10)
+        else:
+            self.labelErrorSeleccion.grid_remove()
        
             
             #indicadoresDeCitas.append(self.horaInicialArray[i])
@@ -2755,7 +2875,6 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
             #indicadoresDeCitas.append(self.horaFinalArray[i])
             #indicadoresDeCitas.append(self.minutoFinalArray[i])
 
-            break
         return  #indicadoresDeCitas
               
                    
