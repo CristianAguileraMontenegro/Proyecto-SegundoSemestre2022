@@ -42,6 +42,18 @@ class Calendario:
                 return True
         
         return False
+    
+    def verificarFechaHorario(self, fecha, horaInicial, horaFinal): #verificamos que la fecha ya haya sido agregada previamente
+        for i in range(len(self.fechasAsignadas)):
+            if (self.fechasAsignadas[i]["fecha"] == fecha):
+                for j in range(len(self.fechasAsignadas[i]["ruts"])):
+                    print("50 calendario :"+str(self.fechasAsignadas[i]["horasInicio"][j])+"-"+str(horaInicial))
+                    print("51 calendario :"+str(self.fechasAsignadas[i]["horasFin"][j])+"-"+str(horaFinal))
+                    if(str(self.fechasAsignadas[i]["horasInicio"][j]) == str(horaInicial) and str(self.fechasAsignadas[i]["horasFin"][j]) == str(horaFinal)):
+                        print("51 -")
+                        return True #existe la cita en la fecha
+        
+        return False
 
     def agregarFechas(self, fecha, mycursor, db):
         self.fechasAsignadas.append(fecha) #agregamos la fecha al arreglos
