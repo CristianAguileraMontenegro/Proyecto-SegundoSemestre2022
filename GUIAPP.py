@@ -3246,7 +3246,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         print(horarioInicial)
         print(horarioFinal)
 
-        if(horarioFinal-horarioInicial == 30):
+        if(horarioFinal-horarioInicial == 30 or horarioFinal-horarioInicial == 70):
             return True
         
         return False
