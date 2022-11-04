@@ -16,8 +16,8 @@ from fichaMedica import FichaMedica
 from calendario import Calendario
 
 db = mysql.connector.connect(
-    user='root',
-    password='root',
+    user='piero',
+    password='pieron123',
     host='localhost',
     database='mydb',
     port='3306'
