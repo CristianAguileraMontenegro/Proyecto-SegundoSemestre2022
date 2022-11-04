@@ -159,13 +159,12 @@ class Calendario:
         fechaCompletaInicial = str(fecha[2])+"-"+str(fecha[1])+"-"+str(fecha[0])+" "+str(self.fechasAsignadas[idFecha]["horasInicio"][idicadorDeDatosAAgregar])+":"+str(self.fechasAsignadas[idFecha]["minutosInicio"][idicadorDeDatosAAgregar])+":00"
         fechaCompletaFinal = str(fecha[2])+"-"+str(fecha[1])+"-"+str(fecha[0])+" "+str(self.fechasAsignadas[idFecha]["horasFin"][idicadorDeDatosAAgregar])+":"+str(self.fechasAsignadas[idFecha]["minutosFin"][idicadorDeDatosAAgregar])+":00"
 
-        print("145 calendario : "+str(self.fechasAsignadas[idFecha]["id"][idicadorDeDatosAAgregar]))
+        print("162 calendario : "+str(fechaCompletaInicial))
+        print("163 calendario : "+str(fechaCompletaFinal))
     
         sql = 'UPDATE fechassolicitadas SET Rut =%s, NumeroDeContacto = %s, FechaInicial = %s, FechaFinal = %s WHERE idFechasSolicitadas = %s'
         mycursor.execute(sql, (str(self.fechasAsignadas[idFecha]["ruts"][idicadorDeDatosAAgregar]), str(self.fechasAsignadas[idFecha]["numeros"][idicadorDeDatosAAgregar]), str(fechaCompletaInicial), str(fechaCompletaFinal),  str(self.fechasAsignadas[idFecha]["id"][idicadorDeDatosAAgregar]))) #cambiar al terminal en el que nos encontramos
         db.commit()
-
-        print("149")
     
     def eliminarDatosDeFecha(self, fecha, cita, mysql, db): #agregamos datos a una fecha ya existente 
         for i in range(len(self.fechasAsignadas)):
@@ -190,65 +189,6 @@ class Calendario:
     
     def actualizarCitaEnBaseDeDatos(self, idFecha, mycursor, db):
         pass
-    
-    
-    
-    """def getFechas(self):
-        return self.fechasAsignadas
-    
-    def getHorasAsignadas(self):
-        return self.horasAsignadas
-    
-    def getMinutosAsignadas(self):
-        return self.minutos
-
-    def getComentarios(self):
-        return self.comentarios
-
-    def getTelefonos(self):
-        return self.telefonos
-
-    def getRuts(self):
-        return self.ruts
-    
-    def setFechas(self, fechas):
-        self.fechasAsignadas = fechas
-
-    def setHoras(self, horas):
-        self.horasAsignadas = horas
-    
-    def setMinutos(self, minutos):
-        self.minutos = minutos
-    
-    def setComentarios(self, comentarios):
-        self.comentarios = comentarios
-    
-    def setTelefonos(self, telefonos):
-        self.telefonos = telefonos
-    
-    def setRuts(self, ruts):
-        self.ruts = ruts
-    
-    def agregarFechas(self, fecha:Date):
-        self.fechasAsignadas.append(fecha)
-    
-    def agregarHoras(self, horas):
-        self.horasAsignadas.append(horas)
-    
-    def agregarMinutos(self, minutos):
-        self.minutos.append(minutos)
-    
-    def agregarComentarios(self, comentarios):
-        self.comentarios.append(comentarios)
-    
-    def agregarTelefonos(self, telefono):
-        self.telefonos.append(telefono)
-    
-    def agregarRuts(self, rut):
-        self.ruts.append(rut)
-    
-    def guardarFechasEnBaseDeDatos(self):
-        pass"""
         
         
 

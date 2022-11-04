@@ -465,20 +465,31 @@ class screenDatosTotalMascota(ctk.CTkFrame): #HACERLA DPS
             self.labelErrorFicha2 = ctk.CTkLabel(self.frameListboxFichas, text="Seleccione una ficha", text_color="red")
 
     def verSeleccionado(self, lista, parent, container, mascotaActual):
-        item = lista.curselection()
-        if(item != ""):
-            auxTexto = lista.get(item)
+        item = None
+
+        for i in lista.curselection(): #recorrecmos para ver cual es el elemeto seleccionado, al ser uno solo se recorre uno
+            item = lista.get(i) #item el elemento seleccionado
+            break
+
+        if(item != None):
+            auxTexto = item
             textoSplit = auxTexto.split('Ficha del : ')
             fechaSolo = textoSplit[1]
             mascotaActual.setActualFichaMedicaConsulta(fechaSolo, True)
             parent.update_frame(parent.screenFormularioVerFicha, parent, container)
         else:
+            print("477 gui")
             self.labelErrorFicha.grid(row=2, column=0, padx=10, pady=10)
     
     def verSeleccionadoEditar(self, lista, parent, container, mascotaActual):
-        item = lista.curselection()
-        if(item != ""):
-            auxTexto = lista.get(item)
+        item = None
+
+        for i in lista.curselection(): #recorrecmos para ver cual es el elemeto seleccionado, al ser uno solo se recorre uno
+            item = lista.get(i) #item el elemento seleccionado
+            break
+
+        if(item != None):
+            auxTexto = item
             textoSplit = auxTexto.split('Ficha del : ')
             fechaSolo = textoSplit[1]
             mascotaActual.setActualFichaMedicaConsulta(fechaSolo, True)
@@ -871,20 +882,21 @@ class screenFormularioEditarFicha(ctk.CTkFrame):
             flagHosp = False
             flagOperacion = False
 
-            
-            if (mascotaActual.getHospitalizacion(idFicha) is True):
+            print("Gui 874 :"+str(mascotaActual.getHospitalizacion(idFicha)))
+            if (mascotaActual.getHospitalizacion(idFicha) == True):
                 flagHosp = True
+                print("Gui 877 :"+str(mascotaActual.getHospitalizacion(idFicha)))
                 self.botonEditarFichaHosp = ctk.CTkButton(self.frameButtonsSEditarFicha, width= 250, height= 80, text='Editar Ficha Hospitalizacion', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.clickEditarHosp(parent, container, flagHosp)) #hay que agregar cauda de la visita a la base de datos
                 self.botonEditarFichaHosp.grid(row=0, column=1, padx=5, pady=15)
             else:
                 self.botonAgregarFichaHosp = ctk.CTkButton(self.frameButtonsSEditarFicha, width= 250, height= 80, text='Agregar Ficha Hospitalizacion', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.clickEditarHosp(parent, container, flagHosp)) #hay que agregar cauda de la visita a la base de datos
                 self.botonAgregarFichaHosp.grid(row=0, column=1, padx=5, pady=15)
 
-            if(mascotaActual.getSedacion(idFicha) is False):
+            if(mascotaActual.getSedacion(idFicha) == False):
                 self.botonAgregarFichaSedacion = ctk.CTkButton(self.frameButtonsSEditarFicha, width= 250, height= 80, text='Agregar Ficha Sedación', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.clickAgregarSedacion(parent, container))
                 self.botonAgregarFichaSedacion.grid(row=0, column=2, padx=5, pady=15)
 
-            if(mascotaActual.getOperacion(idFicha) is True):
+            if(mascotaActual.getOperacion(idFicha) == True):
                 flagOperacion = True
                 self.botonEditarFichaOperacion = ctk.CTkButton(self.frameButtonsSEditarFicha, width= 250, height= 80, text='Editar Ficha Operación', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.clickEditarOperacion(parent, container, flagOperacion))
                 self.botonEditarFichaOperacion.grid(row=0, column=3, padx=5, pady=15)
@@ -1672,6 +1684,7 @@ class screenFormularioEditarMascota(ctk.CTkFrame):
             self.labelErrorAlergias.place_forget()
 
         if(flag):
+            print("1675")
             self.clickEditarMascota(parent, mascotaActual, nombreMascota, especie, color, raza, nombreTutor, rutTutor, numTel, alergias, direccion, fechaNac)
 
 
@@ -3252,7 +3265,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         minuto = 0
         hora2 = 0
         minuto2 = 30
-        for i in range(48): #iteramos por el maximo largo
+        for i in range(46): #iteramos por el maximo largo
             if i % 2 == 0:
                 hora2 = hora+1
                 datos = 'Hora de atención : '+str(hora)+':'+str(minuto2)+"-"+str(hora2)+':'+str(minuto)
@@ -3298,7 +3311,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         self.labelErrorSeleccionEliminacion.grid_remove()
         self.labelErrorSeleccionEdicion.grid_remove()
         indicadorDeSeleccion = False
-        for a in self.lista.curselection():
+        for a in self.lista.curselection(): #al solo ser uno toma el seleccionado
             self.elementoAEditar = self.lista.get(a)
 
             if(self.elementoAEditar != None): #verificamos que haya seleccionado un fecha

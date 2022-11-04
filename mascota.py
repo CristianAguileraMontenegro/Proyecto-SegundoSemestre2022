@@ -39,7 +39,7 @@ class Mascota:
         myCursor.execute(sql, (str(self.id), str(self.nombre), str(self.especie), str(self.color), str(self.raza), str(self.nombreTutor), str(self.rutTutor), str(self.numeroTelefono), str(self.direccion), str(self.FechaNacimiento)))
         dB.commit()
     
-    def actulizarMascota(self, myCursor, dB):
+    def actualizarMascota(self, myCursor, dB):
         sql = "UPDATE mascota SET nombreMascota = %s, especie = %s, color = %s, raza = %s, nombreTutor = %s, rutTutor = %s, numeroTelefono = %s, Dirección = %s,  FechaDeNacimiento = %s WHERE idMascota = %s"
         myCursor.execute(sql, (str(self.nombre), str(self.especie), str(self.color), str(self.raza), str(self.nombreTutor), str(self.rutTutor), str(self.numeroTelefono), str(self.direccion), str(self.FechaNacimiento), str(self.id)))
         dB.commit()
