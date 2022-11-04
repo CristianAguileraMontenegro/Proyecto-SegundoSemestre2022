@@ -14,10 +14,11 @@ from mascota import Mascota
 from tablaMedica import TablaMedica
 from fichaMedica import FichaMedica
 from calendario import Calendario
+from insumos import insumoVeterinario
 
 db = mysql.connector.connect(
-    user='piero',
-    password='pieron123',
+    user='root',
+    password='root',
     host='localhost',
     database='mydb',
     port='3306'
@@ -37,6 +38,7 @@ if __name__ != "__main__":
             self.mascotas:Mascota = []
             self.mascotasExternas:Mascota = [] #masconas no pertenecientes a la veterinrias
             self.calendaio = Calendario()
+            self.insumos:insumoVeterinario = []
 
             self.validarTokenDeActivacion()
             
@@ -152,8 +154,8 @@ if __name__ != "__main__":
         def editarMascota(self, id, nombre, especie, color, raza, nombreTutor, rutTutor, numeroTelefono, direccion, alergias, fechaNacimiento):
             db.commit()
             for mascota in self.mascotas:
-                if (mascota.getId == id):
-
+                if (str(mascota.getId()) == str(id)):
+                    print("158 terminal")
                     mascota.setNombreMascota(nombre)
                     mascota.setColorMascota(especie)
                     mascota.setEspecie(color)
@@ -180,8 +182,8 @@ if __name__ != "__main__":
                     
                     mascota.setAlergias(alergiasFinal)
 
-                    mascota.actulizarMascota(mycursor, db)
-                    mascota.actualizarAlergias(mycursor, db)
+                    mascota.actualizarMascota(mycursor, db)
+                    mascota.editarRegistroDeAlergias(mycursor, db)
         
         def verificarPresenciaDeTablaDeMascota(self, idMascota):
 
@@ -751,3 +753,36 @@ if __name__ != "__main__":
             return numeros
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ 
+#-----------Insumo
+
+        def setInsumos(self):
+            db.commit()
+            sql = 'SELECT idInsumo FROM Insumos WHERE Veterinaria_idVeterinaria = (%s) AND Veterinaria_nombreVeterinaria = (%s)'
+            mycursor.execute(sql, (str(self.idVeterinaria), str(self.nombreVeterinaria)))
+            datosInsumos = mycursor.fetchone()
+            
+            for i in range(len(datosInsumos)):
+                insumo = insumoVeterinario(datosInsumos[i])
+                insumo.obtenerDatosBaseDeDatos(db, mycursor)
+                self.insumos.append(insumo)
+        
+        def getNombreInsumo(self, idInsumo):
+            for i in range(len(self.insumos)):
+                if(str(self.insumos[i].getId()) == str(idInsumo)):
+                    return self.insumos[i].getNombreDeInsumo()
+            return False
+        
+        def getPrecioInsumo(self, idInsumo):
+            for i in range(len(self.insumos)):
+                if(str(self.insumos[i].getId()) == str(idInsumo)):
+                    return self.insumos[i].getPrecioInsumo()
+            return False
+        
+        def getIdInsumos(self):
+            idInsumos = []
+            for i in range(len(self.insumos)):
+                idInsumos.append(self.insumos[i].getId())
+            return idInsumos
+
+
+#-----------Insumo
