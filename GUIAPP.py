@@ -1998,15 +1998,15 @@ class screenFormularioEditarFichaAuthCirugia(ctk.CTkFrame): #Ta weno ya
 
         if(parent.filtroNoValidChar(diagnostico) is not True or (parent.filtroNum(diagnostico) is not False) or (len(diagnostico) < 6)):
             flag = False
-            self.labelErrorDiagnostico.place(x="210", y="445")
+            self.labelErrorDiagnosticoSEditarFichaAuthCirugia.place(x="210", y="445")
         else:
-            self.labelErrorDiagnostico.place_forget()
+            self.labelErrorDiagnosticoSEditarFichaAuthCirugia.place_forget()
 
         if((parent.filtroNoValidChar(cirugia) is not True) or (parent.filtroNum(cirugia) is not False) or (len(cirugia) < 3)):
             flag = False
-            self.labelErrorCirugia.place(x="810", y="43")
+            self.labelErrorCirugiaSEditarFichaAuthCirugia.place(x="810", y="43")
         else:
-            self.labelErrorCirugia.place_forget()
+            self.labelErrorCirugiaSEditarFichaAuthCirugia.place_forget()
             
         if(flag is True):
             self.editarFichaCirugia(mascotaActual, idFicha)
