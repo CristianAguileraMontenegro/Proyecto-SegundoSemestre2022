@@ -223,7 +223,7 @@ if __name__ != "__main__":
                     mascota.agregarTablaMedica(tablaMedicaId) 
                     mascota.guardarTablaEnBaseDeDatos(mycursor, db, self.idVeterinaria, self.nombreVeterinaria, idMascota)
                     mascota.setAlergias(alergiasFinal)
-                    mascota.agregarTablaMascota(self.id, mycursor, db)
+                    #mascota.agregarTablaMascota(self.id, mycursor, db)
                     break
 
         def agregarFichaMedica(self, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, idMascota, tratamientos, causaVisita, medicamentos, vacunas):
@@ -610,9 +610,11 @@ if __name__ != "__main__":
             if(llaveEntrada == ''):
                  return False
 
-            mycursor.execute(f'SELECT Llaves FROM keysactivacion WHERE Llaves = {llaveEntrada}')
+            sql = 'SELECT Llaves FROM keysactivacion WHERE Llaves = (%s)' #ocupamos sql para la consulta ya que si se aplica directamente en my cursos general problemas
+            mycursor.execute(sql, (llaveEntrada,))
             resultado = mycursor.fetchone()
-            
+
+            print("615 terminal "+str(resultado))
             if(resultado == None):
                 return False
             else:
