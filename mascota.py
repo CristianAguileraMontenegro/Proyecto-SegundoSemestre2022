@@ -263,23 +263,23 @@ class Mascota:
     def setTempFicha(self, temp):
         self.tablaMedica.setTempFicha(temp)
 
-    def setFichaDeOperacion(self, opFicha, myCursor, dB): #se ocupa el id para identificar la ficha especifica a la que añadir
-        self.tablaMedica.setFichaDeOperacion(opFicha, myCursor, dB)
+    def setFichaDeOperacion(self, idFicha, opFicha, myCursor, dB): #se ocupa el id para identificar la ficha especifica a la que añadir
+        self.tablaMedica.setFichaDeOperacion(idFicha, opFicha, myCursor, dB)
     
-    def setFichaDeHospitalizacion(self, hospFicha, myCursor, dB): #se ocupa el id para identificar
-        self.tablaMedica.setFichaDeHospitalizacion(hospFicha, myCursor, dB)
+    def setFichaDeHospitalizacion(self, idFicha,hospFicha, myCursor, dB): #se ocupa el id para identificar
+        self.tablaMedica.setFichaDeHospitalizacion(idFicha,hospFicha, myCursor, dB)
     
-    def setFichaDeSefacion(self, sedFicha, myCursor, dB): #se ocupa el id
-        self.tablaMedica.setFichaDeSefacion(sedFicha, myCursor, dB)
+    def setFichaDeSefacion(self, idFicha,sedFicha, myCursor, dB): #se ocupa el id
+        self.tablaMedica.setFichaDeSefacion(idFicha,sedFicha, myCursor, dB)
     
-    def setOperacionFicha(self, operacion): #indicadores de que existe una ficha de cada tipo
-        self.tablaMedica.setOperacionFicha(operacion)
+    def setOperacionFicha(self, idFicha,operacion): #indicadores de que existe una ficha de cada tipo
+        self.tablaMedica.setOperacionFicha(idFicha,operacion)
     
-    def setHospitalizacionFicha(self, hospitalizacion):
-        self.tablaMedica.setHospitalizacionFicha(hospitalizacion)
+    def setHospitalizacionFicha(self, idFicha,hospitalizacion):
+        self.tablaMedica.setHospitalizacionFicha(idFicha,hospitalizacion)
 
-    def setSedacionFicha(self, sedacion):
-        self.tablaMedica.setSedacionFicha(sedacion)
+    def setSedacionFicha(self, idFicha,sedacion):
+        self.tablaMedica.setSedacionFicha(idFicha,sedacion)
 
     def setTratamientos(self, tratamiento, myCursor, dB):
         self.tablaMedica.setTratamientos(tratamiento, myCursor, dB)

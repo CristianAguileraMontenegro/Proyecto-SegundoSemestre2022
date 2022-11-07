@@ -269,23 +269,36 @@ class TablaMedica:
 #todos los set se realizaran sobre la ultima ficha agregada, esto debido a que solo la utima puede llegar a ser modificada o se agregaran datos 
 #metodos de bajada de datos a clase inferior, fichas extra 
 
-    def setFichaDeOperacion(self, opFicha, myCursor, dB): #se ocupa el id para identificar la ficha especifica a la que añadir
-        self.fichas[len(self.fichas)-1].setFichaOperacion(opFicha, myCursor, dB) #siempre se agrega a la ultima ficha generada
+    def setFichaDeOperacion(self, idFicha, opFicha, myCursor, dB): #se ocupa el id para identificar la ficha especifica a la que añadir
+        for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+                ficha.setFichaOperacion(opFicha, myCursor, dB) 
+                break
     
-    def setFichaDeHospitalizacion(self, hospFicha, myCursor, dB): #se ocupa el id para identificar
-        self.fichas[len(self.fichas)-1].setFichaDeHospitalizacion(hospFicha, myCursor, dB)
+    def setFichaDeHospitalizacion(self, idFicha, hospFicha, myCursor, dB): #se ocupa el id para identificar
+        for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+                ficha.setFichaDeHospitalizacion(hospFicha, myCursor, dB)
     
-    def setFichaDeSefacion(self, sedFicha, myCursor, dB): #se ocupa el id
-        self.fichas[len(self.fichas)-1].setFichaDeSefacion(sedFicha, myCursor, dB)
+    def setFichaDeSefacion(self, idFicha, sedFicha, myCursor, dB): #se ocupa el id
+        for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+                ficha.setFichaDeSefacion(sedFicha, myCursor, dB)
     
-    def setOperacionFicha(self, operacion): #indicadores de que existe una ficha de cada tipo
-        self.fichas[len(self.fichas)-1].setOperacion(operacion)
+    def setOperacionFicha(self, idFicha, operacion): #indicadores de que existe una ficha de cada tipo
+        for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+                ficha.setOperacion(operacion)
     
-    def setHospitalizacionFicha(self, hospitalizacion):
-        self.fichas[len(self.fichas)-1].setHospitalizacion(hospitalizacion)
+    def setHospitalizacionFicha(self, idFicha, hospitalizacion):
+         for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+                ficha.setHospitalizacion(hospitalizacion)
 
-    def setSedacionFicha(self, sedacion):
-        self.fichas[len(self.fichas)-1].setSedacion(sedacion)
+    def setSedacionFicha(self, idFicha, sedacion):
+         for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+                ficha.setSedacion(sedacion)
 
 #metodos de bajada de datos a clase inferior, fichas extra
 
