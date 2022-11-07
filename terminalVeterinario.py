@@ -17,8 +17,8 @@ from calendario import Calendario
 from insumos import insumoVeterinario
 
 db = mysql.connector.connect(
-    user='piero',
-    password='pieron123',
+    user='root',
+    password='root',
     host='localhost',
     database='mydb',
     port='3306'
@@ -354,7 +354,7 @@ if __name__ != "__main__":
                     break
 
 
-        def agregarFichaOperacion(self, idMascota, opFicha):
+        def agregarFichaOperacion(self, idFicha, idMascota, opFicha):
             for mascota in self.mascotas:
                 if mascota.getId() == idMascota:
 
@@ -364,7 +364,7 @@ if __name__ != "__main__":
                      }
                     mascota.agregarOperaciones(operacion, mycursor, db)
 
-                    mascota.setFichaDeOperacion(opFicha, mycursor, db)
+                    mascota.setFichaDeOperacion(idFicha, opFicha, mycursor, db)
         
         def editarFichaOperacion(self, idMascota, idFicha, diagnostico, cirugia, fechaUltimaModificacion):
 
@@ -387,15 +387,15 @@ if __name__ != "__main__":
 
                     mascota.editarFichaOperacion(idFicha, opFicha, fechaUltimaModificacion, mycursor, db)
         
-        def agregarFichaSedacion(self, idMascota, sedFicha):
+        def agregarFichaSedacion(self, idFicha, idMascota, sedFicha):
             for mascota in self.mascotas:
                 if mascota.getId() == idMascota:
-                    mascota.setFichaDeSefacion(sedFicha, mycursor, db)
+                    mascota.setFichaDeSefacion(idFicha, sedFicha, mycursor, db)
 
-        def agregarFichaHospitalizacion(self, idMascota, hospFicha):
+        def agregarFichaHospitalizacion(self, idFicha, idMascota, hospFicha):
             for mascota in self.mascotas:
                 if mascota.getId() == idMascota:
-                    mascota.setFichaDeHospitalizacion(hospFicha, mycursor, db)
+                    mascota.setFichaDeHospitalizacion(idFicha, hospFicha, mycursor, db)
         
         def editarFichaHospitalizacion(self, idMascota, idFicha, motivoHospitalización, fechaUltimaModificacion):
 

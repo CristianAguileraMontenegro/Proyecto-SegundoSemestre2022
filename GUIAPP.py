@@ -2182,10 +2182,10 @@ class screenFormularioCrearFichaAuthCirugia(ctk.CTkFrame):
                 self.botonVolverSCrearFichaAuthCirugia = ctk.CTkButton(self.frameButtonsSCrearFichaAuthCirugia, width= 250, height= 80, text='Volver', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.show_frame(parent.screenFormularioCrearFicha))
                 self.botonVolverSCrearFichaAuthCirugia.grid(row=0, column=0, padx= 15, pady = 20)
 
-            self.botonAgregarFichaSCrearFichaAuthCirugia = ctk.CTkButton(self.frameButtonsSCrearFichaAuthCirugia, width= 250, height= 80, text='Agregar Ficha Operación', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.validarDatos(parent, mascotaActual))
+            self.botonAgregarFichaSCrearFichaAuthCirugia = ctk.CTkButton(self.frameButtonsSCrearFichaAuthCirugia, width= 250, height= 80, text='Agregar Ficha Operación', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.validarDatos(parent, idFicha, mascotaActual))
             self.botonAgregarFichaSCrearFichaAuthCirugia.grid(row=0, column=1, padx= 15, pady = 20)
     
-    def validarDatos(self, parent, mascotaActual):
+    def validarDatos(self, parent, idFicha, mascotaActual):
         
         flag = True
         diagnostico = self.entradaDiagnosticoSFichaAuthCirugia.get("1.0",END)
@@ -2205,9 +2205,9 @@ class screenFormularioCrearFichaAuthCirugia(ctk.CTkFrame):
             self.labelErrorCirugia.place_forget()
         
         if(flag is True):
-            self.agregarFichaCirugia(mascotaActual, parent)
+            self.agregarFichaCirugia(idFicha, mascotaActual, parent)
 
-    def agregarFichaCirugia(self, mascotaActual, parent):
+    def agregarFichaCirugia(self, idFicha, mascotaActual, parent):
         idFichahOp = uuid.uuid4()
         diagnostico = self.entradaDiagnosticoSFichaAuthCirugia.get("1.0",END)
         cirugia = self.entradaCirugiaARealizarSCrearFichaAuthCirugia.get()
@@ -2219,7 +2219,7 @@ class screenFormularioCrearFichaAuthCirugia(ctk.CTkFrame):
             'autTutor': check
         }
         parent.setFlagEditar(False) #indica que en este caso no se esta agregando en una ficha nueva, se esta gregando en una ficha de edicion
-        terminalVet.agregarFichaOperacion(mascotaActual.getId(), self.operacionFicha)
+        terminalVet.agregarFichaOperacion(idFicha, mascotaActual.getId(), self.operacionFicha)
         self.botonAgregarFichaSCrearFichaAuthCirugia.configure(state=DISABLED)
         self.labelMensajeAgregadoSCrearFichaAuthCirugia.grid(row=1, column=1, padx=10, pady=1)
         
@@ -2414,10 +2414,10 @@ class screenFormularioCrearFichaHospt(ctk.CTkFrame): #Hospitalización
                 self.botonVolverSCrearFichaHosp = ctk.CTkButton(self.frameButtonsSCrearFichaHosp, width=200, height=120, text='Volver', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.show_frame(parent.screenFormularioCrearFicha))
                 self.botonVolverSCrearFichaHosp.pack(padx= 10, pady = 40)
             
-            self.botonAgregarFichaHosp = ctk.CTkButton(self.frameButtonsSCrearFichaHosp, width=250, height=120, text='Agregar Ficha \nHospitalización', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.validarDatos(parent, mascotaActual))
+            self.botonAgregarFichaHosp = ctk.CTkButton(self.frameButtonsSCrearFichaHosp, width=250, height=120, text='Agregar Ficha \nHospitalización', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.validarDatos(parent, idFicha, mascotaActual))
             self.botonAgregarFichaHosp.pack(padx= 10, pady = 40)
 
-    def validarDatos(self, parent, mascotaActual):
+    def validarDatos(self, parent, idFicha, mascotaActual):
         
         flag = True
         motivo = self.entradaMotivoHospSCrearFichaHosp.get("1.0", END)
@@ -2429,10 +2429,10 @@ class screenFormularioCrearFichaHospt(ctk.CTkFrame): #Hospitalización
             self.labelErrorMotivo.place_forget()
 
         if(flag is True):
-            self.agregarFichaHosp(mascotaActual, parent)
+            self.agregarFichaHosp(idFicha, mascotaActual, parent)
 
 
-    def agregarFichaHosp(self, mascotaActual, parent):
+    def agregarFichaHosp(self, idFicha, mascotaActual, parent):
         motivo = self.entradaMotivoHospSCrearFichaHosp.get("1.0", END)
         idFichahHosp = uuid.uuid4()
         hospDicc = {
@@ -2440,7 +2440,7 @@ class screenFormularioCrearFichaHospt(ctk.CTkFrame): #Hospitalización
             'motivo':motivo
         }
         parent.setFlagEditar(False)
-        terminalVet.agregarFichaHospitalizacion(mascotaActual.getId(), hospDicc)
+        terminalVet.agregarFichaHospitalizacion(idFicha, mascotaActual.getId(), hospDicc)
         self.botonAgregarFichaHosp.configure(state=DISABLED)
         self.labelMensajeAgregadoSCrearFichaHosp.pack()
 
@@ -2763,16 +2763,16 @@ class screenFormularioCrearFichaSedacion(ctk.CTkFrame):
                 self.botonVolverSCrearFichaSedacion = ctk.CTkButton(self.frameButtonsSCrearFichaSedacion, width= 200, height= 120,text='Volver', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.show_frame(parent.screenFormularioCrearFicha))
                 self.botonVolverSCrearFichaSedacion.pack(padx= 10, pady = 40)
             
-            self.botonAgregarFichaSedacion = ctk.CTkButton(self.frameButtonsSCrearFichaSedacion, width= 200, height= 120,text='Agregar Ficha Hospitalización', text_font=Font_tuple, hover_color="#142C3D", command=lambda:self.agregarFichaSed(mascotaActual,self.entradaAuthTutorSCrearFichaSedacion.get(), parent))
+            self.botonAgregarFichaSedacion = ctk.CTkButton(self.frameButtonsSCrearFichaSedacion, width= 200, height= 120,text='Agregar Ficha Hospitalización', text_font=Font_tuple, hover_color="#142C3D", command=lambda:self.agregarFichaSed(idFicha, mascotaActual,self.entradaAuthTutorSCrearFichaSedacion.get(), parent))
             self.botonAgregarFichaSedacion.pack(padx= 10, pady = 40)
         
-    def agregarFichaSed(self, mascota, check, parent):
+    def agregarFichaSed(self, idFicha, mascota, check, parent):
         idFichahSedacion = uuid.uuid4()
         sedacionDicc = {
             'id':idFichahSedacion,
             'autorizacion':check
         }
-        terminalVet.agregarFichaSedacion(mascota.getId(), sedacionDicc)
+        terminalVet.agregarFichaSedacion(idFicha, mascota.getId(), sedacionDicc)
         parent.setFlagEditar(False)
         self.botonAgregarFichaSedacion.configure(state=DISABLED)
         self.labelMensajeAgregarSCrearFichaSedacion.pack()
