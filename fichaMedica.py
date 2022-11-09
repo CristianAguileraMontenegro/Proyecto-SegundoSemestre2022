@@ -32,6 +32,8 @@ class FichaMedica:
             self.indicarModificacion = None
             self.fichaActual = False
 
+            self.receta = None
+
         elif(len(args) == 12):
             self.idFicha = args[0]
             self.sucursalVeterinaria = args[1]
@@ -59,6 +61,8 @@ class FichaMedica:
             self.indicarModificacion = None
 
             self.fichaActual = False   
+
+            self.receta = None
 
     def editarFichaMedica(self):
         pass
@@ -151,6 +155,9 @@ class FichaMedica:
 
     def getActual(self):
         return self.fichaActual
+    
+    def getReceteta(self):
+        return self.receta
 
 #setters 
 
@@ -198,6 +205,9 @@ class FichaMedica:
 
     def setActual(self, actual):
         self.fichaActual = actual
+    
+    def setReceteta(self, receta):
+        self.receta = receta
 
     def solicitarFichaDeOperacionEnBaseDeDatos(self, myCursor):
         if (self.operacion == 1):
@@ -444,3 +454,33 @@ class FichaMedica:
 
     def validarFormatoDatos(self): #validar formato de datos en la propia clase ya que pueden saltarse validacioines mediante ui #holka
         pass
+
+    #---------------------receta
+    def solicitarRecetaBaseDeDatos(self, myCursor):
+        sql = 'SELECT * FROM RecetaMedica WHERE FichaMedica_idFichaMedica = (%s)'
+        myCursor.execute(sql, (str(self.getId()),))
+        recetaDatos = myCursor.fetchone()
+       
+        if(recetaDatos is not None):
+            self.receta = { #al ser una ficha se guarda directamente en el tributo relerente al diccionario
+                'id' : recetaDatos[0],
+                'rutVeterinario' : recetaDatos[1],
+                'preescripcion' : recetaDatos[2]
+            }
+
+    def guardarRecetaBaseDeDatos(self, myCursor, dB):
+        sql = 'INSERT INTO RecetaMedica VALUES (%s, %s, %s, %s)'
+        myCursor.execute(sql, (str(self.receta['id']), str(self.receta['rutVeterinario']), str(self.receta['preescripcion']) ,str(self.getId())))
+        dB.commit()
+
+    def modificarRecetaBaseDeDatos(self, myCursor, dB):
+        sql = 'UPDATE RecetaMedica SET rutVeterinario=(%s), prescripcion=(%s) WHERE idFichaMedica = (%s)'
+        myCursor.execute(sql, (self.receta['rutVeterinario'], str(self.receta['preescripcion']), str(self.getId())))
+        dB.commit()
+
+    def setReceta(self, receta, myCursor, dB):
+        self.receta = receta
+        self.guardarRecetaBaseDeDatos(myCursor, dB)
+    
+    def getIdReceta(self):
+        return self.receta['id']

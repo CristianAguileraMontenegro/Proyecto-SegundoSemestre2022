@@ -76,6 +76,9 @@ class Mascota:
     
     def editarFichaHospitalizacion(self, idFicha, hospitalización, fechaUltimaModificacion, myCursor, dB):
         self.tablaMedica.editarFichaHospitalizacion(idFicha, hospitalización, fechaUltimaModificacion, myCursor, dB)
+    
+    def editarReceta(self, idFicha, receta, fechaUltimaModificacion, myCursor, dB):
+        self.tablaMedica.editarReceta( idFicha, receta, fechaUltimaModificacion, myCursor, dB)
 
     def getId(self):
         return self.id
@@ -289,7 +292,9 @@ class Mascota:
 
     def setVacunas(self, vacunas, myCursor, dB):
         self.tablaMedica.setVacunas(vacunas, myCursor, dB)
-        
+    
+    def setReceta(self, idFicha, receta, myCursor, dB):
+        self.tablaMedica.setReceta(idFicha, receta, myCursor, dB)
 
     # metodos de subida para ficha
 
@@ -358,6 +363,12 @@ class Mascota:
     
     def getTratamiento(self, idFicha):
         return self.tablaMedica.getTratamiento(idFicha)
+    
+    def getReceta(self, idFicha):
+        return self.tablaMedica.getReceta(idFicha)
+    
+    def getIdReceta(self, idFicha):
+        return self.tablaMedica.getIdReceta(idFicha)
 
     def setActualFichaMedicaConsulta(self, fecha, actual):
         self.tablaMedica.setActualFichaMedicaConsulta(fecha, actual)
