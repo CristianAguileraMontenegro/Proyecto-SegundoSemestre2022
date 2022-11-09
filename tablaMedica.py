@@ -59,6 +59,7 @@ class TablaMedica:
         fichaMedicaConsulta.solicitarFichaDeOperacionEnBaseDeDatos(myCursor)
         fichaMedicaConsulta.solicitarFichaDeSedacionEnBaseDeDatos(myCursor)
         fichaMedicaConsulta.solicitarTratamientosConsultaBaseDeDatos(myCursor)
+        fichaMedicaConsulta.solicitarRecetaBaseDeDatos(myCursor)
 
         if(fechaMod is not None):
             print("tablamedica 62")
@@ -133,6 +134,11 @@ class TablaMedica:
         for ficha in self.fichas:
             if(ficha.getId() == idFicha):
                 ficha.modificarHopitalizacionEnBaseDeDatos(hospitalizacion, fechaUltimaModificacion, myCursor, dB)
+    
+    def editarReceta(self, idFicha, receta, fechaUltimaModificacion, myCursor, dB):
+        for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+                ficha.modificarRecetaBaseDeDatos(receta, myCursor, dB)
 
     def mostrarFichasMedicas(self):
         pass
@@ -299,6 +305,11 @@ class TablaMedica:
          for ficha in self.fichas:
             if(ficha.getId() == idFicha):
                 ficha.setSedacion(sedacion)
+    
+    def setReceta(self, idFicha, receta, myCursor, dB):
+        for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+                ficha.setReceta(receta, myCursor, dB)
 
 #metodos de bajada de datos a clase inferior, fichas extra
 
@@ -339,7 +350,6 @@ class TablaMedica:
 
     def setVacunas(self, operacion, myCursor, dB):
         self.fichas[len(self.fichas)-1].setVacunacion(operacion, myCursor, dB)
-  
 
 # metodos de bajada de datos a clase inferior ne ficha general
 
@@ -451,6 +461,17 @@ class TablaMedica:
             if(ficha.getId() == idFicha):
                 #print("hola soy tu validacion de tratamiento")
                 return ficha.getTratamiento()
+    
+    def getReceta(self, idFicha):
+        for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+                #print("hola soy tu validacion de tratamiento")
+                return ficha.getReceteta()
+
+    def getIdReceta(self,idFicha):
+        for ficha in self.fichas:
+            if(ficha.getId() == idFicha):
+                return ficha.getIdReceta()
 
     def getId(self):
         return self.id

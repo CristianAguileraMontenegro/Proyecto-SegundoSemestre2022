@@ -788,3 +788,24 @@ if __name__ != "__main__":
 
 
 #-----------Insumo
+#-----------rECETA
+
+        def agregarReceta(self, idFicha, idMascota, receta):
+            for mascota in self.mascotas:
+                if mascota.getId() == idMascota:
+                    mascota.setReceta(idFicha, receta, mycursor, db)
+        
+        def editarReceta(self, idMascota, idFicha, rutVeterinario, preescripcion, fechaUltimaModificacion):
+
+            for mascota in self.mascotas:
+                if mascota.getId() == idMascota:
+                            
+                    idReceta = mascota.getIdReceta(idFicha)
+
+                    receta = { #al ser una ficha se guarda directamente en el tributo relerente al diccionario
+                        'id' : idReceta,
+                        'rutVeterinario' : rutVeterinario,
+                        'preescripcion' : preescripcion
+                    }
+
+                    mascota.editarReceta(idFicha, receta, fechaUltimaModificacion, mycursor, db)
