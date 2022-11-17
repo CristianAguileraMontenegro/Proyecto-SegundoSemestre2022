@@ -17,8 +17,8 @@ from calendario import Calendario
 from insumos import insumoVeterinario
 
 db = mysql.connector.connect(
-    user='root',
-    password='root',
+    user='piero',
+    password='pieron123',
     host='localhost',
     database='mydb',
     port='3306'

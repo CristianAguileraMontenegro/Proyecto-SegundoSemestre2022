@@ -8,6 +8,8 @@ from calendario import Calendario
 from itertools import cycle
 import re
 import threading
+import jinja2
+import pdfkit
 
 terminalVet = Terminal()
 today = datetime.date.today()
@@ -678,9 +680,9 @@ class screenFormularioVerFicha(ctk.CTkFrame):
                 self.botonVerFichaOperacion = ctk.CTkButton(self.frameButtons, width= 200, height= 80, text='Ver Ficha Operación', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.update_frame(parent.screenFormularioFichaAuthCirugia, parent, container))
                 self.botonVerFichaOperacion.grid(row=0, column=2, padx=5, pady=15)
 
-            # if(mascotaActual.getReceta(idFicha) == True):         DESCOMENTAR DESPUES, CUANDO ESTEN LO DE LAS RECETAS EN BD
-            #     self.botonVerReceta = ctk.CTkButton(self.frameButtons, width= 200, height= 80, text='Ver Receta', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.verReceta(parent, container))
-            #     self.botonVerReceta.grid(row=1, column=0, padx=5, pady=15)
+            if(mascotaActual.getReceta(idFicha) != None):
+                self.botonVerReceta = ctk.CTkButton(self.frameButtons, width= 200, height= 80, text='Ver Receta', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.verReceta(parent, container))
+                self.botonVerReceta.grid(row=1, column=0, padx=5, pady=15)
 
     def verReceta(self, parent, container):
         parent.setFlagsRecetas(1)
@@ -881,6 +883,7 @@ class screenFormularioEditarFicha(ctk.CTkFrame):
 
             flagHosp = False
             flagOperacion = False
+            flagRecetaEditar = False
 
             print("Gui 874 :"+str(mascotaActual.getHospitalizacion(idFicha)))
             if (mascotaActual.getHospitalizacion(idFicha) == True):
@@ -905,12 +908,13 @@ class screenFormularioEditarFicha(ctk.CTkFrame):
                 self.botonAgregarFichaOperacion = ctk.CTkButton(self.frameButtonsSEditarFicha, width= 250, height= 80, text='Agregar Ficha Operación', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.clickEditarOperacion(parent, container, flagOperacion))
                 self.botonAgregarFichaOperacion.grid(row=0, column=3, padx=5, pady=15)
 
-            # if(mascotaActual.getReceta(idFicha) is True): SE CAMBIA CUANDO ESTE LO DE LA RECETA EN LA BASE DE DATOS
-            #     self.botonEditarReceta = ctk.CTkButton(self.frameButtonsSEditarFicha, width= 250, height= 80, text='Editar Receta', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.clickEditarReceta(parent, container))
-            #     self.botonEditarReceta.grid(row=0, column=4, padx=5, pady=15)
-            # else:
-            #     self.botonAgregarReceta = ctk.CTkButton(self.frameButtonsSEditarFicha, width= 250, height= 80, text='Editar Receta', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.clickEditarReceta(parent, container))
-            #     self.botonAgregarReceta.grid(row=0, column=4, padx=5, pady=15)
+            if(mascotaActual.getReceta(idFicha) is not None):
+                flagRecetaEditar = True
+                self.botonEditarReceta = ctk.CTkButton(self.frameButtonsSEditarFicha, width= 250, height= 80, text='Editar Receta', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.clickEditarReceta(parent, container, flagRecetaEditar))
+                self.botonEditarReceta.grid(row=1, column=4, padx=5, pady=15)
+            else:
+                self.botonAgregarReceta = ctk.CTkButton(self.frameButtonsSEditarFicha, width= 250, height= 80, text='Agregar Receta', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.clickEditarReceta(parent, container, flagRecetaEditar))
+                self.botonAgregarReceta.grid(row=1, column=4, padx=5, pady=15)
             self.botonVolverSEditarFicha = ctk.CTkButton(self.frameButtonsSEditarFicha, width= 200, height= 80, text='Volver', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.volverSDTotalMascota(parent, container, mascotaActual, idFicha))
             self.botonVolverSEditarFicha.grid(row=0, column=4, padx=15, pady=15)
             
@@ -932,8 +936,11 @@ class screenFormularioEditarFicha(ctk.CTkFrame):
         parent.setFlagEditar(True)
         parent.update_frame(parent.screenFormularioCrearFichaSedacion, parent, container)
 
-    def clickEditarReceta(self, parent, container):
-        parent.setFlagsRecetas(3)
+    def clickEditarReceta(self, parent, container, flagValue):
+        if(flagValue == True):
+            parent.setFlagsRecetas(3)
+        else:
+            parent.setFlagsRecetas(2)
         parent.update_frame(parent.screenFormularioReceta, parent, container)
 
     def validarDatosFicha(self, idFicha, sucursalVeterinaria, veterinarioACargo, fechaConsulta, operacion, frecRespiratoria, frecCardiaca, peso, edad, hospitalizacion, sedacion, temp, idMascota, tratamientos, causaVisita, medicamentos, vacunas, terminalVet, mascotaActual, parent):
@@ -2169,8 +2176,8 @@ class screenFormularioCrearFichaAuthCirugia(ctk.CTkFrame):
             self.entradaAuthTutorSCrearFichaAuthCirugia = ctk.CTkCheckBox(self.frameFormSCrearFichaAuthCirugia, text="", fg_color="#0D1D29", border_width=2, border_color="grey")
             self.entradaAuthTutorSCrearFichaAuthCirugia.grid(row=5, column=3, padx=25, pady=15)
 
-            self.labelErrorDiagnostico = ctk.CTkLabel(self.frameFormSCrearFichaAuthCirugia, text="Ingrese diagnostico en formato correcto (Solo letras)", text_font=Font_tuple10, text_color="red")
-            self.labelErrorCirugia = ctk.CTkLabel(self.frameFormSCrearFichaAuthCirugia, text="Ingrese cirugia en formato correcto (Solo letras)", text_font=Font_tuple10, text_color="red")
+            self.labelErrorDiagnostico = ctk.CTkLabel(self.frameFormSCrearFichaAuthCirugia, text="Ingrese diagnostico en formato correcto (Solo letras)", text_font=Font_tuple10, text_color="#c1121f")
+            self.labelErrorCirugia = ctk.CTkLabel(self.frameFormSCrearFichaAuthCirugia, text="Ingrese cirugia en formato correcto (Solo letras)", text_font=Font_tuple10, text_color="#c1121f")
 
 
             #Agregar botones
@@ -2218,7 +2225,7 @@ class screenFormularioCrearFichaAuthCirugia(ctk.CTkFrame):
             'cirugiaARealizar':cirugia,
             'autTutor': check
         }
-        parent.setFlagEditar(False) #indica que en este caso no se esta agregando en una ficha nueva, se esta gregando en una ficha de edicion
+        parent.setFlagEditar(False) #indica que en este caso no se estaba agregando en una ficha nueva, se estaba editando un ficha
         terminalVet.agregarFichaOperacion(idFicha, mascotaActual.getId(), self.operacionFicha)
         self.botonAgregarFichaSCrearFichaAuthCirugia.configure(state=DISABLED)
         self.labelMensajeAgregadoSCrearFichaAuthCirugia.grid(row=1, column=1, padx=10, pady=1)
@@ -2782,6 +2789,7 @@ class screenFormularioReceta(ctk.CTkFrame):
     def __init__(self, parent, container):
         super().__init__(container, fg_color="#C5DEDD")
         Font_tuple = ("Helvetica", 12)
+        Font_tuple10 = ("Helvetica", 10)
         Font_tuple16 = ("Helvetica", 16)
 
         mascotaActual:Mascota = parent.getMascotaApp()
@@ -2790,6 +2798,7 @@ class screenFormularioReceta(ctk.CTkFrame):
             idFicha = mascotaActual.getidFichaActual()
             textoMascota = mascotaActual.getNombreMascota()
             flagReceta = parent.getFlagsRecetas()
+            diccReceta = mascotaActual.getReceta(idFicha)
             self.labelTituloScreenSFormReceta = ctk.CTkLabel(self, text=f"Creación de receta Medica, Mascota : {textoMascota}", text_font=Font_tuple16, text_color="black")
             self.labelTituloScreenSFormReceta.grid(row=0, column=0, padx=10, pady=10)
 
@@ -2800,8 +2809,14 @@ class screenFormularioReceta(ctk.CTkFrame):
             self.frameFormDatosPacienteSFormReceta.grid(row=1, column=1, padx=20, pady=20)
 
             self.frameTextDiagnostico = ctk.CTkFrame(self.frameFormDatosPacienteSFormReceta, corner_radius=0)
-            self.frameTextDiagnostico.grid(row=6, column=1, padx=20, pady=15)
+            self.frameTextDiagnostico.grid(row=6, column=1, padx=20, pady=(15,25))
 
+            self.labelMensajeAgregado = ctk.CTkLabel(self.frameFormDatosVeterinariaSFormReceta, text="Receta agregada", text_font=Font_tuple10, text_color="green")
+            self.labelMensajeEditado = ctk.CTkLabel(self.frameFormDatosVeterinariaSFormReceta, text="Receta editada", text_font=Font_tuple10, text_color="green")
+            self.labelMensajeExportado = ctk.CTkLabel(self.frameFormDatosVeterinariaSFormReceta, text="Receta exportada", text_font=Font_tuple10, text_color="green")
+
+            self.labelErrorPrescripcion = ctk.CTkLabel(self.frameFormDatosPacienteSFormReceta, text="Ingrese prescripcion en formato correcto (Solo letras)", text_font=Font_tuple10, text_color="#c1121f")
+            self.labelErrorRut = ctk.CTkLabel(self.frameFormDatosVeterinariaSFormReceta, text="Ingrese rut válido", text_font=Font_tuple10, text_color="#c1121f")
             #Elementos frame datos veterinaria ----------------------------------------
             self.textoDireccion = tk.StringVar()
             self.textoDireccion.set(str(mascotaActual.getSucursalVeterinaria(idFicha)))
@@ -2810,7 +2825,7 @@ class screenFormularioReceta(ctk.CTkFrame):
             self.textoVeterinario.set(str(mascotaActual.getVeterinarioACargo(idFicha)))
 
             self.textoRut = tk.StringVar()
-            #self.textoRut.set(str(mascotaActual.getRutVeterinario(idFicha))) AGREGAR CUANDO ESTE LO DE LA RECETA EN LA BASE DE DATOS
+            
 
             self.labelDatosVeterinariaSFormReceta = ctk.CTkLabel(self.frameFormDatosVeterinariaSFormReceta, text="Datos Veterinario/a", text_font=Font_tuple, text_color="black", bg_color="#AC99DE")
             self.labelDatosVeterinariaSFormReceta.grid(row=0, column=0, padx=10, pady=10)
@@ -2827,7 +2842,8 @@ class screenFormularioReceta(ctk.CTkFrame):
             self.entradaNombreVetSFormReceta = ctk.CTkEntry(self.frameFormDatosVeterinariaSFormReceta, width=300, text= self.textoVeterinario, text_font=Font_tuple, fg_color="#F0EFEB", text_color="black")
             self.entradaNombreVetSFormReceta.grid(row=1, column=1, padx=20, pady=15)
 
-            if(flagReceta == 1 or flagReceta == 2):
+            if(flagReceta == 1 or flagReceta == 3):
+                self.textoRut.set(str(diccReceta["rutVeterinario"]))
                 self.entradaRutVetSFormReceta = ctk.CTkEntry(self.frameFormDatosVeterinariaSFormReceta, width=300, text= self.textoRut, text_font=Font_tuple, fg_color="#F0EFEB", text_color="black")
             else:
                 self.entradaRutVetSFormReceta = ctk.CTkEntry(self.frameFormDatosVeterinariaSFormReceta, width=300, text_font=Font_tuple, fg_color="#F0EFEB", text_color="black")
@@ -2862,53 +2878,136 @@ class screenFormularioReceta(ctk.CTkFrame):
             self.labelFechaPacienteSFormReceta = ctk.CTkLabel(self.frameFormDatosPacienteSFormReceta, text="Fecha", text_font=Font_tuple, text_color="black")
             self.labelFechaPacienteSFormReceta.grid(row = 5, column = 0, padx=(20,5), pady=15)
 
-            self.labelDiagnosticoPacienteSFormReceta = ctk.CTkLabel(self.frameFormDatosPacienteSFormReceta, text="Diagnostico", text_font=Font_tuple, text_color="black")
-            self.labelDiagnosticoPacienteSFormReceta.grid(row = 6, column = 0, padx=(20,5), pady=15)
+            self.labelPrescripcionPacienteSFormReceta = ctk.CTkLabel(self.frameFormDatosPacienteSFormReceta, text="Prescripción", text_font=Font_tuple, text_color="black")
+            self.labelPrescripcionPacienteSFormReceta.grid(row = 6, column = 0, padx=(20,5), pady=15)
 
 
-            self.textoNombrePaciente.set(mascotaActual.getNombreMascota())
+            self.textoNombrePaciente.set(str(mascotaActual.getNombreMascota()))
             self.entradaNombrePacienteSFormReceta = ctk.CTkEntry(self.frameFormDatosPacienteSFormReceta, width=400, text=self.textoNombrePaciente, text_font=Font_tuple, fg_color="#F0EFEB", text_color="black")
             self.entradaNombrePacienteSFormReceta.grid(row=1, column=1, padx=20, pady=15)
 
-            self.textoRut.set(mascotaActual.getRutTutor())
+            self.textoRut.set(str(mascotaActual.getRutTutor()))
             self.entradaRutPacienteSFormReceta = ctk.CTkEntry(self.frameFormDatosPacienteSFormReceta, width=400, text=self.textoRut, text_font=Font_tuple, fg_color="#F0EFEB", text_color="black")
             self.entradaRutPacienteSFormReceta.grid(row=2, column=1, padx=20, pady=15)
 
-            self.textoEdad.set(mascotaActual.getEdad(idFicha))
+            self.textoEdad.set(str(mascotaActual.getEdad(idFicha)))
             self.entradaEdadPacienteSFormReceta = ctk.CTkEntry(self.frameFormDatosPacienteSFormReceta, width=400, text=self.textoEdad, text_font=Font_tuple, fg_color="#F0EFEB", text_color="black")
             self.entradaEdadPacienteSFormReceta.grid(row=3, column=1, padx=20, pady=15)
 
-            self.textoDireccionPaciente.set(mascotaActual.getDireccion())
+            self.textoDireccionPaciente.set(str(mascotaActual.getDireccion()))
             self.entradaDireccionPacienteSFormReceta = ctk.CTkEntry(self.frameFormDatosPacienteSFormReceta, width=400, text=self.textoDireccionPaciente, text_font=Font_tuple, fg_color="#F0EFEB", text_color="black")
             self.entradaDireccionPacienteSFormReceta.grid(row=4, column=1, padx=20, pady=15)
 
             #scamos la fehca y hora actual
 
             textFechaActual = tk.StringVar()
-            hoy = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-            textFechaActual.set(str(hoy))
+            textFechaActual.set(str(mascotaActual.getFechaConsulta(idFicha)))
 
             self.entradaFechaSFormReceta = ctk.CTkEntry(self.frameFormDatosPacienteSFormReceta, width=400, text_font=Font_tuple, fg_color="#F0EFEB", text_color="grey", text=textFechaActual, state=DISABLED)
             self.entradaFechaSFormReceta.grid(row=5, column=1, padx=20, pady=15)
 
-            if(flagReceta == 1 or flagReceta == 2):
-                # textoDiagnostico = mascotaActual.getDiagnosticoReceta(idFicha)  AGREGAR CUANDO ESTE LO DE LA RECETA EN LA BASE DE DATOS
-                self.entradaDiagnosticoSFormReceta = tk.Text(self.frameTextDiagnostico, width=40, height=8, font=("Helvetica", "12"), background="#F0EFEB", borderwidth=0)
-                self.entradaDiagnosticoSFormReceta.delete(1.0, END)
-                self.entradaDiagnosticoSFormReceta.grid(row=0, column=0, padx=2, pady=2)
-                # self.entradaDiagnosticoSFormReceta.insert(END, textoDiagnostico)
+            if(flagReceta == 1 or flagReceta == 3):
+                textoDiagnostico = diccReceta["preescripcion"]
+                self.entradaPrescripcionSFormReceta = tk.Text(self.frameTextDiagnostico, width=40, height=8, font=("Helvetica", "12"), background="#F0EFEB", borderwidth=0)
+                self.entradaPrescripcionSFormReceta.delete(1.0, END)
+                self.entradaPrescripcionSFormReceta.grid(row=0, column=0, padx=2, pady=2)
+                self.entradaPrescripcionSFormReceta.insert(END, textoDiagnostico)
             else:
-                self.entradaDiagnosticoSFormReceta = tk.Text(self.frameTextDiagnostico, width=40, height=8, font=("Helvetica", "12"), background="#F0EFEB", borderwidth=0)
-                self.entradaDiagnosticoSFormReceta.grid(row=0, column=0, padx=2, pady=2)
+                self.entradaPrescripcionSFormReceta = tk.Text(self.frameTextDiagnostico, width=40, height=8, font=("Helvetica", "12"), background="#F0EFEB", borderwidth=0)
+                self.entradaPrescripcionSFormReceta.grid(row=0, column=0, padx=2, pady=2)
 
             #FIN frame datos paciente ----------------------------------------------
 
             self.botonVolver = ctk.CTkButton(self.frameFormDatosVeterinariaSFormReceta, width= 250, height= 80, text='Volver', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.clickVolver(parent, flagReceta))
             self.botonVolver.grid(row=4, column=0, padx=10, pady=(195, 20))
 
-            self.botonAgregarReceta = ctk.CTkButton(self.frameFormDatosVeterinariaSFormReceta, width= 250, height= 80, text='Guardar Receta', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.update_frame(parent.screenFormularioCrearFicha, parent, container))
-            self.botonAgregarReceta.grid(row=4, column=1, padx=10, pady=(195, 20))
+            self.botonExport = ctk.CTkButton(self.frameFormDatosVeterinariaSFormReceta, width= 250, height= 80, text='Exportar a PDF', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.clickExportarPDF(mascotaActual, idFicha), state=DISABLED)
+            self.botonExport.grid(row=4, column=1, padx=10, pady=(195, 20))
+
+            if(flagReceta == 2):
+                self.botonAgregarReceta = ctk.CTkButton(self.frameFormDatosVeterinariaSFormReceta, width= 250, height= 80, text='Guardar Receta', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.validarDatos(parent, idFicha, mascotaActual, flagReceta))
+                self.botonAgregarReceta.grid(row=5, column=0, padx=10, pady=10)
+            elif(flagReceta == 3):
+                self.botonEditarReceta = ctk.CTkButton(self.frameFormDatosVeterinariaSFormReceta, width= 250, height= 80, text='Editar Receta', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.validarDatos(parent, idFicha, mascotaActual, flagReceta))
+                self.botonEditarReceta.grid(row=5, column=0, padx=10, pady=10)
+            elif(flagReceta == 1):
+                self.botonExport.configure(state=NORMAL)
+
+    def validarDatos(self, parent, idFicha, mascotaActual, flagValue):
+        
+        flag = True
+        flagTipoReceta = flagValue
+        prescripcion = self.entradaPrescripcionSFormReceta.get("1.0",END)
+
+        rutVet = self.entradaRutVetSFormReceta.get()
+
+        if(parent.filtroNoValidChar(prescripcion) is not True or (parent.filtroNum(prescripcion) is not False) or (len(prescripcion) < 6)):
+            flag = False
+            self.labelErrorPrescripcion.place(x="210", y="504")
+        else:
+            self.labelErrorPrescripcion.place_forget()
+
+        if((parent.validarRut(rutVet) is not True)):
+            flag = False
+            self.labelErrorRut.place(x="285", y="150")
+        else:
+            self.labelErrorRut.place_forget()
+        
+        if(flag is True and (flagTipoReceta == 2)):
+            self.clickAgregarReceta(idFicha, mascotaActual, parent)
+            self.botonExport.configure(state=NORMAL)
+        elif(flag is True and (flagTipoReceta == 3)):
+            self.clickEditarReceta(mascotaActual, idFicha)
+            self.botonExport.configure(state=NORMAL)
+
+    def clickAgregarReceta(self, idFicha, mascotaActual, parent):
+        idReceta = uuid.uuid4()
+        rutVet = self.entradaRutVetSFormReceta.get()
+        prescripcion = self.entradaPrescripcionSFormReceta.get("1.0",END)
+        self.diccionarioReceta = {
+            'id':idReceta,
+            'rutVeterinario':rutVet,
+            'preescripcion':prescripcion
+        }
+        terminalVet.agregarReceta(idFicha, mascotaActual.getId(), self.diccionarioReceta)
+        self.botonAgregarReceta.configure(state=DISABLED)
+        self.labelMensajeAgregado.grid(row=6, column=0, padx=5, pady=3)
+
+    def clickEditarReceta(self, mascotaActual, idFicha):
+        hoy = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        rutVet = self.entradaRutVetSFormReceta.get()
+        prescripcion = self.entradaPrescripcionSFormReceta.get("1.0",END)
+
+        terminalVet.editarReceta(mascotaActual.getId(), idFicha, rutVet, prescripcion, hoy)
+        self.labelMensajeEditado.grid(row=6, column=0, padx=5, pady=3)
+
+    def clickExportarPDF(self, mascotaActual:Mascota, idFicha):
+        ruta_template = 'template.html'
+
+        info = {"nombreDoctor" : str(mascotaActual.getVeterinarioACargo(idFicha)),
+                "rutDoctor" : self.entradaRutVetSFormReceta.get(),
+                "direccion" : str(mascotaActual.getSucursalVeterinaria(idFicha)),
+                "nombrePaciente": str(mascotaActual.getNombreMascota()),
+                "edad": str(mascotaActual.getEdad(idFicha)),
+                "fecha" : str(mascotaActual.getFechaConsulta(idFicha)),
+                "rutTutor" : str(mascotaActual.getRutTutor()),
+                "direccionPaciente": str(mascotaActual.getDireccion()),
+                "prescripcion" : self.entradaPrescripcionSFormReceta.get("1.0", END),
+                }
+        self.crea_pdf(ruta_template, info)
+        self.botonExport.configure(state=DISABLED)
+        self.labelMensajeExportado.grid(row=5, column=1, padx=10, pady=10)
+
+    def crea_pdf (self, ruta_template, info, rutacss = ''):
+        nombre_template = ruta_template.split('/')[-1]
+        ruta_template   = ruta_template.replace(nombre_template, '')
+
+        env = jinja2.Environment(loader=jinja2.FileSystemLoader(ruta_template))
+        template = env.get_template(nombre_template)
+        html = template.render(info)
+        config = pdfkit.configuration(wkhtmltopdf='C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe')
+        ruta_salida = 'RecetaMedica.pdf'
+        pdfkit.from_string(html, ruta_salida,configuration=config)
 
     def clickVolver(self, parent, flag):
         if(flag == 1):
