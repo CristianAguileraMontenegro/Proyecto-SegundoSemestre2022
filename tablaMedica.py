@@ -110,6 +110,7 @@ class TablaMedica:
                 ficha.solicitarMedicamentosConsultaEnBaseDeDatos(myCursor)
                 ficha.solicitarVacunacionEnBaseDeDatos(myCursor)
                 ficha.solicitarTratamientosConsultaBaseDeDatos(myCursor)
+                ficha.solicitarRecetaBaseDeDatos(myCursor) # No se solicitaba la receta en este punto
                 break
 
     def guardarFichaGeneralEnBaseDeDatos(self, fichaMedicaConsulta:FichaMedica, myCursor, dB):

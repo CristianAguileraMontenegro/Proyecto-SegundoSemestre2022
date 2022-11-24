@@ -473,9 +473,9 @@ class FichaMedica:
         myCursor.execute(sql, (str(self.receta['id']), str(self.receta['rutVeterinario']), str(self.receta['preescripcion']) ,str(self.getId())))
         dB.commit()
 
-    def modificarRecetaBaseDeDatos(self, myCursor, dB):
-        sql = 'UPDATE RecetaMedica SET rutVeterinario=(%s), prescripcion=(%s) WHERE idFichaMedica = (%s)'
-        myCursor.execute(sql, (self.receta['rutVeterinario'], str(self.receta['preescripcion']), str(self.getId())))
+    def modificarRecetaBaseDeDatos(self, receta, myCursor, dB):
+        sql = 'UPDATE RecetaMedica SET rutVeterinario=(%s), prescripcion=(%s) WHERE FichaMedica_idFichaMedica = (%s)' #Habia que arreglar la query
+        myCursor.execute(sql, (receta['rutVeterinario'], str(receta['preescripcion']), str(self.getId())))
         dB.commit()
 
     def setReceta(self, receta, myCursor, dB):
