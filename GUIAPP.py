@@ -1,5 +1,6 @@
 import tkinter as tk
 from ttkwidgets.autocomplete import AutocompleteCombobox # pip3 install ttkwidgets
+from tkinter.filedialog import askdirectory
 import customtkinter as ctk
 from terminalVeterinario import *
 import datetime #para sacar la fecha actual
@@ -59,6 +60,7 @@ class App(ctk.CTk):
         self.screenFormularioCrearFichaSedacion = screenFormularioCrearFichaSedacion
         self.screenCalendarioVacunacion = screenCalendarioVacunacion
         self.screenFormularioReceta = screenFormularioReceta
+        self.screenInsumos = screenInsumos
         self.screenAbstractMedico = screenAbstractMedico
 
         self.framesTotales = {screenIngresoLlave, screenPantallaInicial, screenBuscarMascota, screenDatosTotalMascota, 
@@ -66,7 +68,7 @@ class App(ctk.CTk):
         screenFormularioEditarMascota, screenFormularioFichaAuthCirugia, screenFormularioEditarFichaAuthCirugia,
         screenFormularioCrearFichaAuthCirugia, screenFormularioEditarFichaHospt, screenFormularioFichaHospt, 
         screenFormularioCrearFichaHospt, screenFormularioFichaSedacion, screenFormularioCrearFichaSedacion, 
-        screenCalendarioVacunacion, screenFormularioReceta, screenAbstractMedico}
+        screenCalendarioVacunacion, screenFormularioReceta, screenInsumos, screenAbstractMedico}
         
         for F in self.framesTotales:
             frame = F(self, container)
@@ -195,16 +197,17 @@ class screenPantallaInicial(ctk.CTkFrame):
         super().__init__(container, fg_color="#C5DEDD")
         Font_tuple = ("Helvetica", 14)
         self.frameBotonesPrincipal = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
-        self.frameBotonesPrincipal.pack(padx=30, pady=30)
+        self.frameBotonesPrincipal.pack(padx=30, pady=100)
 
         self.botonBuscarMascota = ctk.CTkButton(self.frameBotonesPrincipal, width=300, height=120, text="Buscar mascota\n(Ver datos, Crear/Editar Fichas)", text_font=Font_tuple, fg_color="#28587A", hover_color="#142C3D", command= lambda: parent.update_frame(parent.screenBuscarMascota, parent, container))
-        self.botonBuscarMascota.pack(padx=20, pady=50)
+        self.botonBuscarMascota.grid(row=0, column=0, padx=20, pady=50)
         self.botonIngresarMascota = ctk.CTkButton(self.frameBotonesPrincipal, width=300, height=120, text="Ingresar mascota al sistema", text_font=Font_tuple, fg_color="#28587A", hover_color="#142C3D", command= lambda: parent.update_frame(parent.screenFormularioAgregarMascota, parent, container))
-        self.botonIngresarMascota.pack(padx=20, pady=50)
+        self.botonIngresarMascota.grid(row=0, column=1, padx=20, pady=50)
         self.botonCalendario = ctk.CTkButton(self.frameBotonesPrincipal, width=300, height=120, text="Ver calendario de vacunación", text_font=Font_tuple, fg_color="#28587A", hover_color="#142C3D", command= lambda: parent.update_frame(parent.screenCalendarioVacunacion, parent, container))
-        self.botonCalendario.pack(padx=20, pady=50)
+        self.botonCalendario.grid(row=1, column=0, padx=20, pady=50)
+        self.botonInsumos = ctk.CTkButton(self.frameBotonesPrincipal, width=300, height=120, text="Organizar insumos", text_font=Font_tuple, fg_color="#28587A", hover_color="#142C3D", command= lambda: parent.update_frame(parent.screenInsumos, parent, container))
+        self.botonInsumos.grid(row=1, column=1, padx=20, pady=50)
         #futuro boton que liste a las mascotas
-        #Boton que permita manejar los insumos
 
 
 class screenBuscarMascota(ctk.CTkFrame):
@@ -2982,8 +2985,8 @@ class screenFormularioReceta(ctk.CTkFrame):
         self.labelMensajeEditado.grid(row=6, column=0, padx=5, pady=3)
 
     def clickExportarPDF(self, mascotaActual:Mascota, idFicha):
-        ruta_template = 'template.html'
-
+        ruta_template = 'E:/Cosas raras/Ejercicios progra/Proyecto PetRecord 2 semestre/Proyecto-SegundoSemestre2022/htmls/recetaMedica.html'
+        ruta_css      = 'E:/Cosas raras/Ejercicios progra/Proyecto PetRecord 2 semestre/Proyecto-SegundoSemestre2022/htmls/estilos.css'
         info = {"nombreDoctor" : str(mascotaActual.getVeterinarioACargo(idFicha)),
                 "rutDoctor" : self.entradaRutVetSFormReceta.get(),
                 "direccion" : str(mascotaActual.getSucursalVeterinaria(idFicha)),
@@ -2992,22 +2995,27 @@ class screenFormularioReceta(ctk.CTkFrame):
                 "fecha" : str(mascotaActual.getFechaConsulta(idFicha)),
                 "rutTutor" : str(mascotaActual.getRutTutor()),
                 "direccionPaciente": str(mascotaActual.getDireccion()),
-                "prescripcion" : self.entradaPrescripcionSFormReceta.get("1.0", END),
+                "prescripcion" : self.entradaPrescripcionSFormReceta.get("1.0", END)
                 }
-        self.crea_pdf(ruta_template, info)
+        self.crea_pdf(ruta_template, info, ruta_css)
         self.botonExport.configure(state=DISABLED)
         self.labelMensajeExportado.grid(row=5, column=1, padx=10, pady=10)
 
-    def crea_pdf (self, ruta_template, info, rutacss = ''):
+    def crea_pdf (self, ruta_template, info, rutacss):
         nombre_template = ruta_template.split('/')[-1]
         ruta_template   = ruta_template.replace(nombre_template, '')
-
+        
         env = jinja2.Environment(loader=jinja2.FileSystemLoader(ruta_template))
         template = env.get_template(nombre_template)
         html = template.render(info)
         config = pdfkit.configuration(wkhtmltopdf='C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe')
-        ruta_salida = 'RecetaMedica.pdf'
-        pdfkit.from_string(html, ruta_salida,configuration=config)
+        ruta_salida = askdirectory(title='Seleccionar ruta')
+        fecha_string = info["fecha"].split(' ')
+        ruta_salida = ruta_salida + f'/RecetaMedica {info["nombrePaciente"]} {fecha_string[0]}.pdf'
+        options = {"enable-local-file-access": "",
+                    "page-size" : "a4"
+                    }
+        pdfkit.from_string(html, ruta_salida, options=options, configuration=config)
 
     def clickVolver(self, parent, flag):
         if(flag == 1):
@@ -3020,6 +3028,111 @@ class screenFormularioReceta(ctk.CTkFrame):
             parent.setFlagsRecetas(0)
             parent.show_frame(parent.screenFormularioEditarFicha)
     
+class screenInsumos(ctk.CTkFrame):
+    def __init__(self, parent, container):
+        super().__init__(container, fg_color="#C5DEDD")
+        Font_tuple = ("Helvetica", 14)
+        Font_tuple10 = ("Helvetica", 10)
+        Font_tuple16 = ("Helvetica", 16)
+
+        #-------------------------Elementos Menu inicial-------------------------
+        self.frameInsumos = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
+        self.frameInsumos.pack(padx=20, pady=20)
+
+        self.botonCalcularInsumos = ctk.CTkButton(self.frameInsumos, width=300, height=120, text="Calcular costo de insumos", text_font=Font_tuple, fg_color="#28587A", hover_color="#142C3D", command= lambda: self.mostrarElementosCalcularInsumos())
+        self.botonCalcularInsumos.pack(padx=20, pady=20)
+
+        self.botonVerInsumos = ctk.CTkButton(self.frameInsumos, width=300, height=120, text="Ver/Editar insumos", text_font=Font_tuple, fg_color="#28587A", hover_color="#142C3D")
+        self.botonVerInsumos.pack(padx=20, pady=20)
+
+        self.botonAgregarInsumos = ctk.CTkButton(self.frameInsumos, width=300, height=120, text="Agregar nuevo insumo", text_font=Font_tuple, fg_color="#28587A", hover_color="#142C3D", command= lambda: self.mostrarElementosAgregarInsumos())
+        self.botonAgregarInsumos.pack(padx=20, pady=20)
+
+        self.botonVolverSInsumos = ctk.CTkButton(self.frameInsumos, width=300, height=120, text="Volver a pantalla principal", text_font=Font_tuple, fg_color="#28587A", hover_color="#142C3D", command= lambda: parent.update_frame(parent.screenPantallaInicial, parent, container))
+        self.botonVolverSInsumos.pack(padx=20, pady=20)
+        #-------------------------Elementos Menu inicial-------------------------
+
+        #-------------------------ELementos Agregar insumos----------------------
+        self.labelNombreSInsumo = ctk.CTkLabel(self.frameInsumos, text="Nombre insumo", text_font=Font_tuple, text_color="black")
+
+        self.entradaNombreInsumo = ctk.CTkEntry(self.frameInsumos, width=200, text_font=Font_tuple, text_color="black", fg_color="#F0EFEB")
+
+        self.labelCostoInsumo = ctk.CTkLabel(self.frameInsumos, text="Valor insumo", text_font=Font_tuple, text_color="black")
+
+        self.entradaCostoInsumo = ctk.CTkEntry(self.frameInsumos, width=200, text_font=Font_tuple, text_color="black", fg_color="#F0EFEB")
+
+        self.botonAgregarNuevo = ctk.CTkButton(self.frameInsumos, width=200, height=50, text="Agregar nuevo insumo", text_font=Font_tuple, hover_color="#142C3D")
+
+        self.botonEditarInsumo = ctk.CTkButton(self.frameInsumos, width=200, text="Editar insumo", text_font=Font_tuple, hover_color="#142C3D")
+
+        self.botonVolverAgregarInsumos = ctk.CTkButton(self.frameInsumos, width=200, height=50, text="Volver", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.mostrarElementosMenuInicial())
+        #-------------------------ELementos Agregar insumos----------------------
+
+        #-------------------------ELementos Calcular insumos----------------------
+        self.selectNombresInsumos = AutocompleteCombobox(self.frameInsumos)
+
+        self.selectCantInsumos = Spinbox(self.frameInsumos, from_= 0, to = 24, width=5, state = 'readonly')
+
+        self.botonAgregarCalculo = ctk.CTkButton(self.frameInsumos, width=180, height=50, text="Agregar al calculo", text_font=Font_tuple, hover_color="#142C3D")
+
+        self.frameEntry = ctk.CTkFrame(self.frameInsumos, corner_radius=10, fg_color="#8BB0B2")
+        self.entryTotalCosto = ctk.CTkEntry(self.frameEntry, width = 170, text_font=Font_tuple, border_width=0, text_color="black", fg_color="#F0EFEB", justify=RIGHT, state=DISABLED)
+        self.entryTotalCosto.grid(row=0, column=0, padx=5, pady=5)
+
+        self.botonVolverAgregarCalculo = ctk.CTkButton(self.frameInsumos, width=210, height=60, text="Volver", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.mostrarElementosMenuInicial())
+        #-------------------------ELementos Calcular insumos----------------------
+
+        #-------------------------ELementos Ver insumos----------------------
+        #Bueno aqui va un listbox xddd
+        #-------------------------ELementos Ver insumos----------------------
+
+
+    def ocultarElementosMenuInicial(self):
+        self.botonCalcularInsumos.pack_forget()
+        self.botonVerInsumos.pack_forget()
+        self.botonAgregarInsumos.pack_forget()
+        self.botonVolverSInsumos.pack_forget()
+
+    def ocultarElementosElementosCalcularInsumos(self):
+        self.selectNombresInsumos.grid_forget()
+        self.selectCantInsumos.grid_forget()
+        self.botonAgregarCalculo.grid_forget()
+        self.frameEntry.grid_forget()
+        self.botonVolverAgregarCalculo.grid_forget()
+
+    def ocultarElementosAgregarInsumos(self):      
+        self.labelNombreSInsumo.grid_forget()
+        self.entradaNombreInsumo.grid_forget()
+        self.entradaCostoInsumo.grid_forget()
+        self.botonAgregarNuevo.grid_forget()
+        self.botonVolverAgregarInsumos.grid_forget()
+
+    def mostrarElementosMenuInicial(self):
+        self.ocultarElementosAgregarInsumos()
+        self.ocultarElementosElementosCalcularInsumos()
+        self.frameInsumos.pack(padx=20, pady=20)
+        self.botonCalcularInsumos.pack(padx=20, pady=20)
+        self.botonVerInsumos.pack(padx=20, pady=20)
+        self.botonAgregarInsumos.pack(padx=20, pady=20)
+        self.botonVolverSInsumos.pack(padx=20, pady=20)
+
+    def mostrarElementosAgregarInsumos(self):      
+        self.ocultarElementosMenuInicial()
+        self.labelNombreSInsumo.grid(row=0, column=0, padx=(20,5), pady=15)
+        self.entradaNombreInsumo.grid(row=0, column=1, padx=20, pady=15)
+        self.labelCostoInsumo.grid(row=1, column=0, padx=(20,5), pady=15)
+        self.entradaCostoInsumo.grid(row=1, column=1, padx=20, pady=15)
+        self.botonAgregarNuevo.grid(row=2, column=0, padx=20, pady=20)
+        self.botonVolverAgregarInsumos.grid(row=2, column=1, padx=20, pady=20)
+
+    def mostrarElementosCalcularInsumos(self):
+        self.ocultarElementosMenuInicial()
+        self.selectNombresInsumos.grid(row=0, column=0, padx=(20,5), pady=20)
+        self.selectCantInsumos.grid(row=0, column=1, padx=(10,20), pady=20)
+        self.botonAgregarCalculo.grid(row=1, column=0 , padx=(20,5), pady=30)
+        self.frameEntry.grid(row=1, column=1, padx=(10,20), pady=30)
+        self.botonVolverAgregarCalculo.grid(row=2, column=0, padx=(20,5), pady=20)
+
 class screenCalendarioVacunacion(ctk.CTkFrame):
     def __init__(self, parent, container):
         super().__init__(container, fg_color="#C5DEDD")
