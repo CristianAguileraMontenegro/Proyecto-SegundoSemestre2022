@@ -116,6 +116,8 @@ if __name__ != "__main__":
     
             mascota.solicitarFichasParcialesEnBaseDeDatos(mycursor, ResultadoTabla[0])
         
+        def getNombreVeterinaria(self):
+            return self.nombreVeterinaria
 
         def getMascota(self, idMascota):
             for mascota in self.mascotas:

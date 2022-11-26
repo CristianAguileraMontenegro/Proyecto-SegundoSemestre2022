@@ -6,6 +6,7 @@ from terminalVeterinario import *
 import datetime #para sacar la fecha actual
 from  tkcalendar import *
 from calendario import Calendario
+from pdfClassExport import *
 from itertools import cycle
 import re
 import threading
@@ -522,8 +523,14 @@ class screenFormularioVerFicha(ctk.CTkFrame):
             self.frameForm = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
             self.frameForm.grid(row=1, column=0, padx=20, pady=20)
 
-            self.frameButtons = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
-            self.frameButtons.grid(row=2, column=0, padx=20, pady=20)
+            self.framePruebaSVerFicha = ctk.CTkFrame(self, corner_radius=10, fg_color="#C5DEDD")
+            self.framePruebaSVerFicha.grid(row=2, column=0, padx=20, pady=20)
+
+            self.frameButtons = ctk.CTkFrame(self.framePruebaSVerFicha, corner_radius=10, fg_color="#99C1DE")
+            self.frameButtons.grid(row=0, column=0, padx=20, pady=20)
+
+            self.frameButtons2 = ctk.CTkFrame(self.framePruebaSVerFicha, corner_radius=10, fg_color="#99C1DE")
+            self.frameButtons2.grid(row=0, column=1, padx=20, pady=20)
 
             self.labelSucursalSVerFicha = ctk.CTkLabel(self.frameForm, text="Sucursal Veterinaria", text_font=Font_tuple, text_color='black')
             self.labelSucursalSVerFicha.grid(row = 0, column = 0, padx=(20,5), pady=15)
@@ -561,7 +568,8 @@ class screenFormularioVerFicha(ctk.CTkFrame):
             self.labelTemperaturaSVerFicha = ctk.CTkLabel(self.frameForm, text="Temperatura", text_font=Font_tuple, text_color='black')
             self.labelTemperaturaSVerFicha.grid(row = 5, column = 2, padx=(20,5), pady=15)
 
-            
+            self.labelMensajeFichaExportada = ctk.CTkLabel(self.frameButtons2, text="Ficha Exportada", text_font=Font_tuple, text_color="green")
+
             #Agregar Entrys------------------------------------------------------------------------------------------------------------------------------
             self.textVarSucursal = tk.StringVar()
             self.textVarVetACargo = tk.StringVar()
@@ -668,6 +676,8 @@ class screenFormularioVerFicha(ctk.CTkFrame):
                 self.entradaFechaUltimaModSVerFicha.grid(row = 6, column = 1, padx=20, pady=15)
 
             #Agregar Buttons
+            self.buttonExportar = ctk.CTkButton(self.frameButtons2, width= 250, height = 80, text='Exportar Ficha General', hover_color="#142C3D", text_font=Font_tuple, command= lambda: self.clickExportar(mascotaActual))
+            self.buttonExportar.grid(row=0, column=0, padx=15, pady=15)
             self.botonVolverSVerFicha = ctk.CTkButton(self.frameButtons, width= 200, height= 80, text='Volver', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.volverSDTotalMascota(parent, container, mascotaActual, idFicha))
             self.botonVolverSVerFicha.grid(row=1, column=1, padx=15, pady=15)
 
@@ -696,6 +706,66 @@ class screenFormularioVerFicha(ctk.CTkFrame):
         mascotaActual.quitarActualFichaMedicaConsulta(idFicha)
         parent.update_frame(parent.screenDatosTotalMascota, parent, container)
 
+    def clickExportar(self, mascotaActual:Mascota):
+        idFicha = mascotaActual.getidFichaActual()
+        tratamientos = mascotaActual.getTratamiento(idFicha)
+        tratamientosString = ''      
+        for i in range(len(tratamientos)):
+            if(i == len(tratamientos)-1):
+                tratamientosString = tratamientosString + tratamientos[i]['nombreTratamiento'] + '.'
+            else:
+                tratamientosString = tratamientosString + tratamientos[i]['nombreTratamiento'] + ','
+
+
+        medicamentos = mascotaActual.getMedicamentosConsulta(idFicha)
+        medicamentosString = '' 
+        for i in range(len(medicamentos)):
+            if(i == len(medicamentos)-1):
+                medicamentosString = medicamentosString + medicamentos[i]['nomMedicamento'] + '.'
+            else:
+                medicamentosString = medicamentosString + medicamentos[i]['nomMedicamento'] + ','
+
+        causaVisita = mascotaActual.getTratamiento(idFicha)
+        causaVisitaString = ''
+        for i in range(len(tratamientos)):
+            if(i == len(causaVisita)-1):
+                causaVisitaString = causaVisitaString + causaVisita[i]['causaVisita'] + '.'
+            else:
+                causaVisitaString = causaVisitaString + causaVisita[i]['causaVisita'] + ','
+
+        vacunas = mascotaActual.getVacunasSuministradasConsulta(idFicha)
+        vacunasString = ''
+        
+        for i in range(len(vacunas)):
+            if(i == len(vacunas)-1):
+                vacunasString = vacunasString + vacunas[i]['nomVacuna'] + '.'
+            else:
+                vacunasString = vacunasString + vacunas[i]['nomVacuna'] + ','
+
+        info = {"nombreDoctor" : str(mascotaActual.getVeterinarioACargo(idFicha)),
+                "rutDoctor" : "kkkkkkkkkkkkk",
+                "nombreClinica" : str(terminalVet.getNombreVeterinaria()),
+                "direccion" : str(mascotaActual.getSucursalVeterinaria(idFicha)),
+                "fecha" : str(mascotaActual.getFechaConsulta(idFicha)),
+                "nombrePaciente": str(mascotaActual.getNombreMascota()),
+                "especie" : str(mascotaActual.getEspecie()),
+                "peso": str(mascotaActual.getPeso(idFicha)),
+                "edad": str(mascotaActual.getEdad(idFicha)),
+                "frecResp" : str(mascotaActual.getFrecRespiratoria(idFicha)),
+                "frecCard": str(mascotaActual.getFrecCardiaca(idFicha)),
+                "temp" : str(mascotaActual.getTemp(idFicha)),
+                "tratamientos" : tratamientosString,
+                "vacunasSum": vacunasString, 
+                "causaVisita": causaVisitaString
+                }
+
+        pdf = PdfFichaGeneral(info["nombreDoctor"], info["rutDoctor"], info["nombreClinica"],
+                                info["direccion"], info["fecha"], info["nombrePaciente"],
+                                info["especie"], info["peso"], info["edad"], info["frecResp"],
+                                info["frecCard"], info["temp"], info["tratamientos"], info["vacunasSum"], info["causaVisita"])
+
+        self.buttonExportar.configure(state=DISABLED)
+        self.labelMensajeFichaExportada.grid(row=1, column=0, pady=3)
 
 class screenFormularioEditarFicha(ctk.CTkFrame):
 
@@ -1050,8 +1120,14 @@ class screenFormularioCrearFicha(ctk.CTkFrame):
             self.frameFormSCrearFicha = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
             self.frameFormSCrearFicha.grid(row=1, column=0, padx=20, pady=20)
 
-            self.frameButtonsSCrearFicha = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
-            self.frameButtonsSCrearFicha.grid(row=2, column=0, padx=20, pady=20)
+            self.framePrueba = ctk.CTkFrame(self, corner_radius=10, fg_color="#C5DEDD")
+            self.framePrueba.grid(row=2, column=0, padx=20, pady=20)
+
+            self.frameButtonsSCrearFicha = ctk.CTkFrame(self.framePrueba, corner_radius=10, fg_color="#99C1DE")
+            self.frameButtonsSCrearFicha.grid(row=0, column=0, padx=20, pady=20)
+
+            self.frameButtons2SCrearFicha = ctk.CTkFrame(self.framePrueba, corner_radius=10, fg_color="#99C1DE")
+            self.frameButtons2SCrearFicha.grid(row=0, column=1, padx=20, pady=20)
 
             # self.frameButtonsVolver = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
             # self.frameButtonsVolver.grid(row=1, column=2, padx=(20,5), pady=20)
@@ -1093,6 +1169,7 @@ class screenFormularioCrearFicha(ctk.CTkFrame):
             self.labelTemperaturaSCrearFicha.grid(row = 5, column = 2, padx=(20,5), pady=(15,35))
 
             self.labelMensajeAgregarSCrearFicha = ctk.CTkLabel(self.frameButtonsSCrearFicha, text="Ficha Agregada", text_font=Font_tuple, text_color="green")
+            self.labelMensajeFichaExportada = ctk.CTkLabel(self.frameButtons2SCrearFicha, text="Ficha Exportada", text_font=Font_tuple, text_color="green")
             
             #Agregar Entrys------------------------------------------------------------------------------------------------------------------------------
 
@@ -1162,6 +1239,9 @@ class screenFormularioCrearFicha(ctk.CTkFrame):
 
             self.buttonCrearReceta = ctk.CTkButton(self.frameButtonsSCrearFicha, width= 250, height = 80, text='Crear Receta', hover_color="#142C3D", text_font=Font_tuple, command=lambda: parent.update_frame(parent.screenFormularioReceta, parent, container))
             self.buttonCrearReceta.grid(row=2, column=2, padx=15, pady=15)
+
+            self.buttonExportar = ctk.CTkButton(self.frameButtons2SCrearFicha, width= 250, height = 80, text='Exportar Ficha General', hover_color="#142C3D", text_font=Font_tuple, state=DISABLED, command= lambda: self.clickExportar(mascotaActual))
+            self.buttonExportar.grid(row=0, column=0, padx=15, pady=15)
 
 
             self.labelErrorSucursalVetSCrearFicha = ctk.CTkLabel(self.frameFormSCrearFicha, text="Ingrese sucursal válida (solo letras)", text_font=Font_tuple10, text_color='#c1121f')
@@ -1268,15 +1348,75 @@ class screenFormularioCrearFicha(ctk.CTkFrame):
         self.botonAgregarFichaOperacion.configure(state=NORMAL)
         self.botonAgregarFichaSedacion.configure(state=NORMAL)
         self.botonAgregarFichaHosp.configure(state=NORMAL)
+        self.buttonExportar.configure(state=NORMAL)
+        self.labelMensajeFichaExportada.grid(row=1, column=0, pady=3)
         self.labelMensajeAgregarSCrearFicha.grid(row=1, column=0, pady=3)
         parent.setFlagsRecetas(2)
         mascotaActual.setActualFichaMedicaConsulta(str(fechaConsulta), True)
         
     def clickVolver(self, parent, container, mascotaActual, fechaConsulta):
-
         mascotaActual.setActualFichaMedicaConsulta(fechaConsulta, False)
         parent.update_frame(parent.screenDatosTotalMascota, parent, container)
+
+    def clickExportar(self, mascotaActual:Mascota):
+        idFicha = mascotaActual.getidFichaActual()
+        tratamientos = mascotaActual.getTratamiento(idFicha)
+        tratamientosString = ''      
+        for i in range(len(tratamientos)):
+            if(i == len(tratamientos)-1):
+                tratamientosString = tratamientosString + tratamientos[i]['nombreTratamiento'] + '.'
+            else:
+                tratamientosString = tratamientosString + tratamientos[i]['nombreTratamiento'] + ','
+
+
+        medicamentos = mascotaActual.getMedicamentosConsulta(idFicha)
+        medicamentosString = '' 
+        for i in range(len(medicamentos)):
+            if(i == len(medicamentos)-1):
+                medicamentosString = medicamentosString + medicamentos[i]['nomMedicamento'] + '.'
+            else:
+                medicamentosString = medicamentosString + medicamentos[i]['nomMedicamento'] + ','
+
+        causaVisita = mascotaActual.getTratamiento(idFicha)
+        causaVisitaString = ''
+        for i in range(len(tratamientos)):
+            if(i == len(causaVisita)-1):
+                causaVisitaString = causaVisitaString + causaVisita[i]['causaVisita'] + '.'
+            else:
+                causaVisitaString = causaVisitaString + causaVisita[i]['causaVisita'] + ','
+
+        vacunas = mascotaActual.getVacunasSuministradasConsulta(idFicha)
+        vacunasString = ''
         
+        for i in range(len(vacunas)):
+            if(i == len(vacunas)-1):
+                vacunasString = vacunasString + vacunas[i]['nomVacuna'] + '.'
+            else:
+                vacunasString = vacunasString + vacunas[i]['nomVacuna'] + ','
+
+        info = {"nombreDoctor" : str(mascotaActual.getVeterinarioACargo(idFicha)),
+                "rutDoctor" : "kkkkkkkkkkkkk",
+                "nombreClinica" : str(terminalVet.getNombreVeterinaria()),
+                "direccion" : str(mascotaActual.getSucursalVeterinaria(idFicha)),
+                "fecha" : str(mascotaActual.getFechaConsulta(idFicha)),
+                "nombrePaciente": str(mascotaActual.getNombreMascota()),
+                "especie" : str(mascotaActual.getEspecie()),
+                "peso": str(mascotaActual.getPeso(idFicha)),
+                "edad": str(mascotaActual.getEdad(idFicha)),
+                "frecResp" : str(mascotaActual.getFrecRespiratoria(idFicha)),
+                "frecCard": str(mascotaActual.getFrecCardiaca(idFicha)),
+                "temp" : str(mascotaActual.getTemp(idFicha)),
+                "tratamientos" : tratamientosString,
+                "vacunasSum": vacunasString, 
+                "causaVisita": causaVisitaString
+                }
+
+        pdf = PdfFichaGeneral(info["nombreDoctor"], info["rutDoctor"], info["nombreClinica"],
+                                info["direccion"], info["fecha"], info["nombrePaciente"],
+                                info["especie"], info["peso"], info["edad"], info["frecResp"],
+                                info["frecCard"], info["temp"], info["tratamientos"], info["vacunasSum"], info["causaVisita"])
+
+        self.buttonExportar.configure(state=DISABLED)
         
 class screenFormularioAgregarMascota(ctk.CTkFrame):
     def __init__(self, parent, container):
@@ -1786,6 +1926,7 @@ class screenFormularioFichaAuthCirugia(ctk.CTkFrame): #Ta weno ya
             self.labelAuthTutorSFichaAuthCirugia = ctk.CTkLabel(self.frameFormSFichaAuthCirugia, text="Autorizacion tutor", text_font=Font_tuple, text_color="black")
             self.labelAuthTutorSFichaAuthCirugia.grid(row=5, column=2, padx=(20,5), pady=15)
 
+            self.labelMensajeFichaExportada = ctk.CTkLabel(self.frameButtonsSFichaAuthCirugia, text="Ficha Exportada", text_font=Font_tuple, text_color="green")
     
             #Agregar Entrys
             self.textVarNombrePaciente = tk.StringVar()
@@ -1864,7 +2005,40 @@ class screenFormularioFichaAuthCirugia(ctk.CTkFrame): #Ta weno ya
     
             #Agregar botones
             self.botonVolverSFichaAuthCirugia = ctk.CTkButton(self.frameButtonsSFichaAuthCirugia, width= 250, height= 80, text='Volver', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.update_frame(parent.screenFormularioVerFicha, parent, container))
-            self.botonVolverSFichaAuthCirugia.pack(padx= 10, pady = 40)
+            self.botonVolverSFichaAuthCirugia.grid(row=0, column=0, padx= 15, pady = 20)
+
+            self.buttonExportar = ctk.CTkButton(self.frameButtonsSFichaAuthCirugia, width= 250, height = 80, text='Exportar Ficha Operacion', hover_color="#142C3D", text_font=Font_tuple, command= lambda: self.clickExportar(mascotaActual))
+            self.buttonExportar.grid(row=0, column=1, padx=15, pady=20)
+
+    def clickExportar(self, mascotaActual:Mascota):
+        idFicha = mascotaActual.getidFichaActual()
+        info = {"nombreDoctor" : str(mascotaActual.getVeterinarioACargo(idFicha)),
+                "rutDoctor" : "kkkkkkkkkkkkk",
+                "nombreClinica" : str(terminalVet.getNombreVeterinaria()),
+                "direccion" : str(mascotaActual.getSucursalVeterinaria(idFicha)),
+                "fecha" : str(mascotaActual.getFechaConsulta(idFicha)),
+                "nombrePaciente": str(mascotaActual.getNombreMascota()),
+                "especie" : str(mascotaActual.getEspecie()),
+                "peso": str(mascotaActual.getPeso(idFicha)),
+                "edad": str(mascotaActual.getEdad(idFicha)),
+                "rutTutor" : str(mascotaActual.getRutTutor()),
+                "nombreTutor": str(mascotaActual.getNombreTutor()),
+                "numeroTel" : str(mascotaActual.getNumeroTelefono()),
+                "direccionPaciente" : str(mascotaActual.getDireccion()),
+                "raza": str(mascotaActual.getRaza()), 
+                "color": str(mascotaActual.getColorMascota()),
+                "diagnostico": self.entradaDiagnosticoSFichaAuthCirugia.get("1.0", END),
+                "operacion": self.entradaCirugiaARealizarSFichaAuthCirugia.get()
+                }
+
+        pdf = PdfFichaOperacion(info["nombreDoctor"], info["rutDoctor"], info["nombreClinica"],
+                                info["direccion"], info["especie"], info["rutTutor"],
+                                info["nombrePaciente"], info["edad"], info["direccionPaciente"],
+                                info["peso"], info["raza"], info["color"], info["nombreTutor"], 
+                                info["numeroTel"], info["diagnostico"], info["operacion"])
+
+        self.buttonExportar.configure(state=DISABLED)
+        self.labelMensajeFichaExportada.grid(row=1, column=1, pady=3)
 
 
 class screenFormularioEditarFichaAuthCirugia(ctk.CTkFrame): #Ta weno ya
@@ -2116,7 +2290,8 @@ class screenFormularioCrearFichaAuthCirugia(ctk.CTkFrame):
             self.labelAuthTutorSCrearFichaAuthCirugia.grid(row=5, column=2, padx=(20,5), pady=15)
 
             #self.labelErrorCamposSCrearFichaAuthCirugia = ctk.CTkLabel(self.frameFormSCrearFichaAuthCirugia, text="Error en el formato", text_font=Font_tuple10, text_color="black")
-            self.labelMensajeAgregadoSCrearFichaAuthCirugia = ctk.CTkLabel(self.frameButtonsSCrearFichaAuthCirugia, text="Ficha Agregada", text_font=Font_tuple10, text_color="green")
+            self.labelMensajeAgregadoSCrearFichaAuthCirugia = ctk.CTkLabel(self.frameButtonsSCrearFichaAuthCirugia, text="Ficha Agregada", text_font=Font_tuple, text_color="green")
+            self.labelMensajeFichaExportada = ctk.CTkLabel(self.frameButtonsSCrearFichaAuthCirugia, text="Ficha Exportada", text_font=Font_tuple, text_color="green")
 
             #Agregar Entrys
             self.textVarNombrePaciente = tk.StringVar()
@@ -2194,6 +2369,9 @@ class screenFormularioCrearFichaAuthCirugia(ctk.CTkFrame):
 
             self.botonAgregarFichaSCrearFichaAuthCirugia = ctk.CTkButton(self.frameButtonsSCrearFichaAuthCirugia, width= 250, height= 80, text='Agregar Ficha Operación', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.validarDatos(parent, idFicha, mascotaActual))
             self.botonAgregarFichaSCrearFichaAuthCirugia.grid(row=0, column=1, padx= 15, pady = 20)
+
+            self.buttonExportar = ctk.CTkButton(self.frameButtonsSCrearFichaAuthCirugia, width= 250, height = 80, text='Exportar Ficha Operacion', hover_color="#142C3D", text_font=Font_tuple, state=DISABLED, command= lambda: self.clickExportar(mascotaActual))
+            self.buttonExportar.grid(row=0, column=2, padx=15, pady=20)
     
     def validarDatos(self, parent, idFicha, mascotaActual):
         
@@ -2231,8 +2409,38 @@ class screenFormularioCrearFichaAuthCirugia(ctk.CTkFrame):
         parent.setFlagEditar(False) #indica que en este caso no se estaba agregando en una ficha nueva, se estaba editando un ficha
         terminalVet.agregarFichaOperacion(idFicha, mascotaActual.getId(), self.operacionFicha)
         self.botonAgregarFichaSCrearFichaAuthCirugia.configure(state=DISABLED)
+        self.buttonExportar.configure(state=NORMAL)
         self.labelMensajeAgregadoSCrearFichaAuthCirugia.grid(row=1, column=1, padx=10, pady=1)
         
+    def clickExportar(self, mascotaActual:Mascota):
+        idFicha = mascotaActual.getidFichaActual()
+        info = {"nombreDoctor" : str(mascotaActual.getVeterinarioACargo(idFicha)),
+                "rutDoctor" : "kkkkkkkkkkkkk",
+                "nombreClinica" : str(terminalVet.getNombreVeterinaria()),
+                "direccion" : str(mascotaActual.getSucursalVeterinaria(idFicha)),
+                "fecha" : str(mascotaActual.getFechaConsulta(idFicha)),
+                "nombrePaciente": str(mascotaActual.getNombreMascota()),
+                "especie" : str(mascotaActual.getEspecie()),
+                "peso": str(mascotaActual.getPeso(idFicha)),
+                "edad": str(mascotaActual.getEdad(idFicha)),
+                "rutTutor" : str(mascotaActual.getRutTutor()),
+                "nombreTutor": str(mascotaActual.getNombreTutor()),
+                "numeroTel" : str(mascotaActual.getNumeroTelefono()),
+                "direccionPaciente" : str(mascotaActual.getDireccion()),
+                "raza": str(mascotaActual.getRaza()), 
+                "color": str(mascotaActual.getColorMascota()),
+                "diagnostico": self.entradaDiagnosticoSFichaAuthCirugia.get("1.0", END),
+                "operacion": self.entradaCirugiaARealizarSCrearFichaAuthCirugia.get()
+                }
+
+        pdf = PdfFichaOperacion(info["nombreDoctor"], info["rutDoctor"], info["nombreClinica"],
+                                info["direccion"], info["especie"], info["rutTutor"],
+                                info["nombrePaciente"], info["edad"], info["direccionPaciente"],
+                                info["peso"], info["raza"], info["color"], info["nombreTutor"], 
+                                info["numeroTel"], info["diagnostico"], info["operacion"])
+
+        self.buttonExportar.configure(state=DISABLED)
+        self.labelMensajeFichaExportada.grid(row=1, column=2, pady=3)
 
 class screenFormularioFichaHospt(ctk.CTkFrame):
     def __init__(self, parent, container):
@@ -2277,7 +2485,7 @@ class screenFormularioFichaHospt(ctk.CTkFrame):
             self.labelMotivoHospSVerFichaHosp = ctk.CTkLabel(self.frameFormSVerFichaHosp, text="Motivo de Hospitalización", text_font=Font_tuple, text_color="black")
             self.labelMotivoHospSVerFichaHosp.grid(row=6, column=0, padx=20, pady=10) 
 
-            self.labelMensajeAgregarSVerFichaHosp = ctk.CTkLabel(self.frameButtonsSVerFichaHosp, text="Ficha Agregada", text_font=Font_tuple, text_color="green")
+            self.labelMensajeFichaExportada = ctk.CTkLabel(self.frameButtonsSVerFichaHosp, text="Ficha Exportada", text_font=Font_tuple, text_color="green")
 
 
             #Agregar Entrys
@@ -2326,8 +2534,37 @@ class screenFormularioFichaHospt(ctk.CTkFrame):
 
             #Agregar buttons
             self.botonVolverSVerFichaHosp = ctk.CTkButton(self.frameButtonsSVerFichaHosp, width=200, height=120, text='Volver', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.update_frame(parent.screenFormularioVerFicha, parent, container))
-            self.botonVolverSVerFichaHosp.pack(padx= 10, pady = 40)
+            self.botonVolverSVerFichaHosp.grid(row=0, column=0, padx= 10, pady = 40)
 
+            self.buttonExportar = ctk.CTkButton(self.frameButtonsSVerFichaHosp, width= 250, height = 80, text='Exportar Ficha Operacion', hover_color="#142C3D", text_font=Font_tuple, command= lambda: self.clickExportar(mascotaActual))
+            self.buttonExportar.grid(row=1, column=0, padx=10, pady=40)
+
+    def clickExportar(self, mascotaActual:Mascota):
+        idFicha = mascotaActual.getidFichaActual()
+        info = {"nombreDoctor" : str(mascotaActual.getVeterinarioACargo(idFicha)),
+                "rutDoctor" : "kkkkkkkkkkkkk",
+                "nombreClinica" : str(terminalVet.getNombreVeterinaria()),
+                "direccion" : str(mascotaActual.getSucursalVeterinaria(idFicha)),
+                "fecha" : str(mascotaActual.getFechaConsulta(idFicha)),
+                "nombrePaciente": str(mascotaActual.getNombreMascota()),
+                "especie" : str(mascotaActual.getEspecie()),
+                "peso": str(mascotaActual.getPeso(idFicha)),
+                "edad": str(mascotaActual.getEdad(idFicha)),
+                "rutTutor" : str(mascotaActual.getRutTutor()),
+                "nombreTutor": str(mascotaActual.getNombreTutor()),
+                "numeroTel" : str(mascotaActual.getNumeroTelefono()),
+                "direccionPaciente" : str(mascotaActual.getDireccion()),
+                "raza": str(mascotaActual.getRaza()), 
+                "color": str(mascotaActual.getColorMascota()),
+                "motivoHosp": self.entradaMotivoHospSVerFichaHosp.get("1.0", END)
+                }
+
+        pdf = PdfFichaHospt(info["nombreDoctor"], info["rutDoctor"], info["nombreClinica"],
+                                info["direccion"], info["especie"], info["nombrePaciente"],
+                                info["edad"], info["peso"], info["raza"], info["color"], info["motivoHosp"])
+
+        self.buttonExportar.configure(state=DISABLED)
+        self.labelMensajeFichaExportada.grid(row=2, column=0, pady=3)
 
 class screenFormularioCrearFichaHospt(ctk.CTkFrame): #Hospitalización
     def __init__(self, parent, container):
@@ -2376,6 +2613,7 @@ class screenFormularioCrearFichaHospt(ctk.CTkFrame): #Hospitalización
             self.labelMotivoHospSCrearFichaHosp.grid(row=6, column=0, padx=20, pady=15)
 
             self.labelMensajeAgregadoSCrearFichaHosp = ctk.CTkLabel(self.frameButtonsSCrearFichaHosp, text="Ficha agregada", text_font=Font_tuple, text_color="green")
+            self.labelMensajeFichaExportada = ctk.CTkLabel(self.frameButtonsSCrearFichaHosp, text="Ficha Exportada", text_font=Font_tuple, text_color="green")
 
             #Agregar Entrys
 
@@ -2419,13 +2657,16 @@ class screenFormularioCrearFichaHospt(ctk.CTkFrame): #Hospitalización
             flagEditar = parent.getFlagEditar()
             if(flagEditar is True):
                 self.botonVolverSCrearFichaHosp = ctk.CTkButton(self.frameButtonsSCrearFichaHosp, width=200, height=120, text='Volver', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.update_frame(parent.screenFormularioEditarFicha, parent, container))
-                self.botonVolverSCrearFichaHosp.pack(padx= 10, pady = 40)
+                self.botonVolverSCrearFichaHosp.grid(row=0, column=0, padx= 10, pady = 40)
             else:
                 self.botonVolverSCrearFichaHosp = ctk.CTkButton(self.frameButtonsSCrearFichaHosp, width=200, height=120, text='Volver', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.show_frame(parent.screenFormularioCrearFicha))
-                self.botonVolverSCrearFichaHosp.pack(padx= 10, pady = 40)
+                self.botonVolverSCrearFichaHosp.grid(row=0, column=0, padx= 10, pady = 40)
             
             self.botonAgregarFichaHosp = ctk.CTkButton(self.frameButtonsSCrearFichaHosp, width=250, height=120, text='Agregar Ficha \nHospitalización', text_font=Font_tuple, hover_color="#142C3D", command=lambda: self.validarDatos(parent, idFicha, mascotaActual))
-            self.botonAgregarFichaHosp.pack(padx= 10, pady = 40)
+            self.botonAgregarFichaHosp.grid(row=1, column=0, padx= 10, pady = 40)
+
+            self.buttonExportar = ctk.CTkButton(self.frameButtonsSCrearFichaHosp, width= 250, height = 80, text='Exportar Ficha Operacion', hover_color="#142C3D", text_font=Font_tuple, state=DISABLED, command= lambda: self.clickExportar(mascotaActual))
+            self.buttonExportar.grid(row=3, column=0, padx=10, pady=40)
 
     def validarDatos(self, parent, idFicha, mascotaActual):
         
@@ -2452,8 +2693,35 @@ class screenFormularioCrearFichaHospt(ctk.CTkFrame): #Hospitalización
         parent.setFlagEditar(False)
         terminalVet.agregarFichaHospitalizacion(idFicha, mascotaActual.getId(), hospDicc)
         self.botonAgregarFichaHosp.configure(state=DISABLED)
-        self.labelMensajeAgregadoSCrearFichaHosp.pack()
+        self.buttonExportar.configure(state=NORMAL)
+        self.labelMensajeAgregadoSCrearFichaHosp.grid(row=2, column=0, pady=3)
+        
+    def clickExportar(self, mascotaActual:Mascota):
+        idFicha = mascotaActual.getidFichaActual()
+        info = {"nombreDoctor" : str(mascotaActual.getVeterinarioACargo(idFicha)),
+                "rutDoctor" : "kkkkkkkkkkkkk",
+                "nombreClinica" : str(terminalVet.getNombreVeterinaria()),
+                "direccion" : str(mascotaActual.getSucursalVeterinaria(idFicha)),
+                "fecha" : str(mascotaActual.getFechaConsulta(idFicha)),
+                "nombrePaciente": str(mascotaActual.getNombreMascota()),
+                "especie" : str(mascotaActual.getEspecie()),
+                "peso": str(mascotaActual.getPeso(idFicha)),
+                "edad": str(mascotaActual.getEdad(idFicha)),
+                "rutTutor" : str(mascotaActual.getRutTutor()),
+                "nombreTutor": str(mascotaActual.getNombreTutor()),
+                "numeroTel" : str(mascotaActual.getNumeroTelefono()),
+                "direccionPaciente" : str(mascotaActual.getDireccion()),
+                "raza": str(mascotaActual.getRaza()), 
+                "color": str(mascotaActual.getColorMascota()),
+                "motivoHosp": self.entradaMotivoHospSCrearFichaHosp.get("1.0", END)
+                }
 
+        pdf = PdfFichaHospt(info["nombreDoctor"], info["rutDoctor"], info["nombreClinica"],
+                                info["direccion"], info["especie"], info["nombrePaciente"],
+                                info["edad"], info["peso"], info["raza"], info["color"], info["motivoHosp"])
+
+        self.buttonExportar.configure(state=DISABLED)
+        self.labelMensajeFichaExportada.grid(row=4, column=0, pady=3)
 
 class screenFormularioEditarFichaHospt(ctk.CTkFrame):
     def __init__(self, parent, container):
@@ -2985,10 +3253,9 @@ class screenFormularioReceta(ctk.CTkFrame):
         self.labelMensajeEditado.grid(row=6, column=0, padx=5, pady=3)
 
     def clickExportarPDF(self, mascotaActual:Mascota, idFicha):
-        ruta_template = 'E:/Cosas raras/Ejercicios progra/Proyecto PetRecord 2 semestre/Proyecto-SegundoSemestre2022/htmls/recetaMedica.html'
-        ruta_css      = 'E:/Cosas raras/Ejercicios progra/Proyecto PetRecord 2 semestre/Proyecto-SegundoSemestre2022/htmls/estilos.css'
         info = {"nombreDoctor" : str(mascotaActual.getVeterinarioACargo(idFicha)),
                 "rutDoctor" : self.entradaRutVetSFormReceta.get(),
+                "nombreClinica": terminalVet.getNombreVeterinaria(),
                 "direccion" : str(mascotaActual.getSucursalVeterinaria(idFicha)),
                 "nombrePaciente": str(mascotaActual.getNombreMascota()),
                 "edad": str(mascotaActual.getEdad(idFicha)),
@@ -2997,25 +3264,10 @@ class screenFormularioReceta(ctk.CTkFrame):
                 "direccionPaciente": str(mascotaActual.getDireccion()),
                 "prescripcion" : self.entradaPrescripcionSFormReceta.get("1.0", END)
                 }
-        self.crea_pdf(ruta_template, info, ruta_css)
+        pdf = PdfRecetaMedica(info["nombreDoctor"], info["rutDoctor"], info["nombreClinica"], info["direccion"], info["fecha"], info["rutTutor"],
+                            info["nombrePaciente"], info["edad"], info["direccionPaciente"], info["prescripcion"])
         self.botonExport.configure(state=DISABLED)
         self.labelMensajeExportado.grid(row=5, column=1, padx=10, pady=10)
-
-    def crea_pdf (self, ruta_template, info, rutacss):
-        nombre_template = ruta_template.split('/')[-1]
-        ruta_template   = ruta_template.replace(nombre_template, '')
-        
-        env = jinja2.Environment(loader=jinja2.FileSystemLoader(ruta_template))
-        template = env.get_template(nombre_template)
-        html = template.render(info)
-        config = pdfkit.configuration(wkhtmltopdf='C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe')
-        ruta_salida = askdirectory(title='Seleccionar ruta')
-        fecha_string = info["fecha"].split(' ')
-        ruta_salida = ruta_salida + f'/RecetaMedica {info["nombrePaciente"]} {fecha_string[0]}.pdf'
-        options = {"enable-local-file-access": "",
-                    "page-size" : "a4"
-                    }
-        pdfkit.from_string(html, ruta_salida, options=options, configuration=config)
 
     def clickVolver(self, parent, flag):
         if(flag == 1):
@@ -3103,6 +3355,7 @@ class screenInsumos(ctk.CTkFrame):
     def ocultarElementosAgregarInsumos(self):      
         self.labelNombreSInsumo.grid_forget()
         self.entradaNombreInsumo.grid_forget()
+        self.labelCostoInsumo.grid_forget()
         self.entradaCostoInsumo.grid_forget()
         self.botonAgregarNuevo.grid_forget()
         self.botonVolverAgregarInsumos.grid_forget()
