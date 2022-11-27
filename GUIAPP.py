@@ -1,5 +1,6 @@
 import tkinter as tk
 from ttkwidgets.autocomplete import AutocompleteCombobox # pip3 install ttkwidgets
+from tkinter import ttk
 from tkinter.filedialog import askdirectory
 import customtkinter as ctk
 from terminalVeterinario import *
@@ -10,8 +11,7 @@ from pdfClassExport import *
 from itertools import cycle
 import re
 import threading
-import jinja2
-import pdfkit
+from colorama import Fore,Back,Style
 
 terminalVet = Terminal()
 today = datetime.date.today()
@@ -62,6 +62,7 @@ class App(ctk.CTk):
         self.screenCalendarioVacunacion = screenCalendarioVacunacion
         self.screenFormularioReceta = screenFormularioReceta
         self.screenInsumos = screenInsumos
+        self.screenListadoMascotas = screenListadoMascotas
         self.screenAbstractMedico = screenAbstractMedico
 
         self.framesTotales = {screenIngresoLlave, screenPantallaInicial, screenBuscarMascota, screenDatosTotalMascota, 
@@ -69,7 +70,7 @@ class App(ctk.CTk):
         screenFormularioEditarMascota, screenFormularioFichaAuthCirugia, screenFormularioEditarFichaAuthCirugia,
         screenFormularioCrearFichaAuthCirugia, screenFormularioEditarFichaHospt, screenFormularioFichaHospt, 
         screenFormularioCrearFichaHospt, screenFormularioFichaSedacion, screenFormularioCrearFichaSedacion, 
-        screenCalendarioVacunacion, screenFormularioReceta, screenInsumos, screenAbstractMedico}
+        screenCalendarioVacunacion, screenFormularioReceta, screenInsumos, screenListadoMascotas, screenAbstractMedico}
         
         for F in self.framesTotales:
             frame = F(self, container)
@@ -220,11 +221,17 @@ class screenBuscarMascota(ctk.CTkFrame):
 
         self.frameMensajes = ctk.CTkFrame(self.searchFrame, corner_radius=10, fg_color="#C5DEDD")
 
+        self.frameListado = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
+        
+
         self.entradaBuscar = ctk.CTkEntry(self.searchFrame, width = 600, text_font=Font_tuple, border_width=0, placeholder_text="Ingrese Codigo Mascota", placeholder_text_color="grey", text_color="black", fg_color="#F0EFEB")
         self.entradaBuscar.grid(row=0, column=0, padx=10, pady=10)
 
         self.botonBuscar = ctk.CTkButton(self.searchFrame, width= 10, text="Buscar", text_font=Font_tuple, command= lambda: self.clickBuscar(parent, container), fg_color="#28587A")
         self.botonBuscar.grid(row=0, column=1, padx=10, pady=10)
+
+        self.botonVerListado = ctk.CTkButton(self, width= 10, text="Ver listado de mascotas", text_font=Font_tuple, command= lambda: self.clickVerListado(), fg_color="#28587A")
+        self.botonVerListado.grid(row=0, column=2, padx=10, pady=10)
 
         self.labelCodigoInvalido = ctk.CTkLabel(self.frameMensajes, text="Ingrese un código válido", text_font=Font_tuple, text_color='red')
         self.labelNoExiste =  ctk.CTkLabel(self.frameMensajes, justify='left', text= "Mascota no registrada en el sistema", text_font=Font_tuple, text_color='black', width=100)
@@ -237,6 +244,24 @@ class screenBuscarMascota(ctk.CTkFrame):
         self.botonVolver.grid(row=0, column=1, padx=20, pady=20)
 
         self.labelInfoBasica = ctk.CTkLabel(self.frameMensajes, justify='left', text_font=Font_tuple, text_color='black', width=100)
+
+        listaNombres = terminalVet.getNombresMascotas()
+        listaIds = terminalVet.getIdsMascotas()
+
+        s = ttk.Style()
+        s.theme_use('default')
+        self.tree = ttk.Treeview(self.frameListado, column=("c1", "c2,"), show="headings", height=10) #Tipo de listbox que permite usar columnas
+
+        self.tree.column("# 1", anchor=CENTER)
+        self.tree.heading("# 1", text="Codigo mascota")
+
+        self.tree.column("# 2", anchor=CENTER)
+        self.tree.heading("# 2", text="Nombre mascota")
+
+        for i in range(len(listaNombres)):
+            self.tree.insert("", "end", text=f"{i}", values=(f"{listaIds[i]}", f"{listaNombres[i]}"))
+
+        self.tree.grid(row=1, column=0, padx=20, pady=20)
     
     def validarDatos(self, parent, container):
         flag = False
@@ -248,6 +273,13 @@ class screenBuscarMascota(ctk.CTkFrame):
         if(flag):
             self.clickBuscar(parent, container)
 
+    def clickVerListado(self):
+        self.frameListado.grid(row=2, column=0, padx=20, pady=20)
+        self.botonVerListado.configure(text="Ocultar listado mascotas", command= lambda:self.clickOcultarListado())
+
+    def clickOcultarListado(self):
+        self.frameListado.grid_forget()
+        self.botonVerListado.configure(text="Ver listado mascotas", command= lambda:self.clickVerListado())
 
     def clickBuscar(self, parent, container):
         codigoMascota = self.entradaBuscar.get()
@@ -3286,6 +3318,7 @@ class screenInsumos(ctk.CTkFrame):
         Font_tuple = ("Helvetica", 14)
         Font_tuple10 = ("Helvetica", 10)
         Font_tuple16 = ("Helvetica", 16)
+        self.idInsumoEditar = 0
 
         #-------------------------Elementos Menu inicial-------------------------
         self.frameInsumos = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
@@ -3294,7 +3327,7 @@ class screenInsumos(ctk.CTkFrame):
         self.botonCalcularInsumos = ctk.CTkButton(self.frameInsumos, width=300, height=120, text="Calcular costo de insumos", text_font=Font_tuple, fg_color="#28587A", hover_color="#142C3D", command= lambda: self.mostrarElementosCalcularInsumos())
         self.botonCalcularInsumos.pack(padx=20, pady=20)
 
-        self.botonVerInsumos = ctk.CTkButton(self.frameInsumos, width=300, height=120, text="Ver/Editar insumos", text_font=Font_tuple, fg_color="#28587A", hover_color="#142C3D")
+        self.botonVerInsumos = ctk.CTkButton(self.frameInsumos, width=300, height=120, text="Ver/Editar insumos", text_font=Font_tuple, fg_color="#28587A", hover_color="#142C3D", command= lambda: self.mostrarElementosVerInsumos())
         self.botonVerInsumos.pack(padx=20, pady=20)
 
         self.botonAgregarInsumos = ctk.CTkButton(self.frameInsumos, width=300, height=120, text="Agregar nuevo insumo", text_font=Font_tuple, fg_color="#28587A", hover_color="#142C3D", command= lambda: self.mostrarElementosAgregarInsumos())
@@ -3307,25 +3340,34 @@ class screenInsumos(ctk.CTkFrame):
         #-------------------------ELementos Agregar insumos----------------------
         self.labelNombreSInsumo = ctk.CTkLabel(self.frameInsumos, text="Nombre insumo", text_font=Font_tuple, text_color="black")
 
+        self.labelMensajeAgregado = ctk.CTkLabel(self.frameInsumos, text="Insumo agregado", text_font=Font_tuple, text_color="green")
+
+        self.labelMensajeEditado = ctk.CTkLabel(self.frameInsumos, text="Insumo Editado", text_font=Font_tuple, text_color="green")
+
         self.entradaNombreInsumo = ctk.CTkEntry(self.frameInsumos, width=200, text_font=Font_tuple, text_color="black", fg_color="#F0EFEB")
 
         self.labelCostoInsumo = ctk.CTkLabel(self.frameInsumos, text="Valor insumo", text_font=Font_tuple, text_color="black")
 
         self.entradaCostoInsumo = ctk.CTkEntry(self.frameInsumos, width=200, text_font=Font_tuple, text_color="black", fg_color="#F0EFEB")
 
-        self.botonAgregarNuevo = ctk.CTkButton(self.frameInsumos, width=200, height=50, text="Agregar nuevo insumo", text_font=Font_tuple, hover_color="#142C3D")
+        self.botonAgregarNuevo = ctk.CTkButton(self.frameInsumos, width=200, height=50, text="Agregar nuevo insumo", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.clickAgregarNuevoInsumo())
 
-        self.botonEditarInsumo = ctk.CTkButton(self.frameInsumos, width=200, text="Editar insumo", text_font=Font_tuple, hover_color="#142C3D")
+        self.botonEditarInsumo = ctk.CTkButton(self.frameInsumos, width=200, height=50, text="Editar insumo", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.clickEditarInsumo())
 
         self.botonVolverAgregarInsumos = ctk.CTkButton(self.frameInsumos, width=200, height=50, text="Volver", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.mostrarElementosMenuInicial())
+
+        self.botonVolver2AgregarInsumos = ctk.CTkButton(self.frameInsumos, width=200, height=50, text="Volver", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.mostrarElementosVerInsumos())
         #-------------------------ELementos Agregar insumos----------------------
 
         #-------------------------ELementos Calcular insumos----------------------
+        self.textVariable = tk.StringVar()
+        self.textVariable.set("0")
+        calculo = [0]
         self.selectNombresInsumos = AutocompleteCombobox(self.frameInsumos)
 
-        self.selectCantInsumos = Spinbox(self.frameInsumos, from_= 0, to = 24, width=5, state = 'readonly')
+        self.selectCantInsumos = Spinbox(self.frameInsumos, from_= 0, to = 24, width=5, state = 'readonly', textvariable= self.textVariable)
 
-        self.botonAgregarCalculo = ctk.CTkButton(self.frameInsumos, width=180, height=50, text="Agregar al calculo", text_font=Font_tuple, hover_color="#142C3D")
+        self.botonAgregarCalculo = ctk.CTkButton(self.frameInsumos, width=180, height=50, text="Agregar al calculo", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.clickAgregarCalculo(calculo))
 
         self.frameEntry = ctk.CTkFrame(self.frameInsumos, corner_radius=10, fg_color="#8BB0B2")
         self.entryTotalCosto = ctk.CTkEntry(self.frameEntry, width = 170, text_font=Font_tuple, border_width=0, text_color="black", fg_color="#F0EFEB", justify=RIGHT, state=DISABLED)
@@ -3335,7 +3377,19 @@ class screenInsumos(ctk.CTkFrame):
         #-------------------------ELementos Calcular insumos----------------------
 
         #-------------------------ELementos Ver insumos----------------------
-        #Bueno aqui va un listbox xddd
+        s = ttk.Style()
+        s.theme_use('default')
+        self.tree = ttk.Treeview(self.frameInsumos, column=("c1", "c2,"), show="headings", height=10) #Tipo de listbox que permite usar columnas
+
+        self.tree.column("# 1", anchor=CENTER)
+        self.tree.heading("# 1", text="Nombre insumo")
+
+        self.tree.column("# 2", anchor=CENTER)
+        self.tree.heading("# 2", text="Costo insumo")
+
+        self.botonEditarInsumoEnVer = ctk.CTkButton(self.frameInsumos, width=210, height=60, text="Editar insumo", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.clickEditarInsumoEnVer())
+        self.botonVolverVerInsumos = ctk.CTkButton(self.frameInsumos, width=200, text="Volver", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.mostrarElementosMenuInicial())
+
         #-------------------------ELementos Ver insumos----------------------
 
 
@@ -3346,6 +3400,11 @@ class screenInsumos(ctk.CTkFrame):
         self.botonVolverSInsumos.pack_forget()
 
     def ocultarElementosElementosCalcularInsumos(self):
+        self.textVariable.set("0")
+        self.selectNombresInsumos.delete(0, END)
+        self.entryTotalCosto.configure(state=NORMAL)
+        self.entryTotalCosto.delete(0, END)
+        self.entryTotalCosto.configure(state=DISABLED)
         self.selectNombresInsumos.grid_forget()
         self.selectCantInsumos.grid_forget()
         self.botonAgregarCalculo.grid_forget()
@@ -3354,15 +3413,32 @@ class screenInsumos(ctk.CTkFrame):
 
     def ocultarElementosAgregarInsumos(self):      
         self.labelNombreSInsumo.grid_forget()
+        self.labelMensajeAgregado.grid_forget()
         self.entradaNombreInsumo.grid_forget()
         self.labelCostoInsumo.grid_forget()
         self.entradaCostoInsumo.grid_forget()
         self.botonAgregarNuevo.grid_forget()
         self.botonVolverAgregarInsumos.grid_forget()
 
+    def ocultarElementosEditarInsumos(self):      
+        self.labelNombreSInsumo.grid_forget()
+        self.labelMensajeEditado.grid_forget()
+        self.entradaNombreInsumo.grid_forget()
+        self.labelCostoInsumo.grid_forget()
+        self.entradaCostoInsumo.grid_forget()
+        self.botonEditarInsumo.grid_forget()
+        self.botonVolver2AgregarInsumos.grid_forget()
+
+    def ocultarElementosVerInsumos(self):
+        self.tree.delete(*self.tree.get_children())
+        self.tree.grid_forget()
+        self.botonEditarInsumoEnVer.grid_forget()
+        self.botonVolverVerInsumos.grid_forget()
+
     def mostrarElementosMenuInicial(self):
         self.ocultarElementosAgregarInsumos()
         self.ocultarElementosElementosCalcularInsumos()
+        self.ocultarElementosVerInsumos()
         self.frameInsumos.pack(padx=20, pady=20)
         self.botonCalcularInsumos.pack(padx=20, pady=20)
         self.botonVerInsumos.pack(padx=20, pady=20)
@@ -3380,11 +3456,102 @@ class screenInsumos(ctk.CTkFrame):
 
     def mostrarElementosCalcularInsumos(self):
         self.ocultarElementosMenuInicial()
+        listaIdInsumos = terminalVet.getIdInsumos()
+        listaNombreInsumos = []
+        for i in listaIdInsumos:
+            listaNombreInsumos.append(str(terminalVet.getNombreInsumo(i)))
+        self.selectNombresInsumos.configure(completevalues = listaNombreInsumos)
         self.selectNombresInsumos.grid(row=0, column=0, padx=(20,5), pady=20)
         self.selectCantInsumos.grid(row=0, column=1, padx=(10,20), pady=20)
         self.botonAgregarCalculo.grid(row=1, column=0 , padx=(20,5), pady=30)
         self.frameEntry.grid(row=1, column=1, padx=(10,20), pady=30)
         self.botonVolverAgregarCalculo.grid(row=2, column=0, padx=(20,5), pady=20)
+
+    def clickAgregarCalculo(self, calculo:list):
+        nombre = self.selectNombresInsumos.get()
+        cant = self.selectCantInsumos.get()
+        idInsumo = ""
+        listaIdInsumos = terminalVet.getIdInsumos()
+
+        for i in listaIdInsumos:
+            if(str(terminalVet.getNombreInsumo(i)) == str(nombre)):
+                idInsumo = i
+
+        calculo[0] = calculo[0] + (terminalVet.getPrecioInsumo(idInsumo)*int(cant))
+        textoCalculo = tk.StringVar()
+        textoCalculo.set(calculo[0])
+        self.entryTotalCosto.configure(text=textoCalculo)
+
+    def mostrarElementosVerInsumos(self):
+        self.ocultarElementosMenuInicial()
+        self.ocultarElementosEditarInsumos()
+        listaIdInsumos = terminalVet.getIdInsumos()
+        for i in range(len(listaIdInsumos)):
+            self.tree.insert("", "end", text=f"{i}", values=(f"{terminalVet.getNombreInsumo(listaIdInsumos[i])}", f"{terminalVet.getPrecioInsumo(listaIdInsumos[i])}"))
+        self.tree.grid(row=0, column=0, padx=20, pady=20)
+        self.botonEditarInsumoEnVer.grid(row=1, column=0, padx=20, pady=10)
+        self.botonVolverVerInsumos.grid(row=2, column=0, padx=20, pady=20)
+
+    def clickAgregarNuevoInsumo(self):
+        nombreInsumoNuevo = self.entradaNombreInsumo.get()
+        valorInsumoNuevo = self.entradaCostoInsumo.get()
+        terminalVet.guardarInsumoNuevo(nombreInsumoNuevo, valorInsumoNuevo)
+        self.entradaNombreInsumo.delete(0, END)
+        self.entradaCostoInsumo.delete(0, END)
+        self.labelMensajeAgregado.grid(row=3, column=0, pady=3)
+
+    def clickEditarInsumoEnVer(self):
+        curItem = self.tree.focus()
+        diccInsumo = self.tree.item(curItem)
+        nombreInsumoSelected = diccInsumo['values'][0]
+        valorInsumoSelected = diccInsumo['values'][1]
+        idInsumoSelected = int(diccInsumo["text"])
+        listaIdInsumos = terminalVet.getIdInsumos()
+        self.mostrarEditarInsumo(nombreInsumoSelected, valorInsumoSelected, listaIdInsumos[idInsumoSelected])
+
+    def mostrarEditarInsumo(self, nombre, valor, idInsumo):
+        self.ocultarElementosVerInsumos()
+        self.textNombreInsumo = tk.StringVar()
+        self.textPrecioInsumo = tk.StringVar()
+
+        self.textNombreInsumo.set(str(nombre))
+        self.textPrecioInsumo.set(str(valor))
+        self.entradaNombreInsumo.configure(text=self.textNombreInsumo)
+        self.entradaCostoInsumo.configure(text=self.textPrecioInsumo)
+        self.labelNombreSInsumo.grid(row=0, column=0, padx=(20,5), pady=15)
+        self.entradaNombreInsumo.grid(row=0, column=1, padx=20, pady=15)
+        self.labelCostoInsumo.grid(row=1, column=0, padx=(20,5), pady=15)
+        self.entradaCostoInsumo.grid(row=1, column=1, padx=20, pady=15)
+        self.botonEditarInsumo.grid(row=2, column=0, padx=20, pady=20)
+        self.botonVolver2AgregarInsumos.grid(row=2, column=1, padx=20, pady=20)
+        self.idInsumoEditar = idInsumo
+
+    def clickEditarInsumo(self):
+        self.labelMensajeEditado.grid(row=3, column=0, pady=3)
+        terminalVet.editarInsumo(self.entradaNombreInsumo.get(), self.entradaCostoInsumo.get(), self.idInsumoEditar)
+
+class screenListadoMascotas(ctk.CTkFrame):
+    def __init__(self, parent, container):
+        super().__init__(container, fg_color="#C5DEDD")
+        listaNombres = terminalVet.getNombresMascotas()
+        listaIds = terminalVet.getIdsMascotas()
+
+        s = ttk.Style()
+        s.theme_use('default')
+        self.tree = ttk.Treeview(self, column=("c1", "c2,"), show="headings", height=10) #Tipo de listbox que permite usar columnas
+
+        self.tree.column("# 1", anchor=CENTER)
+        self.tree.heading("# 1", text="Codigo mascota")
+
+        self.tree.column("# 2", anchor=CENTER)
+        self.tree.heading("# 2", text="Nombre mascota")
+
+        for i in range(len(listaNombres)):
+            self.tree.insert("", "end", text=f"{i}", values=(f"{listaIds[i]}", f"{listaNombres[i]}"))
+
+        self.tree.grid(row=0, column=0, padx=20, pady=20)
+
+
 
 class screenCalendarioVacunacion(ctk.CTkFrame):
     def __init__(self, parent, container):
@@ -3430,7 +3597,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
             self.verCitas= ctk.CTkButton(self.frameBotonesCalendario, width=20, text='Revisar Horarios Reservados', command=lambda: self.mostarFechas(parent))
             self.verCitas.grid(row=6, column=0, padx=10 , pady=10)
 
-            self.botonVolverBuscar = ctk.CTkButton(self.frameBotonesCalendario, width= 20, text='Volver', command=lambda: parent.update_frame(parent.screenBuscarMascota, parent, container), hover_color="#142C3D")
+            self.botonVolverBuscar = ctk.CTkButton(self.frameBotonesCalendario, width= 20, text='Volver', command=lambda: parent.update_frame(parent.screenPantallaInicial, parent, container), hover_color="#142C3D")
             self.botonVolverBuscar.grid(row=9, column=0, padx=10 , pady=10)
 
             self.labelErrorFicha = ctk.CTkLabel(self, text="Seleccione una ficha")

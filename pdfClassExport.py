@@ -95,13 +95,10 @@ class PdfFichaHospt:
 
                 #LOS new_x y new_y indican la posicion de la siguiente celda
 
-                pdf.cell(w = 0, h = 10, txt = 'Dr/a '+str(nombreDoctor), border = 1, new_x=XPos.LEFT, new_y=YPos.NEXT,##w = 0 autoajusta hasta el ultimo borde y ln = 2 para que la siguiente se posiscione abajo de la celda actual
+                pdf.cell(w = 0, h = 15, txt = 'Dr/a '+str(nombreDoctor), border = 1, new_x=XPos.LEFT, new_y=YPos.NEXT,##w = 0 autoajusta hasta el ultimo borde y ln = 2 para que la siguiente se posiscione abajo de la celda actual
                         align = 'L', fill = 0)
 
-                pdf.cell(w = 0, h = 10, txt = f'Rut {rutDoctor}', border = 1, new_x=XPos.LEFT, new_y=YPos.NEXT, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
-                        align = 'L', fill = 0)
-
-                pdf.cell(w = 0, h = 10, txt = f'{direccion}', border = 1, new_x=XPos.LMARGIN, new_y=YPos.NEXT, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
+                pdf.cell(w = 0, h = 15, txt = f'{direccion}', border = 1, new_x=XPos.LMARGIN, new_y=YPos.NEXT, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
                         align = 'L', fill = 0)
 
                 pdf.multi_cell(w = 65, h = 10, txt = f'Nombre Paciente:\n{nombrePaciente}', border = 1, new_x=XPos.RIGHT, new_y=YPos.TOP, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
@@ -166,13 +163,10 @@ class PdfFichaOperacion:
 
                 #LOS new_x y new_y indican la posicion de la siguiente celda
 
-                pdf.cell(w = 0, h = 10, txt = 'Dr/a '+str(nombreDoctor), border = 1, new_x=XPos.LEFT, new_y=YPos.NEXT,##w = 0 autoajusta hasta el ultimo borde y ln = 2 para que la siguiente se posiscione abajo de la celda actual
+                pdf.cell(w = 0, h = 15, txt = 'Dr/a '+str(nombreDoctor), border = 1, new_x=XPos.LEFT, new_y=YPos.NEXT,##w = 0 autoajusta hasta el ultimo borde y ln = 2 para que la siguiente se posiscione abajo de la celda actual
                         align = 'L', fill = 0)
 
-                pdf.cell(w = 0, h = 10, txt = f'Rut {rutDoctor}', border = 1, new_x=XPos.LEFT, new_y=YPos.NEXT, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
-                        align = 'L', fill = 0)
-
-                pdf.cell(w = 0, h = 10, txt = f'{direccion}', border = 1, new_x=XPos.LMARGIN, new_y=YPos.NEXT, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
+                pdf.cell(w = 0, h = 15, txt = f'{direccion}', border = 1, new_x=XPos.LMARGIN, new_y=YPos.NEXT, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
                         align = 'L', fill = 0)
 
                 pdf.multi_cell(w = 65, h = 10, txt = f'Nombre Paciente:\n{nombrePaciente}', border = 1, new_x=XPos.RIGHT, new_y=YPos.TOP, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
@@ -250,13 +244,10 @@ class PdfFichaGeneral:
 
                 #LOS new_x y new_y indican la posicion de la siguiente celda
 
-                pdf.cell(w = 0, h = 10, txt = 'Dr/a '+str(nombreDoctor), border = 1, new_x=XPos.LEFT, new_y=YPos.NEXT,##w = 0 autoajusta hasta el ultimo borde y ln = 2 para que la siguiente se posiscione abajo de la celda actual
+                pdf.cell(w = 0, h = 15, txt = 'Dr/a '+str(nombreDoctor), border = 1, new_x=XPos.LEFT, new_y=YPos.NEXT,##w = 0 autoajusta hasta el ultimo borde y ln = 2 para que la siguiente se posiscione abajo de la celda actual
                         align = 'L', fill = 0)
 
-                pdf.cell(w = 0, h = 10, txt = f'Rut {rutDoctor}', border = 1, new_x=XPos.LEFT, new_y=YPos.NEXT, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
-                        align = 'L', fill = 0)
-
-                pdf.cell(w = 0, h = 10, txt = f'{direccion}', border = 1, new_x=XPos.LMARGIN, new_y=YPos.NEXT, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
+                pdf.cell(w = 0, h = 15, txt = f'{direccion}', border = 1, new_x=XPos.LMARGIN, new_y=YPos.NEXT, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
                         align = 'L', fill = 0)
 
                 pdf.multi_cell(w = 45, h = 10, txt = f'Fecha:\n{fecha}', border = 1, new_x=XPos.RIGHT, new_y=YPos.TOP, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado

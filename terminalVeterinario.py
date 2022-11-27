@@ -51,6 +51,7 @@ if __name__ != "__main__":
                 self.setNombreVeterinaria()
                 self.setMascotas()
                 self.setCalendario() #las veterinarias tendran calendario independiente de si tienen o no pacientes
+                self.setInsumos()
 
         def setIdVeterinaria(self):
             db.commit()
@@ -75,6 +76,30 @@ if __name__ != "__main__":
                 print("67 terminal :"+str(ids[i][0]))
                 mascotalol= Mascota(str(ids[i][0]))
                 self.mascotas.append(mascotalol)
+                self.setNombresMascotas(ids[i][0])
+
+        def  getNombresMascotas(self):
+            nombre = []
+            for mascota in self.mascotas:
+                nombre.append(mascota.getNombreMascota())
+
+            return nombre
+
+        def  getIdsMascotas(self):
+            ids = []
+            for mascota in self.mascotas:
+                ids.append(mascota.getId())
+
+            return ids
+
+        def setNombresMascotas(self, idMascota):
+            for mascota in self.mascotas:
+                if((mascota.getId() == str(idMascota))): 
+                    db.commit()
+                    sql = 'SELECT nombreMascota FROM mascota WHERE idMascota = (%s)'
+                    mycursor.execute(sql, (str(mascota.getId()),))
+                    nombres = mycursor.fetchone()
+                    mascota.setNombreMascota(nombres[0])
         
         def setMascotaOtraVeterinaria(self, idMascota): #seteamos la mascota de otra veterinaria para esta vaterinaria
             mascotalol= Mascota(str(idMascota)) #en los otros metodos como busquedaLocal2 obtendremos solo los datos asociados a esta veterinaria
@@ -643,6 +668,7 @@ if __name__ != "__main__":
             self.setNombreVeterinaria()
             self.setMascotas()
             self.setCalendario()
+            self.setInsumos()
         
         def validarTokenDeActivacion(self):
             
@@ -761,12 +787,12 @@ if __name__ != "__main__":
 
         def setInsumos(self):
             db.commit()
-            sql = 'SELECT idInsumo FROM Insumos WHERE Veterinaria_idVeterinaria = (%s) AND Veterinaria_nombreVeterinaria = (%s)'
+            sql = 'SELECT idInsumos FROM Insumos WHERE Veterinaria_idVeterinaria = (%s) AND Veterinaria_nombreVeterinaria = (%s)'
             mycursor.execute(sql, (str(self.idVeterinaria), str(self.nombreVeterinaria)))
-            datosInsumos = mycursor.fetchone()
+            datosInsumos = mycursor.fetchall()
             
-            for i in range(len(datosInsumos)):
-                insumo = insumoVeterinario(datosInsumos[i])
+            for i in datosInsumos:
+                insumo = insumoVeterinario(i[0])
                 insumo.obtenerDatosBaseDeDatos(db, mycursor)
                 self.insumos.append(insumo)
         
@@ -788,6 +814,18 @@ if __name__ != "__main__":
                 idInsumos.append(self.insumos[i].getId())
             return idInsumos
 
+        def guardarInsumoNuevo(self, nombreInsumo, valor):
+            idInsumoNuevo = uuid.uuid4()
+            nuevoInsumo = insumoVeterinario(idInsumoNuevo, valor, nombreInsumo)
+            self.insumos.append(nuevoInsumo)
+            nuevoInsumo.guardarInsumoEnBaseDeDatos(db, mycursor, self.idVeterinaria, self.nombreVeterinaria)
+
+        def editarInsumo(self, nombreInsumo, valor, idInsumo):
+            for i in range(len(self.insumos)):
+                if(str(self.insumos[i].getId()) == str(idInsumo)):
+                    self.insumos[i].setPrecioInsumo(valor)
+                    self.insumos[i].setNombreDeInsumo(nombreInsumo)
+                    self.insumos[i].editarInsumoBaseDeDatos(db, mycursor)
 
 #-----------Insumo
 #-----------rECETA
