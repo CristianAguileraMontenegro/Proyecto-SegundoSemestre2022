@@ -34,25 +34,26 @@ class insumoVeterinario:
         self.nombreDeInsumo = nombreDeInsumo
     
     def guardarInsumoEnBaseDeDatos(self, dB, myCursor, idVeterinaria, nombreVeterinaria):
-        sql = 'INSERT INTO Insumos (idInsumo, precioInsumo, nombreDeInsumo,Veterinaria_idVeterinaria, Veterinaria_nombreVeterinaria) VALUES (%s, %s, %s, %s, %s)' 
-        myCursor.execute(sql, (str(self.idInsumo), str(self.PrecioInsumo), str(self.nombreDeInsumo), str(idVeterinaria), str(nombreVeterinaria)))
+        sql = 'INSERT INTO Insumos (idInsumos, nombre, valor, Veterinaria_idVeterinaria, Veterinaria_nombreVeterinaria) VALUES (%s, %s, %s, %s, %s)' 
+        myCursor.execute(sql, (str(self.idInsumo), str(self.nombreDeInsumo), str(self.PrecioInsumo), str(idVeterinaria), str(nombreVeterinaria)))
         dB.commit()
 
     def editarInsumoBaseDeDatos(self, dB, myCursor):
-        sql = 'UPDATE Insumos SET precioInsumo = %s, nombreDeInsumo = %s WHERE idInsumo = %s' 
+        sql = 'UPDATE Insumos SET valor = %s, nombre = %s WHERE idInsumos = %s' 
         myCursor.execute(sql, (str(self.PrecioInsumo), str(self.nombreDeInsumo), str(self.idInsumo)))
         dB.commit()
     
     def eliminarInsumoBaseDeDatos(self, dB, myCursor):
-        sql = 'DELETE FROM Insumos WHERE idInsumo = %s'
+        sql = 'DELETE FROM Insumos WHERE idInsumos = %s'
         myCursor.execute(sql, (str(self.idInsumo),))
         dB.commit()
     
     def obtenerDatosBaseDeDatos(self, dB, mycursor):
         dB.commit()
-        sql = 'SELECT (precioInsumo, nombreDeInsumo) FROM Insumos WHERE idInsumo = %s' 
+        sql = 'SELECT valor, nombre FROM Insumos WHERE idInsumos = %s' 
         mycursor.execute(sql, (str(self.idInsumo),))
         datos = mycursor.fetchall()
+        print(datos)
 
-        self.setNombreDeInsumo(datos[0])
-        self.setPrecioInsumo(datos[1])
+        self.setNombreDeInsumo(datos[0][1])
+        self.setPrecioInsumo(datos[0][0])
