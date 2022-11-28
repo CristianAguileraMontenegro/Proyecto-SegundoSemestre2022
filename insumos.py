@@ -53,7 +53,6 @@ class insumoVeterinario:
         sql = 'SELECT valor, nombre FROM Insumos WHERE idInsumos = %s' 
         mycursor.execute(sql, (str(self.idInsumo),))
         datos = mycursor.fetchall()
-        print(datos)
 
         self.setNombreDeInsumo(datos[0][1])
         self.setPrecioInsumo(datos[0][0])
