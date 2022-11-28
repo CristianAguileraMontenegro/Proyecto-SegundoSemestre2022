@@ -601,6 +601,7 @@ class screenFormularioVerFicha(ctk.CTkFrame):
             self.labelTemperaturaSVerFicha.grid(row = 5, column = 2, padx=(20,5), pady=15)
 
             self.labelMensajeFichaExportada = ctk.CTkLabel(self.frameButtons2, text="Ficha Exportada", text_font=Font_tuple, text_color="green")
+            self.labelMensajeErrorPath = ctk.CTkLabel(self.frameButtons2, text="Seleccione ruta", text_font=Font_tuple, text_color="#c1121f")
 
             #Agregar Entrys------------------------------------------------------------------------------------------------------------------------------
             self.textVarSucursal = tk.StringVar()
@@ -796,8 +797,13 @@ class screenFormularioVerFicha(ctk.CTkFrame):
                                 info["especie"], info["peso"], info["edad"], info["frecResp"],
                                 info["frecCard"], info["temp"], info["tratamientos"], info["vacunasSum"], info["causaVisita"])
 
-        self.buttonExportar.configure(state=DISABLED)
-        self.labelMensajeFichaExportada.grid(row=1, column=0, pady=3)
+        respuesta = pdf.exportar()
+        if(respuesta == 0):
+            self.buttonExportar.configure(state=DISABLED)
+            self.labelMensajeErrorPath.grid_forget()
+            self.labelMensajeFichaExportada.grid(row=1, column=0, pady=3)
+        else:
+            self.labelMensajeErrorPath.grid(row=1, column=0, pady=3)
 
 class screenFormularioEditarFicha(ctk.CTkFrame):
 
@@ -1202,6 +1208,7 @@ class screenFormularioCrearFicha(ctk.CTkFrame):
 
             self.labelMensajeAgregarSCrearFicha = ctk.CTkLabel(self.frameButtonsSCrearFicha, text="Ficha Agregada", text_font=Font_tuple, text_color="green")
             self.labelMensajeFichaExportada = ctk.CTkLabel(self.frameButtons2SCrearFicha, text="Ficha Exportada", text_font=Font_tuple, text_color="green")
+            self.labelMensajeErrorPath = ctk.CTkLabel(self.frameButtons2SCrearFicha, text="Seleccione ruta", text_font=Font_tuple, text_color="#c1121f")
             
             #Agregar Entrys------------------------------------------------------------------------------------------------------------------------------
 
@@ -1448,7 +1455,13 @@ class screenFormularioCrearFicha(ctk.CTkFrame):
                                 info["especie"], info["peso"], info["edad"], info["frecResp"],
                                 info["frecCard"], info["temp"], info["tratamientos"], info["vacunasSum"], info["causaVisita"])
 
-        self.buttonExportar.configure(state=DISABLED)
+        respuesta = pdf.exportar()
+        if(respuesta == 0):
+            self.buttonExportar.configure(state=DISABLED)
+            self.labelMensajeErrorPath.grid_forget()
+            self.labelMensajeFichaExportada.grid(row=1, column=0, pady=3)
+        else:
+            self.labelMensajeErrorPath.grid(row=1, column=0, pady=3)
         
 class screenFormularioAgregarMascota(ctk.CTkFrame):
     def __init__(self, parent, container):
@@ -1557,6 +1570,7 @@ class screenFormularioAgregarMascota(ctk.CTkFrame):
         self.labelErrorNumeroTelefono = ctk.CTkLabel(self.frameFormSAgregarMascota, text="Ingrese número válido (Solo números)", text_font=Font_tuple10, text_color="#c1121f")
         self.labelErrorDireccion = ctk.CTkLabel(self.frameFormSAgregarMascota, text="Ingrese dirección válida (Solo letras y números)", text_font=Font_tuple10, text_color="#c1121f")
         self.labelErrorAlergias = ctk.CTkLabel(self.frameFormSAgregarMascota, text="Ingrese alergias válidas (Solo letras y ;)", text_font=Font_tuple10, text_color="#c1121f")
+        self.labelErrorFechaNac = ctk.CTkLabel(self.frameFormSAgregarMascota, text="Fecha nacimiento inválida", text_font=Font_tuple10, text_color="#c1121f")
 
         #Agregar buttons
         self.botonIrScreenInicialSCrearFicha = ctk.CTkButton(self.frameButtonsSAgregarMascota, width= 200, height= 120,text='Ir a pantalla inicial', text_font= Font_tuple14, hover_color="#142C3D", command=lambda: self.clickVolverInicial(parent, container))
@@ -1575,6 +1589,16 @@ class screenFormularioAgregarMascota(ctk.CTkFrame):
     def validarDatos(self, parent, nombreMascota, especie, color, raza, nombreTutor, rutTutor, numTel, direccion, alergias, fechaNac):
         
         flag = True
+
+        anioActual = int(datetime.datetime.now().strftime("%Y"))
+        anioFechaNac = fechaNac.split("/")
+        anioFechaNac = anioFechaNac[2]
+
+        if(int(anioActual) - int(anioFechaNac) > 20):
+            flag = False
+            self.labelErrorFechaNac.place(x="855", y="275")
+        else:
+            self.labelErrorFechaNac.place_forget()
 
         if((parent.filtroNoValidChar(nombreMascota) is not True) or (parent.filtroNum(nombreMascota) is not False) or (len(nombreMascota) < 3)):
             flag = False
@@ -1610,7 +1634,6 @@ class screenFormularioAgregarMascota(ctk.CTkFrame):
             flag = False
             self.labelErrorRutTutor.place(x="835", y="43")
         else:
-            print("Valid")
             self.labelErrorRutTutor.place_forget()
 
         if((parent.filtroNum(numTel) is not True) or (parent.filtroNoValidChar(numTel) is not True) or (len(numTel) < 9)):
@@ -1811,6 +1834,7 @@ class screenFormularioEditarMascota(ctk.CTkFrame):
             self.labelErrorNumeroTelefono = ctk.CTkLabel(self.frameFormSEditarMascota, text="Ingrese número válido (Solo números)", text_font=Font_tuple10, text_color="#c1121f")
             self.labelErrorDireccion = ctk.CTkLabel(self.frameFormSEditarMascota, text="Ingrese dirección válida (Solo letras y números)", text_font=Font_tuple10, text_color="#c1121f")
             self.labelErrorAlergias = ctk.CTkLabel(self.frameFormSEditarMascota, text="Ingrese alergias válidas (Solo letras y ;)", text_font=Font_tuple10, text_color="#c1121f")
+            self.labelErrorFechaNac = ctk.CTkLabel(self.frameFormSEditarMascota, text="Ingrese fecha nacimiento válida", text_font=Font_tuple10, text_color="#c1121f")
 
             #Agregar buttons
             self.botonVolverSEditarFicha = ctk.CTkButton(self.frameButtonsSEditarMascota, width= 200, height= 120,text='Volver a pantalla anterior', text_font= Font_tuple14, hover_color="#142C3D", command=lambda: parent.update_frame(parent.screenDatosTotalMascota, parent, container))
@@ -1827,7 +1851,16 @@ class screenFormularioEditarMascota(ctk.CTkFrame):
         
         flag = True
 
-        
+        anioActual = int(datetime.datetime.now().strftime("%Y"))
+        anioFechaNac = fechaNac.split("/")
+        anioFechaNac = anioFechaNac[2]
+
+        if(int(anioActual) - int(anioFechaNac) > 20):
+            flag = False
+            self.labelErrorFechaNac.place(x="855", y="275")
+        else:
+            self.labelErrorFechaNac.place_forget()
+
         if((parent.filtroNoValidChar(nombreMascota) is not True) or (parent.filtroNum(nombreMascota) is not False) or (len(nombreMascota) < 3)):
             flag = False
             self.labelErrorNombreMascota.place(x="215", y="43")
@@ -1959,6 +1992,7 @@ class screenFormularioFichaAuthCirugia(ctk.CTkFrame): #Ta weno ya
             self.labelAuthTutorSFichaAuthCirugia.grid(row=5, column=2, padx=(20,5), pady=15)
 
             self.labelMensajeFichaExportada = ctk.CTkLabel(self.frameButtonsSFichaAuthCirugia, text="Ficha Exportada", text_font=Font_tuple, text_color="green")
+            self.labelMensajeErrorPath = ctk.CTkLabel(self.frameButtonsSFichaAuthCirugia, text="Seleccione ruta", text_font=Font_tuple, text_color="#c1121f")
     
             #Agregar Entrys
             self.textVarNombrePaciente = tk.StringVar()
@@ -2069,9 +2103,13 @@ class screenFormularioFichaAuthCirugia(ctk.CTkFrame): #Ta weno ya
                                 info["peso"], info["raza"], info["color"], info["nombreTutor"], 
                                 info["numeroTel"], info["diagnostico"], info["operacion"])
 
-        self.buttonExportar.configure(state=DISABLED)
-        self.labelMensajeFichaExportada.grid(row=1, column=1, pady=3)
-
+        respuesta = pdf.exportar()
+        if(respuesta == 0):
+            self.buttonExportar.configure(state=DISABLED)
+            self.labelMensajeErrorPath.grid_forget()
+            self.labelMensajeFichaExportada.grid(row=1, column=1, pady=3)
+        else:
+            self.labelMensajeErrorPath.grid(row=1, column=1, pady=3)
 
 class screenFormularioEditarFichaAuthCirugia(ctk.CTkFrame): #Ta weno ya
     def __init__(self, parent, container):
@@ -2324,6 +2362,7 @@ class screenFormularioCrearFichaAuthCirugia(ctk.CTkFrame):
             #self.labelErrorCamposSCrearFichaAuthCirugia = ctk.CTkLabel(self.frameFormSCrearFichaAuthCirugia, text="Error en el formato", text_font=Font_tuple10, text_color="black")
             self.labelMensajeAgregadoSCrearFichaAuthCirugia = ctk.CTkLabel(self.frameButtonsSCrearFichaAuthCirugia, text="Ficha Agregada", text_font=Font_tuple, text_color="green")
             self.labelMensajeFichaExportada = ctk.CTkLabel(self.frameButtonsSCrearFichaAuthCirugia, text="Ficha Exportada", text_font=Font_tuple, text_color="green")
+            self.labelMensajeErrorPath = ctk.CTkLabel(self.frameButtonsSCrearFichaAuthCirugia, text="Seleccione ruta", text_font=Font_tuple, text_color="#c1121f")
 
             #Agregar Entrys
             self.textVarNombrePaciente = tk.StringVar()
@@ -2471,8 +2510,13 @@ class screenFormularioCrearFichaAuthCirugia(ctk.CTkFrame):
                                 info["peso"], info["raza"], info["color"], info["nombreTutor"], 
                                 info["numeroTel"], info["diagnostico"], info["operacion"])
 
-        self.buttonExportar.configure(state=DISABLED)
-        self.labelMensajeFichaExportada.grid(row=1, column=2, pady=3)
+        respuesta = pdf.exportar()
+        if(respuesta == 0):
+            self.buttonExportar.configure(state=DISABLED)
+            self.labelMensajeErrorPath.grid_forget()
+            self.labelMensajeFichaExportada.grid(row=1, column=2, pady=3)
+        else:
+            self.labelMensajeErrorPath.grid(row=1, column=2, pady=3)
 
 class screenFormularioFichaHospt(ctk.CTkFrame):
     def __init__(self, parent, container):
@@ -2518,6 +2562,7 @@ class screenFormularioFichaHospt(ctk.CTkFrame):
             self.labelMotivoHospSVerFichaHosp.grid(row=6, column=0, padx=20, pady=10) 
 
             self.labelMensajeFichaExportada = ctk.CTkLabel(self.frameButtonsSVerFichaHosp, text="Ficha Exportada", text_font=Font_tuple, text_color="green")
+            self.labelMensajeErrorPath = ctk.CTkLabel(self.frameButtonsSVerFichaHosp, text="Seleccione ruta", text_font=Font_tuple, text_color="#c1121f")
 
 
             #Agregar Entrys
@@ -2595,8 +2640,13 @@ class screenFormularioFichaHospt(ctk.CTkFrame):
                                 info["direccion"], info["especie"], info["nombrePaciente"],
                                 info["edad"], info["peso"], info["raza"], info["color"], info["motivoHosp"])
 
-        self.buttonExportar.configure(state=DISABLED)
-        self.labelMensajeFichaExportada.grid(row=2, column=0, pady=3)
+        respuesta = pdf.exportar()
+        if(respuesta == 0):
+            self.buttonExportar.configure(state=DISABLED)
+            self.labelMensajeErrorPath.grid_forget()
+            self.labelMensajeFichaExportada.grid(row=2, column=0, pady=3)
+        else:
+            self.labelMensajeErrorPath.grid(row=2, column=0, pady=3)
 
 class screenFormularioCrearFichaHospt(ctk.CTkFrame): #Hospitalización
     def __init__(self, parent, container):
@@ -2646,6 +2696,7 @@ class screenFormularioCrearFichaHospt(ctk.CTkFrame): #Hospitalización
 
             self.labelMensajeAgregadoSCrearFichaHosp = ctk.CTkLabel(self.frameButtonsSCrearFichaHosp, text="Ficha agregada", text_font=Font_tuple, text_color="green")
             self.labelMensajeFichaExportada = ctk.CTkLabel(self.frameButtonsSCrearFichaHosp, text="Ficha Exportada", text_font=Font_tuple, text_color="green")
+            self.labelMensajeErrorPath = ctk.CTkLabel(self.frameButtonsSCrearFichaHosp, text="Seleccione ruta", text_font=Font_tuple, text_color="#c1121f")
 
             #Agregar Entrys
 
@@ -2752,8 +2803,13 @@ class screenFormularioCrearFichaHospt(ctk.CTkFrame): #Hospitalización
                                 info["direccion"], info["especie"], info["nombrePaciente"],
                                 info["edad"], info["peso"], info["raza"], info["color"], info["motivoHosp"])
 
-        self.buttonExportar.configure(state=DISABLED)
-        self.labelMensajeFichaExportada.grid(row=4, column=0, pady=3)
+        respuesta = pdf.exportar()
+        if(respuesta == 0):
+            self.buttonExportar.configure(state=DISABLED)
+            self.labelMensajeErrorPath.grid_forget()
+            self.labelMensajeFichaExportada.grid(row=4, column=0, pady=3)
+        else:
+            self.labelMensajeErrorPath.grid(row=4, column=0, pady=3)
 
 class screenFormularioEditarFichaHospt(ctk.CTkFrame):
     def __init__(self, parent, container):
@@ -3117,6 +3173,7 @@ class screenFormularioReceta(ctk.CTkFrame):
             self.labelMensajeAgregado = ctk.CTkLabel(self.frameFormDatosVeterinariaSFormReceta, text="Receta agregada", text_font=Font_tuple10, text_color="green")
             self.labelMensajeEditado = ctk.CTkLabel(self.frameFormDatosVeterinariaSFormReceta, text="Receta editada", text_font=Font_tuple10, text_color="green")
             self.labelMensajeExportado = ctk.CTkLabel(self.frameFormDatosVeterinariaSFormReceta, text="Receta exportada", text_font=Font_tuple10, text_color="green")
+            self.labelMensajeErrorPath = ctk.CTkLabel(self.frameFormDatosVeterinariaSFormReceta, text="Seleccione ruta", text_font=Font_tuple, text_color="#c1121f")
 
             self.labelErrorPrescripcion = ctk.CTkLabel(self.frameFormDatosPacienteSFormReceta, text="Ingrese prescripcion en formato correcto (Solo letras)", text_font=Font_tuple10, text_color="#c1121f")
             self.labelErrorRut = ctk.CTkLabel(self.frameFormDatosVeterinariaSFormReceta, text="Ingrese rut válido", text_font=Font_tuple10, text_color="#c1121f")
@@ -3298,8 +3355,13 @@ class screenFormularioReceta(ctk.CTkFrame):
                 }
         pdf = PdfRecetaMedica(info["nombreDoctor"], info["rutDoctor"], info["nombreClinica"], info["direccion"], info["fecha"], info["rutTutor"],
                             info["nombrePaciente"], info["edad"], info["direccionPaciente"], info["prescripcion"])
-        self.botonExport.configure(state=DISABLED)
-        self.labelMensajeExportado.grid(row=5, column=1, padx=10, pady=10)
+        respuesta = pdf.exportar()
+        if(respuesta == 0):
+            self.botonExport.configure(state=DISABLED)
+            self.labelMensajeErrorPath.grid_forget()
+            self.labelMensajeExportado.grid(row=5, column=1, pady=5)
+        else:
+            self.labelMensajeErrorPath.grid(row=5, column=1, pady=5)
 
     def clickVolver(self, parent, flag):
         if(flag == 1):
