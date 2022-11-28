@@ -117,6 +117,7 @@ class Calendario:
         sql = 'SELECT * FROM fechassolicitadas WHERE Calendario_idCalendario = (%s) AND FechaInicial >= CURDATE() ' #solo tomamos aquellas fechas que sean de el dia actual en adelante
         mycursor.execute(sql, (str(self.idCalendario),))
         DatosCalendario = mycursor.fetchall()
+        self.fechasAsignadas = []
 
         if(DatosCalendario != None):
             self.ProcesarDatosBaseDeDatos(DatosCalendario)
