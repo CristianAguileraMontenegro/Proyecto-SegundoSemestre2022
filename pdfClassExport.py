@@ -75,7 +75,7 @@ class PdfRecetaMedica:
         def exportar(self):
                 folder_path = filedialog.askdirectory()
                 if(folder_path != ''):
-                        folder_path = folder_path+f"/pdf_Operacion_{self.nombrePaciente}.pdf"
+                        folder_path = folder_path+f"/pdf_Receta_{self.nombrePaciente}.pdf"
                         self.pdf.output(str(folder_path), 'F')
                         return 0
                 else:
@@ -155,7 +155,7 @@ class PdfFichaHospt:
         def exportar(self):
                 folder_path = filedialog.askdirectory()
                 if(folder_path != ''):
-                        folder_path = folder_path+f"/pdf_Operacion_{self.nombrePaciente}.pdf"
+                        folder_path = folder_path+f"/pdf_Hospitalizacion_{self.nombrePaciente}.pdf"
                         self.pdf.output(str(folder_path), 'F')
                         return 0
                 else:
@@ -348,7 +348,7 @@ class PdfFichaGeneral:
         def exportar(self):
                 folder_path = filedialog.askdirectory()
                 if(folder_path != ''):
-                        folder_path = folder_path+f"/pdf_Operacion_{self.nombrePaciente}.pdf"
+                        folder_path = folder_path+f"/pdf_General_{self.nombrePaciente}.pdf"
                         self.pdf.output(str(folder_path), 'F')
                         return 0
                 else:

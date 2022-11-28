@@ -17,8 +17,8 @@ from calendario import Calendario
 from insumos import insumoVeterinario
 
 db = mysql.connector.connect(
-    user='piero',
-    password='pieron123',
+    user='root',
+    password='root',
     host='localhost',
     database='mydb',
     port='3306'
@@ -51,7 +51,7 @@ if __name__ != "__main__":
                 self.setNombreVeterinaria()
                 self.setMascotas()
                 self.setCalendario() #las veterinarias tendran calendario independiente de si tienen o no pacientes
-                self.setInsumos()
+                #self.setInsumos()
 
         def setIdVeterinaria(self):
             db.commit()
@@ -668,7 +668,7 @@ if __name__ != "__main__":
             self.setNombreVeterinaria()
             self.setMascotas()
             self.setCalendario()
-            self.setInsumos()
+            #self.setInsumos()
         
         def validarTokenDeActivacion(self):
             
@@ -760,6 +760,9 @@ if __name__ != "__main__":
         def eliminarDatosDeFecha(self, fechaSeleccionada, cita):
             self.calendaio.eliminarDatosDeFecha(fechaSeleccionada, cita, mycursor, db)
         
+        def validarHoraYaGuardada(self, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada):
+            self.calendaio
+        
         def getRutsMascota(self):
             ruts = []
             for mascota in self.mascotas:
@@ -790,7 +793,7 @@ if __name__ != "__main__":
             sql = 'SELECT idInsumos FROM Insumos WHERE Veterinaria_idVeterinaria = (%s) AND Veterinaria_nombreVeterinaria = (%s)'
             mycursor.execute(sql, (str(self.idVeterinaria), str(self.nombreVeterinaria)))
             datosInsumos = mycursor.fetchall()
-            
+            self.insumos = []
             for i in datosInsumos:
                 insumo = insumoVeterinario(i[0])
                 insumo.obtenerDatosBaseDeDatos(db, mycursor)
