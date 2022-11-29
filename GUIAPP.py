@@ -34,8 +34,8 @@ class App(ctk.CTk):
         self.mascotaUtilizada:Mascota = None
         self.calendario:Calendario = None
         self.idNuevaMascota = None
-        self.flagEditar = False
-        self.flagAgregarMascota = False
+        self.flagEditar = False #Flag que permite manejar las screens en caso de Editar
+        self.flagAgregarMascota = False #Flag en caso de agregar o editar una mascota
 
         self.flagsRecetas = 0 #0 nada, 1 para ver, 2 para crear, 3 para editar
 
@@ -61,7 +61,6 @@ class App(ctk.CTk):
         self.screenCalendarioVacunacion = screenCalendarioVacunacion
         self.screenFormularioReceta = screenFormularioReceta
         self.screenInsumos = screenInsumos
-        self.screenListadoMascotas = screenListadoMascotas
         self.screenAbstractMedico = screenAbstractMedico
 
         self.framesTotales = {screenIngresoLlave, screenPantallaInicial, screenBuscarMascota, screenDatosTotalMascota, 
@@ -69,7 +68,7 @@ class App(ctk.CTk):
         screenFormularioEditarMascota, screenFormularioFichaAuthCirugia, screenFormularioEditarFichaAuthCirugia,
         screenFormularioCrearFichaAuthCirugia, screenFormularioEditarFichaHospt, screenFormularioFichaHospt, 
         screenFormularioCrearFichaHospt, screenFormularioFichaSedacion, screenFormularioCrearFichaSedacion, 
-        screenCalendarioVacunacion, screenFormularioReceta, screenInsumos, screenListadoMascotas, screenAbstractMedico}
+        screenCalendarioVacunacion, screenFormularioReceta, screenInsumos, screenAbstractMedico}
         
         for F in self.framesTotales:
             frame = F(self, container)
@@ -232,7 +231,7 @@ class screenBuscarMascota(ctk.CTkFrame):
         self.botonVerListado = ctk.CTkButton(self, width=70, height=50, text="Ver listado \nde mascotas", text_font=Font_tuple, command= lambda: self.clickVerListado(), fg_color="#28587A")
         self.botonVerListado.grid(row=0, column=2, padx=10, pady=10)
 
-        self.labelCodigoInvalido = ctk.CTkLabel(self.frameMensajes, text="Ingrese un código válido", text_font=Font_tuple, text_color='red')
+        self.labelCodigoInvalido = ctk.CTkLabel(self.frameMensajes, text="Ingrese un código válido", text_font=Font_tuple, text_color='#c1121f')
         self.labelNoExiste =  ctk.CTkLabel(self.frameMensajes, justify='left', text= "Mascota no registrada en el sistema", text_font=Font_tuple, text_color='black', width=100)
 
         self.botonEntrar = ctk.CTkButton(self.searchFrame, width=8, text='Ver Datos Mascota', text_font=Font_tuple, fg_color="#28587A", command=lambda: parent.update_frame(parent.screenDatosTotalMascota, parent, container))
@@ -378,7 +377,7 @@ class screenDatosTotalMascota(ctk.CTkFrame): #HACERLA DPS
 
 
             listaDatosBasicos = [f'Nombre : {nombreMascota}', f'Especie: {especieMascota}', f'Raza: {razaMascota}', f'Color: {colorMascota}', f'RUT: {rutTutor}',
-                                 f'Teléfono: {numTelefono}', f'Dirección :{direccion}', f'Fecha Nacimiento: {fechaNacimiento}']
+                                 f'Teléfono: {numTelefono}', f'Dirección: {direccion}', f'Fecha Nacimiento: {fechaNacimiento}']
             listaString = tk.StringVar(value=listaDatosBasicos)
 
             self.listDatosBasicos = tk.Listbox(
@@ -1159,7 +1158,7 @@ class screenFormularioCrearFicha(ctk.CTkFrame):
             self.frameFormSCrearFicha.grid(row=1, column=0, padx=20, pady=20)
 
             self.framePrueba = ctk.CTkFrame(self, corner_radius=10, fg_color="#C5DEDD")
-            self.framePrueba.grid(row=2, column=0, padx=20, pady=20)
+            self.framePrueba.grid(row=2, column=0, padx=20, pady=5)
 
             self.frameButtonsSCrearFicha = ctk.CTkFrame(self.framePrueba, corner_radius=10, fg_color="#99C1DE")
             self.frameButtonsSCrearFicha.grid(row=0, column=0, padx=20, pady=20)
@@ -1388,8 +1387,7 @@ class screenFormularioCrearFicha(ctk.CTkFrame):
         self.botonAgregarFichaSedacion.configure(state=NORMAL)
         self.botonAgregarFichaHosp.configure(state=NORMAL)
         self.buttonExportar.configure(state=NORMAL)
-        self.labelMensajeFichaExportada.grid(row=1, column=0, pady=3)
-        self.labelMensajeAgregarSCrearFicha.grid(row=1, column=0, pady=3)
+        self.labelMensajeAgregarSCrearFicha.grid(row=1, column=0, pady=(2,1))
         parent.setFlagsRecetas(2)
         mascotaActual.setActualFichaMedicaConsulta(str(fechaConsulta), True)
         
@@ -3134,7 +3132,7 @@ class screenFormularioCrearFichaSedacion(ctk.CTkFrame):
                 self.botonVolverSCrearFichaSedacion = ctk.CTkButton(self.frameButtonsSCrearFichaSedacion, width= 200, height= 120,text='Volver', text_font=Font_tuple, hover_color="#142C3D", command=lambda: parent.show_frame(parent.screenFormularioCrearFicha))
                 self.botonVolverSCrearFichaSedacion.pack(padx= 10, pady = 40)
             
-            self.botonAgregarFichaSedacion = ctk.CTkButton(self.frameButtonsSCrearFichaSedacion, width= 200, height= 120,text='Agregar Ficha Hospitalización', text_font=Font_tuple, hover_color="#142C3D", command=lambda:self.agregarFichaSed(idFicha, mascotaActual,self.entradaAuthTutorSCrearFichaSedacion.get(), parent))
+            self.botonAgregarFichaSedacion = ctk.CTkButton(self.frameButtonsSCrearFichaSedacion, width= 200, height= 120,text='Agregar Ficha Sedación', text_font=Font_tuple, hover_color="#142C3D", command=lambda:self.agregarFichaSed(idFicha, mascotaActual,self.entradaAuthTutorSCrearFichaSedacion.get(), parent))
             self.botonAgregarFichaSedacion.pack(padx= 10, pady = 40)
         
     def agregarFichaSed(self, idFicha, mascota, check, parent):
@@ -3163,8 +3161,15 @@ class screenFormularioReceta(ctk.CTkFrame):
             textoMascota = mascotaActual.getNombreMascota()
             flagReceta = parent.getFlagsRecetas()
             diccReceta = mascotaActual.getReceta(idFicha)
-            self.labelTituloScreenSFormReceta = ctk.CTkLabel(self, text=f"Creación de receta Medica, Mascota : {textoMascota}", text_font=Font_tuple16, text_color="black")
-            self.labelTituloScreenSFormReceta.grid(row=0, column=0, padx=10, pady=10)
+            if(flagReceta == 1):
+                self.labelTituloScreenSFormReceta = ctk.CTkLabel(self, text=f"Visualización de receta Medica, Mascota : {textoMascota}", text_font=Font_tuple16, text_color="black")
+                self.labelTituloScreenSFormReceta.grid(row=0, column=0, padx=10, pady=10)
+            elif(flagReceta == 2):
+                self.labelTituloScreenSFormReceta = ctk.CTkLabel(self, text=f"Creación de receta Medica, Mascota : {textoMascota}", text_font=Font_tuple16, text_color="black")
+                self.labelTituloScreenSFormReceta.grid(row=0, column=0, padx=10, pady=10)
+            elif(flagReceta == 3):
+                self.labelTituloScreenSFormReceta = ctk.CTkLabel(self, text=f"Edición de receta Medica, Mascota : {textoMascota}", text_font=Font_tuple16, text_color="black")
+                self.labelTituloScreenSFormReceta.grid(row=0, column=0, padx=10, pady=10)
 
             self.frameFormDatosVeterinariaSFormReceta = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
             self.frameFormDatosVeterinariaSFormReceta.grid(row=1, column=0, padx=20, pady=20)
@@ -3384,7 +3389,7 @@ class screenFormularioReceta(ctk.CTkFrame):
             parent.update_frame(parent.screenFormularioEditarFicha, parent, container)
         elif(flag == 3):
             parent.setFlagsRecetas(0)
-            parent.show_frame(parent.screenFormularioEditarFicha, parent , container)
+            parent.update_frame(parent.screenFormularioEditarFicha, parent , container)
     
 class screenInsumos(ctk.CTkFrame):
     def __init__(self, parent, container):
@@ -3413,6 +3418,10 @@ class screenInsumos(ctk.CTkFrame):
         #-------------------------Elementos Menu inicial-------------------------
 
         #-------------------------ELementos Agregar insumos----------------------
+        self.labelErrorNombreInsumo = ctk.CTkLabel(self.frameInsumos, text="Ingrese nombre de insumo válido (solo letras)", text_font=Font_tuple10, text_color='#c1121f')
+
+        self.labelErrorPrecioInsumo = ctk.CTkLabel(self.frameInsumos, text="Ingrese costo de insumo válido (solo numeros)", text_font=Font_tuple10, text_color='#c1121f')
+
         self.labelNombreSInsumo = ctk.CTkLabel(self.frameInsumos, text="Nombre insumo", text_font=Font_tuple, text_color="black")
 
         self.labelMensajeAgregado = ctk.CTkLabel(self.frameInsumos, text="Insumo agregado", text_font=Font_tuple, text_color="green")
@@ -3425,9 +3434,9 @@ class screenInsumos(ctk.CTkFrame):
 
         self.entradaCostoInsumo = ctk.CTkEntry(self.frameInsumos, width=200, text_font=Font_tuple, text_color="black", fg_color="#F0EFEB")
 
-        self.botonAgregarNuevo = ctk.CTkButton(self.frameInsumos, width=200, height=50, text="Agregar nuevo insumo", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.clickAgregarNuevoInsumo())
+        self.botonAgregarNuevo = ctk.CTkButton(self.frameInsumos, width=200, height=50, text="Agregar nuevo insumo", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.validarDatosAgregar(parent))
 
-        self.botonEditarInsumo = ctk.CTkButton(self.frameInsumos, width=200, height=50, text="Editar insumo", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.clickEditarInsumo())
+        self.botonEditarInsumo = ctk.CTkButton(self.frameInsumos, width=200, height=50, text="Editar insumo", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.validarDatosEditar(parent))
 
         self.botonVolverAgregarInsumos = ctk.CTkButton(self.frameInsumos, width=200, height=50, text="Volver", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.mostrarElementosMenuInicial())
 
@@ -3467,6 +3476,45 @@ class screenInsumos(ctk.CTkFrame):
 
         #-------------------------ELementos Ver insumos----------------------
 
+    def validarDatosAgregar(self, parent):
+        flag = True
+        nombreInsumo = self.entradaNombreInsumo.get()
+        precioInsumo = self.entradaCostoInsumo.get()
+
+        if(parent.filtroNoValidChar(nombreInsumo) is not True or parent.filtroNum(nombreInsumo) is not False or len(nombreInsumo) == 0):
+            flag = False
+            self.labelErrorNombreInsumo.place(x="222", y="46")
+        else:
+            self.labelErrorNombreInsumo.place_forget()
+
+        if(parent.filtroNoValidChar(precioInsumo) is not True or parent.filtroNum(precioInsumo) is not True or len(precioInsumo) == 0):
+            flag = False
+            self.labelErrorPrecioInsumo.place(x="222", y="102")
+        else:
+            self.labelErrorPrecioInsumo.place_forget()
+
+        if(flag is True):
+            self.clickAgregarNuevoInsumo()
+
+    def validarDatosEditar(self, parent):
+        flag = True
+        nombreInsumo = self.entradaNombreInsumo.get()
+        precioInsumo = self.entradaCostoInsumo.get()
+
+        if(parent.filtroNoValidChar(nombreInsumo) is not True or parent.filtroNum(nombreInsumo) is not False or len(nombreInsumo) == 0):
+            flag = False
+            self.labelErrorNombreInsumo.place(x="210", y="46")
+        else:
+            self.labelErrorNombreInsumo.place_forget()
+
+        if(parent.filtroNoValidChar(precioInsumo) is not True or parent.filtroNum(precioInsumo) is not True or len(precioInsumo) == 0):
+            flag = False
+            self.labelErrorPrecioInsumo.place(x="210", y="102")
+        else:
+            self.labelErrorPrecioInsumo.place_forget()
+
+        if(flag is True):
+            self.clickEditarInsumo()
 
     def ocultarElementosMenuInicial(self):
         self.botonCalcularInsumos.pack_forget()
@@ -3486,7 +3534,9 @@ class screenInsumos(ctk.CTkFrame):
         self.frameEntry.grid_forget()
         self.botonVolverAgregarCalculo.grid_forget()
 
-    def ocultarElementosAgregarInsumos(self):      
+    def ocultarElementosAgregarInsumos(self):  
+        self.labelErrorNombreInsumo.place_forget()
+        self.labelErrorPrecioInsumo.place_forget()    
         self.labelNombreSInsumo.grid_forget()
         self.labelMensajeAgregado.grid_forget()
         self.entradaNombreInsumo.grid_forget()
@@ -3495,7 +3545,9 @@ class screenInsumos(ctk.CTkFrame):
         self.botonAgregarNuevo.grid_forget()
         self.botonVolverAgregarInsumos.grid_forget()
 
-    def ocultarElementosEditarInsumos(self):      
+    def ocultarElementosEditarInsumos(self):    
+        self.labelErrorNombreInsumo.place_forget()
+        self.labelErrorPrecioInsumo.place_forget()
         self.labelNombreSInsumo.grid_forget()
         self.labelMensajeEditado.grid_forget()
         self.entradaNombreInsumo.grid_forget()
@@ -3578,7 +3630,7 @@ class screenInsumos(ctk.CTkFrame):
         self.labelMensajeAgregado.grid(row=3, column=0, pady=3)
 
     def clickEditarInsumoEnVer(self):
-        curItem = self.tree.focus()
+        curItem = self.tree.focus() #Se obtiene el item seleccionado del tree
         diccInsumo = self.tree.item(curItem)
         nombreInsumoSelected = diccInsumo['values'][0]
         valorInsumoSelected = diccInsumo['values'][1]
@@ -3588,8 +3640,8 @@ class screenInsumos(ctk.CTkFrame):
 
     def mostrarEditarInsumo(self, nombre, valor, idInsumo):
         self.ocultarElementosVerInsumos()
-        self.textNombreInsumo = tk.StringVar()
-        self.textPrecioInsumo = tk.StringVar()
+        self.textNombreInsumo = tk.StringVar() #Se muestran los mismos elementos que al agregar solo cambiando el boton
+        self.textPrecioInsumo = tk.StringVar() #Ademas se colocan los valores para ambos campos basados en los que se clickeo en la anterior screen.
 
         self.textNombreInsumo.set(str(nombre))
         self.textPrecioInsumo.set(str(valor))
@@ -3606,29 +3658,6 @@ class screenInsumos(ctk.CTkFrame):
     def clickEditarInsumo(self):
         self.labelMensajeEditado.grid(row=3, column=0, pady=3)
         terminalVet.editarInsumo(self.entradaNombreInsumo.get(), self.entradaCostoInsumo.get(), self.idInsumoEditar)
-
-class screenListadoMascotas(ctk.CTkFrame):
-    def __init__(self, parent, container):
-        super().__init__(container, fg_color="#C5DEDD")
-        listaNombres = terminalVet.getNombresMascotas()
-        listaIds = terminalVet.getIdsMascotas()
-
-        s = ttk.Style()
-        s.theme_use('default')
-        self.tree = ttk.Treeview(self, column=("c1", "c2,"), show="headings", height=10) #Tipo de listbox que permite usar columnas
-
-        self.tree.column("# 1", anchor=CENTER)
-        self.tree.heading("# 1", text="Codigo mascota")
-
-        self.tree.column("# 2", anchor=CENTER)
-        self.tree.heading("# 2", text="Nombre mascota")
-
-        for i in range(len(listaNombres)):
-            self.tree.insert("", "end", text=f"{i}", values=(f"{listaIds[i]}", f"{listaNombres[i]}"))
-
-        self.tree.grid(row=0, column=0, padx=20, pady=20)
-
-
 
 class screenCalendarioVacunacion(ctk.CTkFrame):
     def __init__(self, parent, container):
@@ -3662,7 +3691,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
             self.labelSubTitle = ctk.CTkLabel(self.frameBotonesCalendario, text=str(terminalVet.getNombreVeterinaria()), text_font=Font_tuple20, text_color='black')
             self.labelSubTitle.grid(row=1, column=0, padx=(50,50), pady=10)
 
-            self.calendario = Calendar(self.frameBotonesCalendario, selectmode='day',date_pattern='dd/mm/yyyy', font="Arial 24",  year=today.year, month=today.month, day=today.day, background="#C5DEDD", foreground="black", headersbackground="#C5DEDD") #font aumenta el tamaño
+            self.calendario = Calendar(self.frameBotonesCalendario, selectmode='day',date_pattern='dd/mm/yyyy', font="Arial 24",  year=today.year, month=today.month, day=today.day, background="#C5DEDD", foreground="black", headersbackground="#97c3c2") #font aumenta el tamaño
             self.calendario.grid(row=3, column=0, padx=(50,50), pady=10)
         
             self.indicarFechasEnCalendarioPostCargaBaseDeDatos(parent)
