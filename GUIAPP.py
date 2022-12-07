@@ -1,13 +1,14 @@
+from  tkcalendar import *
+from pdfClassExport import *
+from terminalVeterinario import *
 import tkinter as tk
 from ttkwidgets.autocomplete import AutocompleteCombobox # pip3 install ttkwidgets
 from tkinter import ttk
 from tkinter.filedialog import askdirectory
 import customtkinter as ctk
-from terminalVeterinario import *
+from PIL import Image, ImageTk
 import datetime #para sacar la fecha actual
-from  tkcalendar import *
 from calendario import Calendario
-from pdfClassExport import *
 from itertools import cycle
 import re
 import threading
@@ -196,6 +197,12 @@ class screenPantallaInicial(ctk.CTkFrame):
     def __init__(self, parent, container):
         super().__init__(container, fg_color="#C5DEDD")
         Font_tuple = ("Helvetica", 14)
+        img = Image.open("IMGs/logo__2_-removebg-preview.png")
+        resize_img = img.resize((250,200))
+        new_img = ImageTk.PhotoImage(resize_img)
+        labelImagen = tk.Label(self, image= new_img, background="#C5DEDD")
+        labelImagen.photo = new_img
+        labelImagen.place(x="0", y="0")
         self.frameBotonesPrincipal = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
         self.frameBotonesPrincipal.pack(padx=30, pady=100)
 
@@ -207,13 +214,18 @@ class screenPantallaInicial(ctk.CTkFrame):
         self.botonCalendario.grid(row=1, column=0, padx=20, pady=50)
         self.botonInsumos = ctk.CTkButton(self.frameBotonesPrincipal, width=300, height=120, text="Organizar insumos", text_font=Font_tuple, fg_color="#28587A", hover_color="#142C3D", command= lambda: parent.update_frame(parent.screenInsumos, parent, container))
         self.botonInsumos.grid(row=1, column=1, padx=20, pady=50)
-        #futuro boton que liste a las mascotas
 
 
 class screenBuscarMascota(ctk.CTkFrame):
     def __init__(self, parent, container):
         super().__init__(container, fg_color="#C5DEDD")
         Font_tuple = ("Helvetica", 14)
+        img = Image.open("IMGs/patita.png")
+        resize_img = img.resize((250,180))
+        new_img = ImageTk.PhotoImage(resize_img)
+        labelImagen = tk.Label(self, image= new_img, background="#C5DEDD")
+        labelImagen.photo = new_img
+        labelImagen.place(x="0", y="100")
         self.searchFrame = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
         self.searchFrame.grid(row=0, column=0, padx=20 , pady=20)
 
@@ -285,6 +297,7 @@ class screenBuscarMascota(ctk.CTkFrame):
         Font_tuple = ("Helvetica", 14)
         self.frameMensajes.grid(row=1, column=0, padx=10, pady=10)
         if(resultado[0] == "MalCodigo"):
+            self.labelInfoBasica.grid_forget()
             self.labelCodigoInvalido.grid(row=0, column=0,padx=10, pady=10)
         elif(resultado[0]=="MascotaLocal"):
 
@@ -494,8 +507,11 @@ class screenDatosTotalMascota(ctk.CTkFrame): #HACERLA DPS
             self.buttonCrearFicha = ctk.CTkButton(self.frameBotones, width= 175, height= 100,text='Crear Ficha', hover_color="#142C3D", text_font=Font_tuple, command=lambda: parent.update_frame(parent.screenFormularioCrearFicha, parent, container))
             self.buttonCrearFicha.grid(row=3, column=0, padx=10, pady=20)
 
+            self.buttonListadFichas = ctk.CTkButton(self.frameBotones, width= 175, height= 100,text='Ver resumen Ficha', hover_color="#142C3D", text_font=Font_tuple, command=lambda: self.mostrarListadoFichas(mascotaActual))
+            self.buttonListadFichas.grid(row=4, column=0, padx=10, pady=20)
+
             self.botonVolverSDatosTotal = ctk.CTkButton(self.frameBotones, width= 175, height= 100,text='Volver', text_font=Font_tuple, command=lambda: parent.update_frame(parent.screenBuscarMascota, parent, container), hover_color="#142C3D")
-            self.botonVolverSDatosTotal.grid(row=4, column=0, padx=10, pady=20)
+            self.botonVolverSDatosTotal.grid(row=5, column=0, padx=10, pady=20)
 
             self.labelErrorFicha = ctk.CTkLabel(self.frameBotones, text="Seleccione una ficha", text_color="red")
             self.labelErrorFicha2 = ctk.CTkLabel(self.frameListboxFichas, text="Seleccione una ficha", text_color="red")
@@ -533,7 +549,113 @@ class screenDatosTotalMascota(ctk.CTkFrame): #HACERLA DPS
         else:
             self.labelErrorFicha2.grid(row=2, column=0, padx=10, pady=10)
         
-        
+    def ocultarItemsDatosTotal(self):
+        self.frameBotones.grid_forget()
+        self.listFichasMedicas.grid_forget()
+        self.buttonEditarFicha.grid_forget()
+
+    def ocultarListadoFichas(self):
+        self.tree.grid_forget()
+        self.botonOcultarListado.grid_forget()
+
+    def mostarElementosDatosTotal(self):
+        self.ocultarListadoFichas()
+        self.frameBotones.grid(row=0, column=2, padx=20 , pady=20)
+        self.listFichasMedicas.grid(row=0, column=0, padx=10, pady=10)
+        self.buttonEditarFicha.grid(row=1, column=0, padx=10, pady=20)
+
+    def mostrarListadoFichas(self, mascotaActual:Mascota):
+        self.ocultarItemsDatosTotal()
+        idsFichas = mascotaActual.getIdsFichas()
+        contador = 0
+        Font_tuple = ('Helvetica', 13)
+        s = ttk.Style()
+        s.theme_use('default')
+        s.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('Helvetica', 8)) # Modify the font of the body
+        s.configure("mystyle.Treeview.Heading", font=('Helvetica', 8,'bold')) # Modify the font of the headings
+        self.tree = ttk.Treeview(self.frameListboxFichas,style="mystyle.Treeview", column=("c1", "c2", "c3", "c4", "c5", "c6", "c7"), show="headings", height=10) #Tipo de listbox que permite usar columnas
+
+        self.tree.column("# 1", anchor=CENTER, stretch=NO, width=120)
+        self.tree.heading("# 1", text="Fecha consulta")
+
+        self.tree.column("# 2", anchor=CENTER, stretch=NO, width=200)
+        self.tree.heading("# 2", text="Tratamientos")
+
+        self.tree.column("# 3", anchor=CENTER, stretch=NO, width=130)
+        self.tree.heading("# 3", text="Medicamentos")
+
+        self.tree.column("# 4", anchor=CENTER, stretch=NO, width=140)
+        self.tree.heading("# 4", text="Vacunas")
+
+        self.tree.column("# 5", anchor=CENTER, stretch=NO, width=90)
+        self.tree.heading("# 5", text="Hospitalización")
+
+        self.tree.column("# 6", anchor=CENTER, stretch=NO, width=65)
+        self.tree.heading("# 6", text="Operación")
+
+        self.tree.column("# 7", anchor=CENTER, stretch=NO, width=70)
+        self.tree.heading("# 7", text="Sedación")
+
+        for idSolo in idsFichas:
+            contador = contador + 1
+            terminalVet.completarFichaParcial(mascotaActual.getId(), idSolo)
+
+            tratamientos = mascotaActual.getTratamiento(idSolo)
+            tratamientosString = ''
+            
+            for i in range(len(tratamientos)):
+                if(i == len(tratamientos)-1):
+                    tratamientosString = tratamientosString + tratamientos[i]['nombreTratamiento'] + '.'
+                else:
+                    tratamientosString = tratamientosString + tratamientos[i]['nombreTratamiento'] + ','
+
+            medicamentos = mascotaActual.getMedicamentosConsulta(idSolo)
+            medicamentosString = ''
+            
+            for i in range(len(medicamentos)):
+                if(i == len(medicamentos)-1):
+                    medicamentosString = medicamentosString + medicamentos[i]['nomMedicamento'] + '.'
+                else:
+                    medicamentosString = medicamentosString + medicamentos[i]['nomMedicamento'] + ','
+
+            vacunas = mascotaActual.getVacunasSuministradasConsulta(idSolo)
+            vacunasString = ''
+            
+            for i in range(len(vacunas)):
+                if(i == len(vacunas)-1):
+                    vacunasString = vacunasString + vacunas[i]['nomVacuna'] + '.'
+                else:
+                    vacunasString = vacunasString + vacunas[i]['nomVacuna'] + ','
+
+            fechaConsulta = mascotaActual.getFechaConsulta(idSolo)
+
+            hospt = ""
+            operacion = ""
+            sedacion = ""
+
+            if(mascotaActual.getHospitalizacion(idSolo) == True):
+                hospt = "Si"
+            else:
+                hospt = "No"
+
+            if(mascotaActual.getOperacion(idSolo) == True):
+                operacion = "Si"
+            else:
+                operacion = "No"
+
+            if(mascotaActual.getSedacion(idSolo) == True):
+                sedacion = "Si"
+            else:
+                sedacion = "No"
+
+            self.tree.insert("", "end", text=f"{contador}", values=(f"{fechaConsulta}", f"{tratamientosString}",
+                            f"{medicamentosString}", f"{vacunasString}", f"{hospt}", f"{operacion}", f"{sedacion}"))
+
+        self.tree.grid(row=0, column=0, padx=10, pady=10)
+
+        self.botonOcultarListado = ctk.CTkButton(self.frameListboxFichas, width= 175, height= 100,text='Ocultar listado fichas', text_font=Font_tuple, command=lambda: self.mostarElementosDatosTotal(), hover_color="#142C3D")
+        self.botonOcultarListado.grid(row=1, column=0, padx=10, pady=20)
+
         
 class screenFormularioVerFicha(ctk.CTkFrame):
     def __init__(self, parent, container):
@@ -3397,6 +3519,10 @@ class screenInsumos(ctk.CTkFrame):
         Font_tuple = ("Helvetica", 14)
         Font_tuple10 = ("Helvetica", 10)
         Font_tuple16 = ("Helvetica", 16)
+        s = ttk.Style()
+        s.theme_use('default')
+        s.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('Helvetica', 8)) # Modify the font of the body
+        s.configure("mystyle.Treeview.Heading", font=('Helvetica', 8,'bold')) # Modify the font of the headings
         terminalVet.setInsumos()
         self.idInsumoEditar = 0
 
@@ -3444,26 +3570,43 @@ class screenInsumos(ctk.CTkFrame):
         #-------------------------ELementos Agregar insumos----------------------
 
         #-------------------------ELementos Calcular insumos----------------------
+        self.frameCosasCalcular = ctk.CTkFrame(self.frameInsumos, fg_color="#99C1DE")
+        
+        self.treeShop = ttk.Treeview(self.frameInsumos, style="mystyle.Treeview",column=("c1", "c2", "c3"), show="headings", height=10) #Tipo de listbox que permite usar columnas
+        self.treeShop.column("# 1", anchor=CENTER, stretch=NO, width=120)
+        self.treeShop.heading("# 1", text="Nombre insumo")
+
+        self.treeShop.column("# 2", anchor=CENTER, stretch=NO, width=120)
+        self.treeShop.heading("# 2", text="Costo insumo")
+
+        self.treeShop.column("# 3", anchor=CENTER, stretch=NO, width=50)
+        self.treeShop.heading("# 3", text="Cantidad")
+
         self.textVariable = tk.StringVar()
         self.textVariable.set("0")
         calculo = [0]
-        self.selectNombresInsumos = AutocompleteCombobox(self.frameInsumos)
+        self.selectNombresInsumos = AutocompleteCombobox(self.frameCosasCalcular)
+        self.selectNombresInsumos.grid(row=0, column=0, padx=(20,5), pady=20)
 
-        self.selectCantInsumos = Spinbox(self.frameInsumos, from_= 0, to = 24, width=5, state = 'readonly', textvariable= self.textVariable)
+        self.selectCantInsumos = Spinbox(self.frameCosasCalcular, from_= 0, to = 24, width=5, state = 'readonly', textvariable= self.textVariable)
+        self.selectCantInsumos.grid(row=0, column=1, padx=(10,20), pady=20)
 
-        self.botonAgregarCalculo = ctk.CTkButton(self.frameInsumos, width=180, height=50, text="Agregar al calculo", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.clickAgregarCalculo(calculo))
+        self.botonAgregarCalculo = ctk.CTkButton(self.frameCosasCalcular, width=180, height=50, text="Agregar al calculo", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.clickAgregarCalculo(calculo))
+        self.botonAgregarCalculo.grid(row=1, column=0 , padx=(20,5), pady=30)
 
-        self.frameEntry = ctk.CTkFrame(self.frameInsumos, corner_radius=10, fg_color="#8BB0B2")
+        self.frameEntry = ctk.CTkFrame(self.frameCosasCalcular, corner_radius=10, fg_color="#8BB0B2")
+        self.frameEntry.grid(row=1, column=1, padx=(10,20), pady=30)
         self.entryTotalCosto = ctk.CTkEntry(self.frameEntry, width = 170, text_font=Font_tuple, border_width=0, text_color="black", fg_color="#F0EFEB", justify=RIGHT, state=DISABLED)
         self.entryTotalCosto.grid(row=0, column=0, padx=5, pady=5)
 
+        self.botonEliminarDelCalculo = ctk.CTkButton(self.frameInsumos, width=210, height=60, text="Eliminar del calculo", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.eliminarDelCalculo(calculo))
         self.botonVolverAgregarCalculo = ctk.CTkButton(self.frameInsumos, width=210, height=60, text="Volver", text_font=Font_tuple, hover_color="#142C3D", command= lambda:self.mostrarElementosMenuInicial())
+        
         #-------------------------ELementos Calcular insumos----------------------
 
         #-------------------------ELementos Ver insumos----------------------
-        s = ttk.Style()
-        s.theme_use('default')
-        self.tree = ttk.Treeview(self.frameInsumos, column=("c1", "c2,"), show="headings", height=10) #Tipo de listbox que permite usar columnas
+        
+        self.tree = ttk.Treeview(self.frameInsumos, style="mystyle.Treeview",column=("c1", "c2,"), show="headings", height=10) #Tipo de listbox que permite usar columnas
 
         self.tree.column("# 1", anchor=CENTER)
         self.tree.heading("# 1", text="Nombre insumo")
@@ -3528,11 +3671,11 @@ class screenInsumos(ctk.CTkFrame):
         self.entryTotalCosto.configure(state=NORMAL)
         self.entryTotalCosto.delete(0, END)
         self.entryTotalCosto.configure(state=DISABLED)
-        self.selectNombresInsumos.grid_forget()
-        self.selectCantInsumos.grid_forget()
-        self.botonAgregarCalculo.grid_forget()
-        self.frameEntry.grid_forget()
+        self.frameCosasCalcular.grid_forget()
+        self.treeShop.delete(*self.treeShop.get_children())
+        self.treeShop.grid_forget()
         self.botonVolverAgregarCalculo.grid_forget()
+        self.botonEliminarDelCalculo.grid_forget()
 
     def ocultarElementosAgregarInsumos(self):  
         self.labelErrorNombreInsumo.place_forget()
@@ -3588,11 +3731,10 @@ class screenInsumos(ctk.CTkFrame):
         for i in listaIdInsumos:
             listaNombreInsumos.append(str(terminalVet.getNombreInsumo(i))+"- $"+str(terminalVet.getPrecioInsumo(i)))
         self.selectNombresInsumos.configure(completevalues = listaNombreInsumos)
-        self.selectNombresInsumos.grid(row=0, column=0, padx=(20,5), pady=20)
-        self.selectCantInsumos.grid(row=0, column=1, padx=(10,20), pady=20)
-        self.botonAgregarCalculo.grid(row=1, column=0 , padx=(20,5), pady=30)
-        self.frameEntry.grid(row=1, column=1, padx=(10,20), pady=30)
+        self.frameCosasCalcular.grid(row=0, column=0, padx=5)
+        self.treeShop.grid(row=0, column=1, padx=20, pady=20)
         self.botonVolverAgregarCalculo.grid(row=2, column=0, padx=(20,5), pady=20)
+        self.botonEliminarDelCalculo.grid(row=2, column=1, padx=20, pady=20)
 
     def clickAgregarCalculo(self, calculo:list):
         nombreTotal = self.selectNombresInsumos.get() #botnemos el insumo selccionado
@@ -3606,7 +3748,21 @@ class screenInsumos(ctk.CTkFrame):
             if(str(terminalVet.getNombreInsumo(i)) == str(nombre)):
                 idInsumo = i
 
-        calculo[0] = calculo[0] + (terminalVet.getPrecioInsumo(idInsumo)*int(cant))
+        calculo[0] = calculo[0] + (int(terminalVet.getPrecioInsumo(idInsumo))*int(cant))
+        textoCalculo = tk.StringVar()
+        textoCalculo.set(calculo[0])
+        self.treeShop.insert("", "end", values=(f"{nombre}", f"{terminalVet.getPrecioInsumo(idInsumo)}", f"{cant}"))
+        self.entryTotalCosto.configure(text=textoCalculo)
+
+    def eliminarDelCalculo(self, calculo:list):
+        curItem = self.treeShop.focus() #Se obtiene el item seleccionado del tree
+        diccInsumo = self.treeShop.item(curItem)
+        valorInsumoSelected = diccInsumo['values'][1]
+        cantidadSelected = diccInsumo["values"][2]
+
+        calculo[0] = calculo[0] - (int(valorInsumoSelected)*int(cantidadSelected))
+
+        self.treeShop.delete(curItem)
         textoCalculo = tk.StringVar()
         textoCalculo.set(calculo[0])
         self.entryTotalCosto.configure(text=textoCalculo)
@@ -3691,7 +3847,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
             self.labelSubTitle = ctk.CTkLabel(self.frameBotonesCalendario, text=str(terminalVet.getNombreVeterinaria()), text_font=Font_tuple20, text_color='black')
             self.labelSubTitle.grid(row=1, column=0, padx=(50,50), pady=10)
 
-            self.calendario = Calendar(self.frameBotonesCalendario, selectmode='day',date_pattern='dd/mm/yyyy', font="Arial 24",  year=today.year, month=today.month, day=today.day, background="#C5DEDD", foreground="black", headersbackground="#97c3c2") #font aumenta el tamaño
+            self.calendario = Calendar(self.frameBotonesCalendario, selectmode='day',date_pattern='dd/mm/yyyy', font="Arial 24",  year=today.year, month=today.month, day=today.day, background="#C5DEDD", foreground="black", headersbackground="#C5DEDD") #font aumenta el tamaño
             self.calendario.grid(row=3, column=0, padx=(50,50), pady=10)
         
             self.indicarFechasEnCalendarioPostCargaBaseDeDatos(parent)
@@ -3747,6 +3903,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- entrada de datos para fechas
             self.listaRuts = terminalVet.getRutsMascota()
             self.listaNumeros = terminalVet.getNumeroTelefonoMascota()
+            self.listaNombresMascota = terminalVet.getNombresMascotas()
 
             self.rutLabel = ctk.CTkLabel(self.frameIngresoDeDatos, text='Rut :', text_color="black", text_font=Font_tuple14)
             self.rutLabel.grid(row=7, column=0, padx=10 , pady=10)
@@ -3760,15 +3917,36 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
             self.numeroDeTelefono = AutocompleteCombobox(self.frameIngresoDeDatos, completevalues = self.listaNumeros)
             self.numeroDeTelefono.grid(row=9, column=1, padx=10 , pady=10)
 
+            self.nombreMascotaLabel = ctk.CTkLabel(self.frameIngresoDeDatos, text='Mascota :', text_color="black", text_font=Font_tuple14)
+            self.nombreMascotaLabel.grid(row=11, column=0, padx=10 , pady=10)
+
+            self.nombreMascota = AutocompleteCombobox(self.frameIngresoDeDatos, completevalues = self.listaNombresMascota)
+            self.nombreMascota.grid(row=11, column=1, padx=10 , pady=10)
+
             self.confirmarCita = ctk.CTkButton(self.frameIngresoDeDatosBajoLista, width= 120, height= 120, text_font= Font_tuple12, text='Confirmar cita', command=lambda: self.clickConfirmarFecha(parent))
-            self.confirmarCita.grid(row=11, column=0, padx=10 , pady=10)
+            self.confirmarCita.grid(row=13, column=0, padx=10 , pady=10)
 
             self.botonConfirmarEditar = ctk.CTkButton(self.frameIngresoDeDatosBajoLista,width= 120, height= 120, text_font= Font_tuple12, text='Confirmar edicion de cita', command=lambda: self.clickConfirmarEdicion(parent), hover_color="#142C3D")
             self.botonConfirmarEditar.grid(row=11, column=0, padx=10 , pady=10)
 #------------------------------------------------------------------------------------------------------------------------------------------------------- lista de datos de fechas
+            s = ttk.Style()
+            s.theme_use('default')
+            self.tree = ttk.Treeview(self.frameIngresoDeDatos, column=("c1", "c2", "c3", "c4,"), show="headings", height=10) #Tipo de listbox que permite usar columnas
+
+            self.tree.column("# 1", anchor=CENTER, minwidth=0, width=180, stretch=NO)
+            self.tree.heading("# 1", text="Horarios de atención")
+
+            self.tree.column("# 2", anchor=CENTER, minwidth=0, width=120, stretch=NO)
+            self.tree.heading("# 2", text="Rut dueño mascota")
+
+            self.tree.column("# 3", anchor=CENTER, minwidth=0, width=140, stretch=NO)
+            self.tree.heading("# 3", text="Numero dueño mascota")
+
+            self.tree.column("# 4", anchor=CENTER, minwidth=0, width=120, stretch=NO)
+            self.tree.heading("# 4", text="Nombre mascota")
 
             self.lista = tk.Listbox(self.frameIngresoDeDatos, width=60, height=15, selectmode='browse', font=('Helvetica', '13')) #creanis la lista pra mostrar nuestros datos
-            self.lista.grid(row=0, column=0, padx=10, pady=10)
+            #self.lista.grid(row=0, column=0, padx=10, pady=10)
 
             #self.lista.bind('<Double-1>', identificarSeleccion())
 
@@ -3788,6 +3966,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
 #mensajes de error 
             self.labelErrorRutTutor = ctk.CTkLabel(self.frameIngresoDeDatos, text="Ingrese rut válido", text_font=Font_tuple12, text_color="#c1121f")
             self.labelErrorNumeroTelefono = ctk.CTkLabel(self.frameIngresoDeDatos, text="Ingrese número válido (Solo números)", text_font=Font_tuple12, text_color="#c1121f")
+            self.labelErrorNombreMascota = ctk.CTkLabel(self.frameIngresoDeDatos, text="Ingrese un nombre de mascota válido", text_font=Font_tuple12, text_color="#c1121f")
             self.labelErrorSeleccion = ctk.CTkLabel(self.frameIngresoDeDatos, text="Seleccione un horario válido", text_font=Font_tuple12, text_color="#c1121f")
             self.labelErrorHorario = ctk.CTkLabel(self.frameIngresoDeDatos, text="Seleccione una horas y minutos validos\nmargen de 30 minutos", text_font=Font_tuple12, text_color="#c1121f")
             self.labelErrorSeleccionEdicion = ctk.CTkLabel(self.frameIngresoDeDatos, text="Seleccione un horario previamente reservado para edición", text_font=Font_tuple12, text_color="#c1121f")
@@ -3816,7 +3995,11 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         self.rutLabel.grid_remove()
         self.numeroDeTelefono.grid_remove()
         self.numeroDeTelefonoLabel.grid_remove()
+        self.nombreMascotaLabel.grid_remove()
+        self.nombreMascota.grid_remove()
         self.lista.grid_remove()
+        self.tree.delete(*self.tree.get_children())
+        self.tree.grid_forget()
         self.ingresarCita.grid_remove()
         self.confirmarCita.grid_remove()
         self.botonEditar.grid_remove()
@@ -3837,9 +4020,13 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         self.numeroDeTelefono.grid()
         self.numeroDeTelefonoLabel.grid()
         self.confirmarCita.grid()
+        self.nombreMascotaLabel.grid()
+        self.nombreMascota.grid()
 
         #quitamos elementos no necesarios
         self.lista.grid_remove()
+        self.tree.delete(*self.tree.get_children())
+        self.tree.grid_forget()
         self.botonEditar.grid_remove()
         self.botonConfirmarEditar.grid_remove()
         self.botonEliminar.grid_remove()
@@ -3862,8 +4049,12 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         self.numeroDeTelefono.grid()
         self.numeroDeTelefonoLabel.grid()
         self.confirmarCita.grid()
+        self.nombreMascotaLabel.grid()
+        self.nombreMascota.grid()
        
         self.lista.grid_remove()
+        self.tree.delete(*self.tree.get_children())
+        self.tree.grid_forget()
         self.botonEditar.grid_remove()
         self.ingresarCita.grid_remove()
         self.confirmarCita.grid_remove()
@@ -3885,7 +4076,11 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         self.rutLabel.grid_remove()
         self.numeroDeTelefono.grid_remove()
         self.numeroDeTelefonoLabel.grid_remove()
+        self.nombreMascotaLabel.grid_remove()
+        self.nombreMascota.grid_remove()
         self.lista.grid_remove()
+        self.tree.delete(*self.tree.get_children())
+        self.tree.grid_forget()
         self.ingresarCita.grid_remove()
         self.confirmarCita.grid_remove()
         self.botonEditar.grid_remove()
@@ -3906,11 +4101,13 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         self.rutLabel.grid_remove()
         self.numeroDeTelefono.grid_remove()
         self.numeroDeTelefonoLabel.grid_remove()
+        self.nombreMascotaLabel.grid_remove()
+        self.nombreMascota.grid_remove()
         self.confirmarCita.grid_remove()
         self.botonConfirmarEditar.grid_remove()
 
         #mostrar estos elementos
-        self.lista.grid()
+        #self.lista.grid()
         self.botonEditar.grid()
         self.ingresarCita.grid()
         self.botonEliminar.grid()
@@ -3930,6 +4127,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
                #ocultamos mensajes de error
         self.labelErrorNumeroTelefono.grid_remove()
         self.labelErrorRutTutor.grid_remove()
+        self.labelErrorNombreMascota.grid_remove()
 
         self.labelErrorHorario.grid_remove()
         self.labelErrorCitaYaAgregada.grid_remove()
@@ -3939,7 +4137,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         self.labelErrorSeleccionEdicion.grid_remove()
         self.labelErrorSeleccion.grid_remove()
     
-    def validarDatos(self, parent, rutTutor, numTel):
+    def validarDatos(self, parent, rutTutor, numTel, nombreMascota):
         
         flag = True
 
@@ -3955,6 +4153,12 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
             self.labelErrorNumeroTelefono.grid(row=10, column=0, padx=10 , pady=10)
         else: 
             self.labelErrorNumeroTelefono.grid_forget()
+
+        if((parent.filtroNoValidChar(nombreMascota) is not True) or (parent.filtroNum(nombreMascota) is not False) or (len(nombreMascota) < 3)):
+            flag = False
+            self.labelErrorNombreMascota.grid(row=12, column=0, padx=10 , pady=10)
+        else: 
+            self.labelErrorNombreMascota.grid_forget()
 
         
         return flag
@@ -3983,7 +4187,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         self.frameIngresoDeDatosBajoLista.grid()
 
         #primero generamos un listado con todas los bloques horarios
-        self.lista.delete(0,'end')
+        #self.lista.delete(0,'end')
         hora = 0
         minuto = 0
         hora2 = 0
@@ -4005,18 +4209,28 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
                 self.minutoFinalArray.append(minuto2)
                 datos = 'Hora de atención : '+str(hora)+':'+str(minuto)+'-'+str(hora)+':'+str(minuto2)
 
-            self.lista.insert(END, datos)
+            #self.lista.insert(END, datos)
+          
+            self.tree.insert("", "end", text=f"", values=(datos,'','',''))
+            self.tree.grid(row=0, column=0, padx=20, pady=20)
 
+        item = self.tree.get_children()#obtenomos los item del tree
         #verificar si ya se tienen horas reservadas 
         if (fechaObtenida is not False):
             cantidadDeElementos = len(fechaObtenida["ruts"])
 
+            item = self.tree.get_children()
             for j in range(cantidadDeElementos):
                 for i in range(len(self.horaInicialArray)): #iteramos por el maximo largo
                         if(fechaObtenida["horasInicio"][j] == str(self.horaInicialArray[i]) and fechaObtenida["minutosInicio"][j] == str(self.minutoInicialArray[i])): #identificamos la hora de 
-                            datos = 'Hora de atención : '+str(self.horaInicialArray[i])+':'+str(self.minutoInicialArray[i])+'-'+str(self.horaFinalArray[i])+':'+str(self.minutoFinalArray[i])+" Rut : "+str(fechaObtenida["ruts"][j])+" numero : "+str(fechaObtenida["numeros"][j])
-                            self.lista.delete(i) #en al linea anterior lar horas permaneceran igual, sin embargo datos como rut y numeros son sacados de la clase calendario
-                            self.lista.insert(i, datos)
+                            #datos = 'Hora de atención : '+str(self.horaInicialArray[i])+':'+str(self.minutoInicialArray[i])+'-'+str(self.horaFinalArray[i])+':'+str(self.minutoFinalArray[i])+" Rut : "+str(fechaObtenida["ruts"][j])+" numero : "+str(fechaObtenida["numeros"][j])
+                            
+                            self.tree.set(item[i],'#2', str(fechaObtenida["ruts"][j]))
+                            self.tree.set(item[i],'#3', str(fechaObtenida["numeros"][j]))
+                            self.tree.set(item[i],'#4', str(fechaObtenida["mascota"][j]))
+                            #self.tree.set(item[i],'#4', str(fechaObtenida["numeros"][j]))
+                            #self.lista.delete(i) #en al linea anterior lar horas permaneceran igual, sin embargo datos como rut y numeros son sacados de la clase calendario
+                            #self.lista.insert(i, datos)
                             break
     
         self.ocultarLlenadoParaMostarListaDeFechas()
@@ -4030,23 +4244,29 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
         #self.ocultarLlenadoParaMostar()
 
 #----------------------------------------------------------------Ingreso Datos
-    def obtenerSeccionHorariaSeleccionada(self):
+    def obtenerSeccionHorariaSeleccionada(self, i):
+       
         indicadoresDeCitas = []
-        for i in self.lista.curselection():
-            print("2494 : "+str(self.horaInicialArray[i]))
-            indicadoresDeCitas.append(self.horaInicialArray[i])
-            indicadoresDeCitas.append(self.minutoInicialArray[i])
-            indicadoresDeCitas.append(self.horaFinalArray[i])
-            indicadoresDeCitas.append(self.minutoFinalArray[i])
-            break
+               
+        #print("2494 : "+str(self.horaInicialArray[i]))
+        indicadoresDeCitas.append(self.horaInicialArray[i])
+        indicadoresDeCitas.append(self.minutoInicialArray[i])
+        indicadoresDeCitas.append(self.horaFinalArray[i])
+        indicadoresDeCitas.append(self.minutoFinalArray[i])
+            
         return  indicadoresDeCitas
     
     def ingresarCitaFuncion(self): #funcion que prepara la screen del ingreso de datos
-        for a in self.lista.curselection():
-            self.elementoAEditar = self.lista.get(a)
-            break
 
-        if(self.elementoAEditar is None):
+        curItem = self.tree.focus() #obtenemos el dato seleccionado de tree
+        item = self.tree.get_children()#obtenomos los item del tree
+        
+        for a in range(len(item)):
+            if(curItem == item[a]):
+                print("2494 : ")
+                break
+
+        if(curItem is None):
             self.labelErrorSeleccion.grid(row=7, column=0, padx=10 , pady=10)
         else:
             #
@@ -4065,7 +4285,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
                 self.minutosInicial.config(state='disabled') #los spin box son deshabilitados
                 self.horaInicial.config(state='disabled') #los spin box son deshabilitados
 
-                indicadorDeCitas = self.obtenerSeccionHorariaSeleccionada() #otenemos los datos de las listas
+                indicadorDeCitas = self.obtenerSeccionHorariaSeleccionada(a) #otenemos los datos de las listas
 
                 self.horaInicialValor.set(indicadorDeCitas[0]) #seteamos los valores en los campos 
                 self.minutosInicialValor.set(indicadorDeCitas[1])
@@ -4087,14 +4307,16 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
 
         rutIngresado = self.entradaRut.get()
         numeroIngresado = self.numeroDeTelefono.get()
+        mascotaIngresada = self.nombreMascota.get()
 
-        if(self.validarDatos(parent, rutIngresado, numeroIngresado) == True):
+        if(self.validarDatos(parent, rutIngresado, numeroIngresado, mascotaIngresada) == True):
             self.indicarFechasEnCalendario(parent, fechaSeleccionada) #marcamod en color verde la fecha seleccionada
             if (terminalVet.verificarFechaCalendario(fechaSeleccionada) == False):
                 id  = str(uuid.uuid4())
-                fechas = {'fecha': fechaSeleccionada, 'ruts':[], 'numeros':[], 'horasInicio':[], 'minutosInicio':[], 'horasFin':[], 'minutosFin':[] , 'id': []}
+                fechas = {'fecha': fechaSeleccionada, 'ruts':[], 'numeros':[], 'mascota':[], 'horasInicio':[], 'minutosInicio':[], 'horasFin':[], 'minutosFin':[] , 'id': []}
                 fechas["ruts"].append(rutIngresado)
                 fechas["numeros"].append(numeroIngresado)
+                fechas["mascota"].append(mascotaIngresada)
                 fechas["horasInicio"].append(horaInicialSeleccionada)
                 fechas["minutosInicio"].append(minutosInicialSeleccionados)
                 fechas["horasFin"].append(horaFinalSeleccionada)
@@ -4102,7 +4324,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
                 fechas["id"].append(id)
                 terminalVet.agregarFechasCalendario(fechas)
             else:
-                terminalVet.agregarDatosAFechasCalendario(fechaSeleccionada, rutIngresado, numeroIngresado, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada)
+                terminalVet.agregarDatosAFechasCalendario(fechaSeleccionada, rutIngresado, numeroIngresado, mascotaIngresada, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada)
         
             self.ocularElementosDeLLenado()
             self.minutos.config(state='normal') #los spin box son deshabilitados
@@ -4133,12 +4355,12 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
 #-------------------------------------------------------------------------------------------------editar
    
     def editarHorario(self, parent):
-        self.quitarMensajesDeErrores()
+        curItem = self.tree.focus() #obtenemos el dato seleccionado de tree
+        item = self.tree.get_children()#obtenomos los item del tree
         indicadorDeSeleccion = False
-        for a in self.lista.curselection(): #al solo ser uno toma el seleccionado
-            self.elementoAEditar = self.lista.get(a)
-
-            if(self.elementoAEditar != None): #verificamos que haya seleccionado un fecha
+        for a in range(len(item)):
+            if(curItem == item[a]):
+            
                 fechaSeleccionada = self.calendario.get_date()
                 datosFecha = terminalVet.getFechaCalendario(fechaSeleccionada)
 
@@ -4164,6 +4386,8 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
                                 self.entradaRut.insert(0, str(datosFecha["ruts"][j]))
                                 self.numeroDeTelefono.delete(0, 'end')
                                 self.numeroDeTelefono.insert(0, str(datosFecha["numeros"][j]))
+                                self.nombreMascota.delete(0, 'end')
+                                self.nombreMascota.insert(0, str(datosFecha["mascota"][j]))
                                 self.mostarElementosDeEditar()
                                 self.elementoAEditar = datosFecha #almacenamos los datos de la fecha actuasl (todas las citas para las fechas)
                                 self.datosAntesDeEdicion = horasInciales
@@ -4233,10 +4457,10 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
 
         rutIngresado = self.entradaRut.get()
         numeroIngresado = self.numeroDeTelefono.get()
-
+        mascotaIngresada = self.nombreMascota.get()
         
 
-        if(self.validarDatos(parent, rutIngresado, numeroIngresado) == True and self.validarHoraSeleccionadaValida(horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada) == True and self.validarHoraYaGuardada(fechaSeleccionada, horaInicialSeleccionada,minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada) == False):
+        if(self.validarDatos(parent, rutIngresado, numeroIngresado,mascotaIngresada) == True and self.validarHoraSeleccionadaValida(horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada) == True and self.validarHoraYaGuardada(fechaSeleccionada, horaInicialSeleccionada,minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada) == False):
         
             datosFecha = self.elementoAEditar
             for j in range(len(datosFecha["ruts"])):
@@ -4247,17 +4471,23 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
                     self.labelErrorHorario.grid_remove()
                     self.labelErrorCitaYaAgregada.grid_remove()
                     self.labelModificacionDatos.grid(row=0, column=0, padx=10 , pady=10)
-                    terminalVet.editarDatosDeFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada, j)
+                    terminalVet.editarDatosDeFecha(fechaSeleccionada, rutIngresado, numeroIngresado, mascotaIngresada, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada, j)
 
 #-----------                --------------eliminar
     def eliminarCita(self, parent):
         self.labelErrorSeleccionEliminacion.grid_remove()
         self.labelErrorSeleccionEdicion.grid_remove()
         indicadorDeSeleccion = False
-        for i in self.lista.curselection():
-            self.elementoAEditar = self.lista.get(i)
 
-            if(self.elementoAEditar != None): #verificamos que haya seleccionado un fecha
+        curItem = self.tree.focus() #obtenemos el dato seleccionado de tree
+    
+        item = self.tree.get_children()#obtenomos los item del tree
+        
+        indicadorDeSeleccion = False
+        for i in range(len(item)):
+        
+            if(curItem == item[i]):
+        
                 fechaSeleccionada = self.calendario.get_date()
                 datosFecha = terminalVet.getFechaCalendario(fechaSeleccionada)
                 
@@ -4268,16 +4498,19 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
                         print('4223 GUI Hora de atención : '+str(self.horaInicialArray[i])+':'+str(self.minutoInicialArray[i])+'-'+str(self.horaFinalArray[i])+':'+str(self.minutoFinalArray[i]))
                         if(datosFecha["horasInicio"][j] == str(self.horaInicialArray[i]) and datosFecha["minutosInicio"][j] == str(self.minutoInicialArray[i]) ): #identificamos la hora seleccionada para de esta manera eliminar los datos
                             datos = 'Hora de atención : '+str(self.horaInicialArray[i])+':'+str(self.minutoInicialArray[i])+'-'+str(self.horaFinalArray[i])+':'+str(self.minutoFinalArray[i])
-                            self.lista.delete(i) #en al linea anterior lar horas permaneceran igual, sin embargo datos como rut y numeros son sacados de la clase calendario
-                            self.lista.insert(i, datos)
                             indicadorDeSeleccion = True
                             terminalVet.eliminarDatosDeFecha(fechaSeleccionada, j)
+
+                            self.tree.set(item[i],'#1', datos)
+                            self.tree.set(item[i],'#2', '')
+                            self.tree.set(item[i],'#3', '')
+                            self.tree.set(item[i],'#4', '')
                             break
                 else:
                     self.labelErrorSeleccionEliminacion.grid(row=7, column=0, padx=10 , pady=10)
                     break
 
-            break
+            
 
         if(indicadorDeSeleccion == False): #verificamos que haya seleccionado una cita valida para edicion
             self.labelErrorSeleccion.grid(row=7, column=0, padx=10 , pady=10)
@@ -4290,7 +4523,7 @@ class screenCalendarioVacunacion(ctk.CTkFrame):
             #indicadoresDeCitas.append(self.horaFinalArray[i])
             #indicadoresDeCitas.append(self.minutoFinalArray[i])
               
-#----------------------------------------------------------------------------------------------------------------------------------------                  
+#----------------------------------------------------------------------------------------------------------------------------------------                   
 class screenAbstractMedico(ctk.CTkFrame):
     def __init__(self, parent, container):
         super().__init__(container, fg_color="#C5DEDD")

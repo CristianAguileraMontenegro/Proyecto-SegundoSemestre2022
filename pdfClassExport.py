@@ -46,7 +46,7 @@ class PdfRecetaMedica:
                 self.pdf.cell(w = 0, h = 10, txt = f'{self.direccion}', border = 1, new_x=XPos.LMARGIN, new_y=YPos.NEXT, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
                         align = 'L', fill = 0)
 
-                self.pdf.multi_cell(w = 95, h = 10, txt = f'Fecha:\n{self.fecha}', border = 1, new_x=XPos.RIGHT, new_y=YPos.TOP, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
+                self.pdf.multi_cell(w = 95, h = 10, txt = f'Fecha de emisión:\n{self.fecha}', border = 1, new_x=XPos.RIGHT, new_y=YPos.TOP, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
                         align = 'L', fill = 0)
 
                 self.pdf.multi_cell(w = 95, h = 10, txt = f'Rut:\n{self.rutTutor}', border = 1, new_x=XPos.LMARGIN, new_y=YPos.NEXT, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
@@ -305,7 +305,7 @@ class PdfFichaGeneral:
                 self.pdf.cell(w = 0, h = 15, txt = f'{self.direccion}', border = 1, new_x=XPos.LMARGIN, new_y=YPos.NEXT, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
                         align = 'L', fill = 0)
 
-                self.pdf.multi_cell(w = 45, h = 10, txt = f'Fecha:\n{self.fecha}', border = 1, new_x=XPos.RIGHT, new_y=YPos.TOP, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
+                self.pdf.multi_cell(w = 45, h = 10, txt = f'Fecha de emisión:\n{self.fecha}', border = 1, new_x=XPos.RIGHT, new_y=YPos.TOP, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
                         align = 'L', fill = 0)
 
                 self.pdf.multi_cell(w = 45, h = 10, txt = f'Nombre paciente:\n{self.nombrePaciente}', border = 1, new_x=XPos.RIGHT, new_y=YPos.TOP, ##w = 0 autoajusta hasta el ultimo borde y ln = 1 para que la siguiente se posiscione al siguiente lado
