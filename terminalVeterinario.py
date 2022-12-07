@@ -751,11 +751,11 @@ if __name__ != "__main__":
         def agregarFechasCalendario(self, fechas):
             self.calendaio.agregarFechas(fechas,mycursor, db)
         
-        def agregarDatosAFechasCalendario(self, fechaSeleccionada, rutIngresado, numeroIngresado, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada):
-            self.calendaio.agregarDatosAFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada, mycursor, db)
+        def agregarDatosAFechasCalendario(self, fechaSeleccionada, rutIngresado, numeroIngresado, mascotaIngresada, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada):
+            self.calendaio.agregarDatosAFecha(fechaSeleccionada, rutIngresado, numeroIngresado, mascotaIngresada, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada, mycursor, db)
         
-        def editarDatosDeFecha(self, fechaSeleccionada, rutIngresado, numeroIngresado, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada, cita):
-            self.calendaio.editarDatosDeFecha(fechaSeleccionada, rutIngresado, numeroIngresado, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada, cita, mycursor, db)
+        def editarDatosDeFecha(self, fechaSeleccionada, rutIngresado, numeroIngresado,mascotaIngresada, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada, cita):
+            self.calendaio.editarDatosDeFecha(fechaSeleccionada, rutIngresado, numeroIngresado,mascotaIngresada, horaInicialSeleccionada, minutosInicialSeleccionados, horaFinalSeleccionada, minutosFinalSeleccionada, cita, mycursor, db)
         
         def eliminarDatosDeFecha(self, fechaSeleccionada, cita):
             self.calendaio.eliminarDatosDeFecha(fechaSeleccionada, cita, mycursor, db)
