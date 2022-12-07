@@ -197,7 +197,7 @@ class screenPantallaInicial(ctk.CTkFrame):
     def __init__(self, parent, container):
         super().__init__(container, fg_color="#C5DEDD")
         Font_tuple = ("Helvetica", 14)
-        img = Image.open("IMGs/logo__2_-removebg-preview.png")
+        img = Image.open("IMGs/logo.png")
         resize_img = img.resize((250,200))
         new_img = ImageTk.PhotoImage(resize_img)
         labelImagen = tk.Label(self, image= new_img, background="#C5DEDD")
@@ -221,11 +221,26 @@ class screenBuscarMascota(ctk.CTkFrame):
         super().__init__(container, fg_color="#C5DEDD")
         Font_tuple = ("Helvetica", 14)
         img = Image.open("IMGs/patita.png")
-        resize_img = img.resize((250,180))
+        resize_img = img.resize((250,170))
         new_img = ImageTk.PhotoImage(resize_img)
         labelImagen = tk.Label(self, image= new_img, background="#C5DEDD")
         labelImagen.photo = new_img
-        labelImagen.place(x="0", y="100")
+        labelImagen.place(x="1120", y="540")
+
+        img2 = Image.open("IMGs/perroGatosolos.png")
+        resize_img2 = img2.resize((250,200))
+        new_img2 = ImageTk.PhotoImage(resize_img2)
+        labelImagen2 = tk.Label(self, image= new_img2, background="#C5DEDD")
+        labelImagen2.photo = new_img2
+        labelImagen2.place(x="10", y="540")
+
+        img3 = Image.open("IMGs/logo.png")
+        resize_img3 = img3.resize((130,80))
+        new_img3 = ImageTk.PhotoImage(resize_img3)
+        labelImagen3 = tk.Label(self, image= new_img3, background="#C5DEDD")
+        labelImagen3.photo = new_img3
+        labelImagen3.place(x="1200", y="5")
+
         self.searchFrame = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
         self.searchFrame.grid(row=0, column=0, padx=20 , pady=20)
 
@@ -367,6 +382,12 @@ class screenDatosTotalMascota(ctk.CTkFrame): #HACERLA DPS
     def __init__(self, parent, container):
         super().__init__(container, fg_color="#C5DEDD")
         Font_tuple = ('Helvetica', 13)
+        img = Image.open("IMGs/dostorPerro4.png")
+        resize_img = img.resize((850,700))
+        new_img = ImageTk.PhotoImage(resize_img)
+        labelImagen = tk.Label(self, image= new_img, background="#C5DEDD")
+        labelImagen.photo = new_img
+        labelImagen.place(x="800", y="60")
         mascotaActual:Mascota = parent.getMascotaApp()
         if(mascotaActual != None):
             
@@ -662,6 +683,40 @@ class screenFormularioVerFicha(ctk.CTkFrame):
         super().__init__(container, fg_color="#C5DEDD")
         Font_tuple = ('Helvetica', 12)
         Font_tuple16 = ('Helvetica', 18)
+
+        img = Image.open("IMGs/patitasMuchas.png")
+        resize_img = img.resize((210,75))
+        new_img = ImageTk.PhotoImage(resize_img)
+        labelImagen = tk.Label(self, image= new_img, background="#C5DEDD")
+        labelImagen.photo = new_img
+        labelImagen.place(x="50", y="-10")
+
+        # labelImagen2 = tk.Label(self, image= new_img, background="#C5DEDD")
+        # labelImagen2.photo = new_img
+        # labelImagen2.place(x="260", y="-10")
+
+        # labelImagen3 = tk.Label(self, image= new_img, background="#C5DEDD")
+        # labelImagen3.photo = new_img
+        # labelImagen3.place(x="840", y="-10")
+
+        labelImagen4 = tk.Label(self, image= new_img, background="#C5DEDD")
+        labelImagen4.photo = new_img
+        labelImagen4.place(x="1040", y="-10")
+
+
+        img6 = Image.open("IMGs/iconPerroGato.png")
+        resize_img6 = img6.resize((130,80))
+        new_img6 = ImageTk.PhotoImage(resize_img6)
+        labelImagen6 = tk.Label(self, image= new_img6, background="#C5DEDD")
+        labelImagen6.photo = new_img6
+        labelImagen6.place(x="1180", y="520")
+
+        img7 = Image.open("IMGs/iconPerro.png")
+        resize_img7 = img7.resize((130,80))
+        new_img7 = ImageTk.PhotoImage(resize_img7)
+        labelImagen7 = tk.Label(self, image= new_img7, background="#C5DEDD")
+        labelImagen7.photo = new_img7
+        labelImagen7.place(x="20", y="590")
         #Agregar Labels--------------------------------------------------------------------------------------------------------------------------------
         mascotaActual:Mascota = parent.getMascotaApp()
         if(mascotaActual != None):
@@ -932,6 +987,16 @@ class screenFormularioEditarFicha(ctk.CTkFrame):
         Font_tuple = ('Helvetica', 12)
         Font_tuple10 = ('Helvetica', 10)
         Font_tuple16 = ('Helvetica', 16)
+        img = Image.open("IMGs/patitasMuchas.png")
+        resize_img = img.resize((210,75))
+        new_img = ImageTk.PhotoImage(resize_img)
+        labelImagen = tk.Label(self, image= new_img, background="#C5DEDD")
+        labelImagen.photo = new_img
+        labelImagen.place(x="50", y="-10")
+
+        labelImagen4 = tk.Label(self, image= new_img, background="#C5DEDD")
+        labelImagen4.photo = new_img
+        labelImagen4.place(x="1035", y="-10")
 
         #Agregar Labels--------------------------------------------------------------------------------------------------------------------------------
         mascotaActual:Mascota = parent.getMascotaApp()
@@ -1268,6 +1333,25 @@ class screenFormularioCrearFicha(ctk.CTkFrame):
         Font_tuple10 = ('Helvetica', 10)
         Font_tuple16 = ('Helvetica', 16)
         mascotaActual:Mascota = parent.getMascotaApp()
+
+        img = Image.open("IMGs/patitasMuchas.png")
+        resize_img = img.resize((210,75))
+        new_img = ImageTk.PhotoImage(resize_img)
+        labelImagen = tk.Label(self, image= new_img, background="#C5DEDD")
+        labelImagen.photo = new_img
+        labelImagen.place(x="50", y="-10")
+
+        labelImagen2 = tk.Label(self, image= new_img, background="#C5DEDD")
+        labelImagen2.photo = new_img
+        labelImagen2.place(x="260", y="-10")
+
+        labelImagen3 = tk.Label(self, image= new_img, background="#C5DEDD")
+        labelImagen3.photo = new_img
+        labelImagen3.place(x="835", y="-10")
+
+        labelImagen4 = tk.Label(self, image= new_img, background="#C5DEDD")
+        labelImagen4.photo = new_img
+        labelImagen4.place(x="1035", y="-10")
         if(mascotaActual != None):
 
      
@@ -1590,6 +1674,33 @@ class screenFormularioAgregarMascota(ctk.CTkFrame):
         Font_tuple10 = ("Helvetica", 10)
         Font_tuple14 = ("Helvetica", 14)
         Font_tuple16 = ("Helvetica", 16)
+
+        img = Image.open("IMGs/patitasMuchas.png")
+        resize_img = img.resize((210,75))
+        new_img = ImageTk.PhotoImage(resize_img)
+
+        labelImagen = tk.Label(self, image= new_img, background="#C5DEDD")
+        labelImagen.photo = new_img
+        labelImagen.place(x="50", y="-10")
+
+        labelImagen4 = tk.Label(self, image= new_img, background="#C5DEDD")
+        labelImagen4.photo = new_img
+        labelImagen4.place(x="1035", y="-10")
+
+        img2 = Image.open("IMGs/perroLengua.png")
+        resize_img2 = img2.resize((140,100))
+        new_img2 = ImageTk.PhotoImage(resize_img2)
+        labelImagen2 = tk.Label(self, image= new_img2, background="#C5DEDD")
+        labelImagen2.photo = new_img2
+        labelImagen2.place(x="10", y="580")
+
+        img3 = Image.open("IMGs/perroGatoLove.png")
+        resize_img3 = img3.resize((130,80))
+        new_img3 = ImageTk.PhotoImage(resize_img3)
+        labelImagen3 = tk.Label(self, image= new_img3, background="#C5DEDD")
+        labelImagen3.photo = new_img3
+        labelImagen3.place(x="1110", y="580")
+
         self.labelTituloScreenSAgregarFicha = ctk.CTkLabel(self, text="Agregando mascota", text_font=Font_tuple16, text_color="black")
         self.labelTituloScreenSAgregarFicha.grid(row=0, column=0, padx=10, pady=10)
 
@@ -1838,6 +1949,18 @@ class screenFormularioEditarMascota(ctk.CTkFrame):
         Font_tuple14 = ("Helvetica", 14)
         Font_tuple16 = ("Helvetica", 16)
         mascotaActual:Mascota = parent.getMascotaApp()
+
+        img = Image.open("IMGs/patitasMuchas.png")
+        resize_img = img.resize((210,75))
+        new_img = ImageTk.PhotoImage(resize_img)
+
+        labelImagen = tk.Label(self, image= new_img, background="#C5DEDD")
+        labelImagen.photo = new_img
+        labelImagen.place(x="50", y="-10")
+
+        labelImagen4 = tk.Label(self, image= new_img, background="#C5DEDD")
+        labelImagen4.photo = new_img
+        labelImagen4.place(x="1035", y="-10")
         if(mascotaActual != None):
 
             self.labelTituloScreenSAgregarFicha = ctk.CTkLabel(self, text="Editando mascota", text_font=Font_tuple16, text_color="black")
@@ -3525,6 +3648,26 @@ class screenInsumos(ctk.CTkFrame):
         s.configure("mystyle.Treeview.Heading", font=('Helvetica', 8,'bold')) # Modify the font of the headings
         terminalVet.setInsumos()
         self.idInsumoEditar = 0
+        img = Image.open("IMGs/heroina.png")
+        resize_img = img.resize((250,170))
+        new_img = ImageTk.PhotoImage(resize_img)
+        labelImagen = tk.Label(self, image= new_img, background="#C5DEDD")
+        labelImagen.photo = new_img
+        labelImagen.place(x="10", y="20")
+
+        img2 = Image.open("IMGs/gatoIcon.png")
+        resize_img2 = img2.resize((210,180))
+        new_img2 = ImageTk.PhotoImage(resize_img2)
+        labelImagen2 = tk.Label(self, image= new_img2, background="#C5DEDD")
+        labelImagen2.photo = new_img2
+        labelImagen2.place(x="1100", y="20")
+
+        img3 = Image.open("IMGs/apotoxin.png")
+        resize_img3 = img3.resize((270,110))
+        new_img3 = ImageTk.PhotoImage(resize_img3)
+        labelImagen3 = tk.Label(self, image= new_img3, background="#C5DEDD")
+        labelImagen3.photo = new_img3
+        labelImagen3.place(x="10", y="600")
 
         #-------------------------Elementos Menu inicial-------------------------
         self.frameInsumos = ctk.CTkFrame(self, corner_radius=10, fg_color="#99C1DE")
